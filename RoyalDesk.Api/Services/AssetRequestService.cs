@@ -1,10 +1,13 @@
 using RoyalDesk.Api.DTOs;
+using RoyalDesk.Api.Logging;
 using RoyalDesk.Api.Models;
 using RoyalDesk.Api.Repositories;
 
 namespace RoyalDesk.Api.Services;
 
-public sealed class AssetRequestService(IAssetRequestRepository repository) : IAssetRequestService
+public sealed class AssetRequestService(
+    IAssetRequestRepository repository,
+    IAssetRequestAuditLogger auditLogger) : IAssetRequestService
 {
     public async Task<AssetRequestResponseDto> CreateAsync(
         CreateAssetRequestDto request,
@@ -24,7 +27,7 @@ public sealed class AssetRequestService(IAssetRequestRepository repository) : IA
 
         entity.Id = await repository.CreateAsync(entity, cancellationToken);
 
-        return new AssetRequestResponseDto
+        var response = new AssetRequestResponseDto
         {
             Id = entity.Id,
             Branch = entity.Branch,
@@ -35,5 +38,8 @@ public sealed class AssetRequestService(IAssetRequestRepository repository) : IA
             RequestedBy = entity.RequestedBy,
             RequestedAtUtc = entity.RequestedAtUtc
         };
+
+        await auditLogger.LogCreatedAsync(response, cancellationToken);
+        return response;
     }
 }
