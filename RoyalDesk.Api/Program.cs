@@ -14,6 +14,13 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("RoyalDeskClient", policy =>
+        policy.WithOrigins("http://localhost:4200")
+            .AllowAnyHeader()
+            .AllowAnyMethod());
+});
 
 builder.Services
     .AddAuthentication(BasicAuthenticationHandler.SchemeName)
@@ -54,6 +61,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseExceptionHandler();
 app.UseHttpsRedirection();
+app.UseCors("RoyalDeskClient");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
