@@ -14,6 +14,8 @@
           "options": {
             "browser": "src/main.ts",
             "index": "src/index.html",
+            "polyfills": ["zone.js"],
+            "tsConfig": "tsconfig.json",
             "styles": ["src/styles.scss"],
             "outputPath": "dist/royaldesk-client"
           }
