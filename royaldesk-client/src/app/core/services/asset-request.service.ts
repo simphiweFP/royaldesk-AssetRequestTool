@@ -9,7 +9,7 @@ import {
 @Injectable({ providedIn: 'root' })
 export class AssetRequestService {
   private readonly http = inject(HttpClient);
-  private readonly endpoint = 'https://localhost:7047/api/asset-requests';
+  private readonly endpoint = 'https://localhost:7080/api/asset-requests';
 
   create(request: CreateAssetRequest): Observable<AssetRequestResponse> {
     const credentials = btoa('demo.user:RoyalDesk123!');
