@@ -1,5 +1,4 @@
 using FluentMigrator.Runner;
-using Microsoft.OpenApi;
 using RoyalDesk.Api.Authentication;
 using RoyalDesk.Api.Data;
 using RoyalDesk.Api.Exceptions;
@@ -13,20 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
-{
-    options.AddSecurityDefinition("basic", new OpenApiSecurityScheme
-    {
-        Type = SecuritySchemeType.Http,
-        Scheme = "basic",
-        Description = "Use the demo Basic Auth credentials to call protected endpoints from Swagger."
-    });
-
-    options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
-    {
-        [new OpenApiSecuritySchemeReference("basic", document)] = []
-    });
-});
+builder.Services.AddSwaggerGen();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddCors(options =>
@@ -72,10 +58,7 @@ using (var scope = app.Services.CreateScope())
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(options =>
-    {
-        options.EnablePersistAuthorization();
-    });
+    app.UseSwaggerUI();
 }
 
 app.UseExceptionHandler();
