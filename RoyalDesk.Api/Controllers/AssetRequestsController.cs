@@ -15,8 +15,6 @@ public sealed class AssetRequestsController(
     CreateAssetRequestValidator validator) : ControllerBase
 {
     [HttpPost]
-    [ProducesResponseType<AssetRequestResponseDto>(StatusCodes.Status201Created)]
-    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Create(
         [FromBody] CreateAssetRequestDto request,
