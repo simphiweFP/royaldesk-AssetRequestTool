@@ -2,7 +2,9 @@
   <header class="app-header">
     <div class="header-content">
       <div class="brand">
-        <img src="assets/images/royal-tyres-logo.png" alt="Royal Tyres" class="brand-logo" />
+        <div class="brand-logo-shell">
+          <img src="assets/images/royal-tyres-logo.jpg" alt="Royal Tyres" class="brand-logo" />
+        </div>
         <div class="brand-divider"></div>
         <div class="product-name">
           <strong>RoyalDesk</strong>
@@ -32,8 +34,6 @@
           <div class="benefit"><div class="benefit-icon">▥</div><span>A Better<br />Tomorrow</span></div>
         </div>
       </div>
-
-      <div class="hero-slogan">KEEPING<br />SOUTH AFRICA<br />MOVING</div>
     </div>
   </section>
 
@@ -51,7 +51,6 @@
         <div class="form-group">
           <label for="branch">Branch <span>*</span></label>
           <select id="branch" formControlName="branch" [disabled]="!!submittedRequest">
-            <option value="">Select branch</option>
             @for (branch of branches; track branch) { <option [value]="branch">{{ branch }}</option> }
           </select>
         </div>
@@ -59,7 +58,6 @@
         <div class="form-group">
           <label for="department">Department <span>*</span></label>
           <select id="department" formControlName="department" [disabled]="!!submittedRequest">
-            <option value="">Select department</option>
             @for (department of departments; track department) { <option [value]="department">{{ department }}</option> }
           </select>
         </div>
@@ -67,12 +65,11 @@
         <div class="form-group">
           <label for="itemType">Item Type <span>*</span></label>
           <select id="itemType" formControlName="itemType" [disabled]="!!submittedRequest">
-            <option value="">Select equipment</option>
             @for (item of itemTypes; track item) { <option [value]="item">{{ item }}</option> }
           </select>
         </div>
 
-        <div class="form-group">
+        <div class="form-group quantity-group">
           <label>Quantity <span>*</span></label>
           <div class="quantity-control">
             <button type="button" aria-label="Decrease quantity" (click)="decreaseQuantity()" [disabled]="!!submittedRequest">−</button>
@@ -83,8 +80,14 @@
 
         <div class="form-group">
           <label for="reason">Reason for Request <span>*</span></label>
-          <textarea id="reason" rows="4" maxlength="500" formControlName="reason" [readonly]="!!submittedRequest" placeholder="Briefly explain why the equipment is needed"></textarea>
-          <div class="field-footer"><span></span><small class="character-count">{{ reasonLength }}/500</small></div>
+          <select id="reason" formControlName="reason" [disabled]="!!submittedRequest">
+            @for (reason of reasonOptions; track reason) { <option [value]="reason">{{ reason }}</option> }
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="additionalNotes">Additional Notes <small>(Optional)</small></label>
+          <textarea id="additionalNotes" rows="2" maxlength="400" formControlName="additionalNotes" [readonly]="!!submittedRequest" placeholder="Add any extra details here..."></textarea>
         </div>
 
         @if (errorMessage) {
@@ -106,7 +109,7 @@
       @if (!submittedRequest) {
         <div class="support-card">
           <div class="support-left">
-            <div class="support-icon">◉</div>
+            <div class="support-icon">🎧</div>
             <div><strong>Need urgent assistance?</strong><p>For IT support issues, contact the IT Helpdesk.</p></div>
           </div>
           <button type="button" class="contact-button" (click)="openContactModal()">Contact IT</button>
@@ -119,17 +122,18 @@
           </div>
 
           <div class="summary-content">
-            <div class="summary-row"><span>⌖ &nbsp; Branch</span><strong>{{ requestPreview.branch || 'Not selected' }}</strong></div>
-            <div class="summary-row"><span>♟ &nbsp; Department</span><strong>{{ requestPreview.department || 'Not selected' }}</strong></div>
-            <div class="summary-row"><span>▣ &nbsp; Item Type</span><strong>{{ requestPreview.itemType || 'Not selected' }}</strong></div>
+            <div class="summary-row"><span>⌖ &nbsp; Branch</span><strong>{{ requestPreview.branch }}</strong></div>
+            <div class="summary-row"><span>♟ &nbsp; Department</span><strong>{{ requestPreview.department }}</strong></div>
+            <div class="summary-row"><span>▣ &nbsp; Item Type</span><strong>{{ requestPreview.itemType }}</strong></div>
             <div class="summary-row"><span># &nbsp; Quantity</span><strong>{{ requestPreview.quantity }}</strong></div>
-            <div class="summary-row reason-row"><span>▤ &nbsp; Reason</span><strong>{{ requestPreview.reason || 'Not provided' }}</strong></div>
+            <div class="summary-row"><span>▤ &nbsp; Reason</span><strong>{{ requestPreview.reason }}</strong></div>
+            <div class="summary-row"><span>▰ &nbsp; Additional Notes</span><strong>{{ requestPreview.additionalNotes || '-' }}</strong></div>
           </div>
         </div>
 
         <div class="info-card">
           <div class="info-icon">i</div>
-          <span>Once submitted, your request is sent to the IT team for review.</span>
+          <span>Once submitted, your request will be sent to the IT team for review.<br />You will be notified once it has been processed.</span>
         </div>
       } @else {
         <div class="success-card">
@@ -145,7 +149,7 @@
             <div class="summary-row"><span>Department</span><strong>{{ submittedRequest.department }}</strong></div>
             <div class="summary-row"><span>Item Type</span><strong>{{ submittedRequest.itemType }}</strong></div>
             <div class="summary-row"><span>Quantity</span><strong>{{ submittedRequest.quantity }}</strong></div>
-            <div class="summary-row reason-row"><span>Reason</span><strong>{{ submittedRequest.reason }}</strong></div>
+            <div class="summary-row"><span>Reason</span><strong>{{ submittedRequest.reason }}</strong></div>
             <div class="summary-row"><span>Requested By</span><strong>{{ submittedRequest.requestedBy }}</strong></div>
           </div>
         </div>
@@ -157,36 +161,24 @@
   </main>
 
   @if (showContactModal) {
-    <div
-      role="presentation"
-      (click)="closeContactModal()"
-      style="position:fixed;inset:0;z-index:1000;background:rgba(9,24,55,.55);display:grid;place-items:center;padding:24px;backdrop-filter:blur(2px);">
-      <section
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="contact-it-title"
-        (click)="$event.stopPropagation()"
-        style="width:min(520px,100%);background:#fff;border:1px solid #dfe5ee;border-radius:14px;box-shadow:0 24px 70px rgba(9,24,55,.28);overflow:hidden;">
-        <div style="background:linear-gradient(90deg,#17388f,#0d2d72);color:#fff;padding:20px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px;">
+    <div class="modal-backdrop" role="presentation" (click)="closeContactModal()">
+      <section class="contact-modal" role="dialog" aria-modal="true" aria-labelledby="contact-it-title" (click)="$event.stopPropagation()">
+        <div class="modal-header">
           <div>
-            <div style="font-size:12px;opacity:.82;margin-bottom:4px;">RoyalDesk · Internal IT</div>
-            <h2 id="contact-it-title" style="margin:0;font-size:22px;">Contact IT Helpdesk</h2>
+            <span>RoyalDesk · Internal IT</span>
+            <h2 id="contact-it-title">Contact IT Helpdesk</h2>
           </div>
-          <button type="button" (click)="closeContactModal()" aria-label="Close IT helpdesk dialog" style="width:36px;height:36px;border:1px solid rgba(255,255,255,.55);border-radius:50%;background:transparent;color:#fff;font-size:22px;cursor:pointer;">×</button>
+          <button type="button" class="modal-close" (click)="closeContactModal()" aria-label="Close IT helpdesk dialog">×</button>
         </div>
-
-        <div style="padding:24px;">
-          <div style="display:flex;gap:14px;align-items:flex-start;padding:16px;border-radius:10px;background:#f5f8ff;border:1px solid #e1e8f4;">
-            <div style="width:42px;height:42px;flex:0 0 42px;border-radius:50%;display:grid;place-items:center;background:#dce8fb;color:#17388f;font-weight:800;font-size:20px;">i</div>
+        <div class="modal-body">
+          <div class="helpdesk-message">
+            <div class="helpdesk-icon">i</div>
             <div>
-              <strong style="display:block;color:#123374;margin-bottom:6px;">Need technical support?</strong>
-              <p style="margin:0;color:#56647c;line-height:1.55;font-size:13px;">Use your normal Royal Tyres internal IT support channel for incidents, access problems or urgent technical assistance. RoyalDesk is intended for new IT equipment requests.</p>
+              <strong>Need technical support?</strong>
+              <p>Use the Royal Tyres internal IT support channel for incidents, access problems or urgent technical assistance. RoyalDesk is for IT equipment requests.</p>
             </div>
           </div>
-
-          <div style="margin-top:20px;display:flex;justify-content:flex-end;">
-            <button type="button" class="contact-button" (click)="closeContactModal()">Close</button>
-          </div>
+          <div class="modal-actions"><button type="button" class="contact-button" (click)="closeContactModal()">Close</button></div>
         </div>
       </section>
     </div>
@@ -194,9 +186,9 @@
 
   <footer>
     <div class="footer-content">
-      <div class="footer-brand"><img src="assets/images/royal-tyres-logo-footer.png" alt="Royal Tyres" /></div>
+      <div class="footer-brand"><img src="assets/images/royal-tyres-logo.jpg" alt="Royal Tyres" /></div>
       <div class="footer-copy"><strong>RoyalDesk &nbsp;|&nbsp; IT Asset Request Portal</strong><span>Your trusted tyre workshop since 1939.</span></div>
-      <div class="footer-links"><span>Privacy Policy &nbsp;|&nbsp; Cookie Notice &nbsp;|&nbsp; Contact Us</span><small>© 2026 Royal Tyres. All rights reserved.</small></div>
+      <div class="footer-links"><span>Privacy Policy &nbsp;|&nbsp; Cookie Notice &nbsp;|&nbsp; Contact Us</span><small>© 2025 Royal Tyres. All rights reserved.</small></div>
     </div>
   </footer>
 </div>

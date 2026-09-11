@@ -32,13 +32,21 @@ export class AssetRequestComponent {
 
   readonly departments = ['IT', 'Sales', 'Finance', 'Operations', 'Human Resources'];
   readonly itemTypes = ['Laptop', 'Desktop', 'Monitor', 'Mouse', 'Keyboard', 'Headset'];
+  readonly reasonOptions = [
+    'New Starter',
+    'Replacement',
+    'Upgrade',
+    'Damaged Equipment',
+    'Additional Equipment'
+  ];
 
   readonly form = this.formBuilder.nonNullable.group({
-    branch: [''],
-    department: [''],
-    itemType: [''],
+    branch: ['Durban Passenger'],
+    department: ['IT'],
+    itemType: ['Laptop'],
     quantity: [1],
-    reason: ['']
+    reason: ['New Starter'],
+    additionalNotes: ['']
   });
 
   submitting = false;
@@ -46,12 +54,8 @@ export class AssetRequestComponent {
   errorMessage = '';
   showContactModal = false;
 
-  get requestPreview(): CreateAssetRequest {
+  get requestPreview() {
     return this.form.getRawValue();
-  }
-
-  get reasonLength(): number {
-    return this.form.controls.reason.value.length;
   }
 
   decreaseQuantity(): void {
@@ -76,7 +80,18 @@ export class AssetRequestComponent {
     this.errorMessage = '';
     this.submitting = true;
 
-    this.service.create(this.form.getRawValue())
+    const value = this.form.getRawValue();
+    const notes = value.additionalNotes.trim();
+
+    const request: CreateAssetRequest = {
+      branch: value.branch,
+      department: value.department,
+      itemType: value.itemType,
+      quantity: value.quantity,
+      reason: notes ? `${value.reason} - ${notes}` : value.reason
+    };
+
+    this.service.create(request)
       .pipe(finalize(() => this.submitting = false))
       .subscribe({
         next: response => this.submittedRequest = response,
@@ -100,11 +115,12 @@ export class AssetRequestComponent {
     this.submittedRequest = null;
     this.errorMessage = '';
     this.form.reset({
-      branch: '',
-      department: '',
-      itemType: '',
+      branch: 'Durban Passenger',
+      department: 'IT',
+      itemType: 'Laptop',
       quantity: 1,
-      reason: ''
+      reason: 'New Starter',
+      additionalNotes: ''
     });
   }
 
