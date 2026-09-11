@@ -6,14 +6,15 @@ A small full-stack IT asset request tool prepared for the Royal Tyres technical 
 
 Employees often request laptops, monitors and other IT equipment through informal channels such as email, phone calls or chat messages. These requests can be incomplete, difficult to trace and disconnected from the employee's branch or department.
 
-RoyalDesk provides one consistent request process. It captures the branch, department, item, quantity and business reason; validates the information before submission; stores the request in a searchable database; links it to an authenticated employee; and creates an audit record for support follow-up.
+RoyalDesk provides one consistent request process. It captures the branch, department, item, quantity and business reason; validates the request on the API; stores it in a searchable database; links it to an authenticated employee; and creates an audit record for support follow-up.
 
 For Royal Tyres, this means fewer incomplete requests, clearer accountability across branches, less manual administration for IT support and a reliable foundation for future approval or helpdesk workflows.
 
 ## Requirements covered
 
-- Angular request form with client-side validation
+- Angular request form for capturing the required request details
 - ASP.NET Core POST API
+- Server-side request validation in the API
 - SQLite persistence with Dapper
 - FluentMigrator database migrations
 - Basic Authentication with a simulated user
@@ -83,7 +84,9 @@ Successful requests return 201 Created. Invalid input returns 400 Bad Request, a
 
 ## Validation and security choices
 
-The client gives immediate feedback, but the API remains the source of truth. Branches, departments and item types use allow-lists; quantity is restricted to 1–10; and the reason is restricted to 10–500 characters. Dapper parameters keep user input separate from SQL. No user-provided HTML is rendered.
+Validation belongs to the API so the same rules are enforced regardless of which client calls the endpoint. The Angular form guides the user through the expected fields, but the backend remains responsible for deciding whether a request is valid.
+
+The API checks branch, department and item type against allow-lists, restricts quantity to 1–10 and restricts the reason to 10–500 characters. Invalid requests return 400 Bad Request. Dapper parameters keep user input separate from SQL, and the Angular client does not render user-provided HTML.
 
 Basic Auth is intentionally small because the requirement asks for simulated authentication, not account registration or role management.
 
