@@ -1,0 +1,86 @@
+<main class="page">
+  <section class="intro">
+    <span class="eyebrow">Royal Tyres · Internal IT</span>
+    <h1>Request IT equipment</h1>
+    <p>Send your equipment request to the RoyalDesk support team.</p>
+  </section>
+
+  <section class="card">
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <div class="grid">
+        <label>
+          <span>Branch</span>
+          <select formControlName="branch">
+            <option value="">Select a branch</option>
+            @for (branch of branches; track branch) {
+              <option [value]="branch">{{ branch }}</option>
+            }
+          </select>
+          @if (form.controls.branch.touched && form.controls.branch.invalid) {
+            <small>Please select your branch.</small>
+          }
+        </label>
+
+        <label>
+          <span>Department</span>
+          <select formControlName="department">
+            <option value="">Select a department</option>
+            @for (department of departments; track department) {
+              <option [value]="department">{{ department }}</option>
+            }
+          </select>
+          @if (form.controls.department.touched && form.controls.department.invalid) {
+            <small>Please select your department.</small>
+          }
+        </label>
+
+        <label>
+          <span>Item</span>
+          <select formControlName="itemType">
+            <option value="">Select an item</option>
+            @for (item of itemTypes; track item) {
+              <option [value]="item">{{ item }}</option>
+            }
+          </select>
+          @if (form.controls.itemType.touched && form.controls.itemType.invalid) {
+            <small>Please select an item.</small>
+          }
+        </label>
+
+        <label>
+          <span>Quantity</span>
+          <input type="number" min="1" max="10" formControlName="quantity">
+          @if (form.controls.quantity.touched && form.controls.quantity.invalid) {
+            <small>Quantity must be between 1 and 10.</small>
+          }
+        </label>
+      </div>
+
+      <label class="reason">
+        <span>Reason for request</span>
+        <textarea rows="4" maxlength="500" formControlName="reason"
+          placeholder="Briefly explain why the equipment is needed"></textarea>
+        <div class="reason-meta">
+          @if (form.controls.reason.touched && form.controls.reason.invalid) {
+            <small>Enter a reason of at least 10 characters.</small>
+          } @else {
+            <span></span>
+          }
+          <span>{{ form.controls.reason.value.length }}/500</span>
+        </div>
+      </label>
+
+      @if (successMessage) {
+        <div class="message success" role="status">{{ successMessage }}</div>
+      }
+
+      @if (errorMessage) {
+        <div class="message error" role="alert">{{ errorMessage }}</div>
+      }
+
+      <button type="submit" [disabled]="submitting">
+        {{ submitting ? 'Submitting request…' : 'Submit request' }}
+      </button>
+    </form>
+  </section>
+</main>
