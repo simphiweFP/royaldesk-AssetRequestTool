@@ -109,7 +109,7 @@
             <div class="support-icon">◉</div>
             <div><strong>Need urgent assistance?</strong><p>For IT support issues, contact the IT Helpdesk.</p></div>
           </div>
-          <button type="button" class="contact-button">Contact IT</button>
+          <button type="button" class="contact-button" (click)="openContactModal()">Contact IT</button>
         </div>
 
         <div class="summary-card">
@@ -155,6 +155,42 @@
       }
     </section>
   </main>
+
+  @if (showContactModal) {
+    <div
+      role="presentation"
+      (click)="closeContactModal()"
+      style="position:fixed;inset:0;z-index:1000;background:rgba(9,24,55,.55);display:grid;place-items:center;padding:24px;backdrop-filter:blur(2px);">
+      <section
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="contact-it-title"
+        (click)="$event.stopPropagation()"
+        style="width:min(520px,100%);background:#fff;border:1px solid #dfe5ee;border-radius:14px;box-shadow:0 24px 70px rgba(9,24,55,.28);overflow:hidden;">
+        <div style="background:linear-gradient(90deg,#17388f,#0d2d72);color:#fff;padding:20px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px;">
+          <div>
+            <div style="font-size:12px;opacity:.82;margin-bottom:4px;">RoyalDesk · Internal IT</div>
+            <h2 id="contact-it-title" style="margin:0;font-size:22px;">Contact IT Helpdesk</h2>
+          </div>
+          <button type="button" (click)="closeContactModal()" aria-label="Close IT helpdesk dialog" style="width:36px;height:36px;border:1px solid rgba(255,255,255,.55);border-radius:50%;background:transparent;color:#fff;font-size:22px;cursor:pointer;">×</button>
+        </div>
+
+        <div style="padding:24px;">
+          <div style="display:flex;gap:14px;align-items:flex-start;padding:16px;border-radius:10px;background:#f5f8ff;border:1px solid #e1e8f4;">
+            <div style="width:42px;height:42px;flex:0 0 42px;border-radius:50%;display:grid;place-items:center;background:#dce8fb;color:#17388f;font-weight:800;font-size:20px;">i</div>
+            <div>
+              <strong style="display:block;color:#123374;margin-bottom:6px;">Need technical support?</strong>
+              <p style="margin:0;color:#56647c;line-height:1.55;font-size:13px;">Use your normal Royal Tyres internal IT support channel for incidents, access problems or urgent technical assistance. RoyalDesk is intended for new IT equipment requests.</p>
+            </div>
+          </div>
+
+          <div style="margin-top:20px;display:flex;justify-content:flex-end;">
+            <button type="button" class="contact-button" (click)="closeContactModal()">Close</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  }
 
   <footer>
     <div class="footer-content">
