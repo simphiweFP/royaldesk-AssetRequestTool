@@ -2,8 +2,12 @@ import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { finalize } from 'rxjs';
+
 import { AssetRequestService } from '../../core/services/asset-request.service';
-import { AssetRequestResponse, CreateAssetRequest } from '../../core/models/asset-request.model';
+import {
+  AssetRequestResponse,
+  CreateAssetRequest
+} from '../../core/models/asset-request.model';
 
 @Component({
   selector: 'app-asset-request',
@@ -30,8 +34,23 @@ export class AssetRequestComponent {
     'Blackheath'
   ];
 
-  readonly departments = ['IT', 'Sales', 'Finance', 'Operations', 'Human Resources'];
-  readonly itemTypes = ['Laptop', 'Desktop', 'Monitor', 'Mouse', 'Keyboard', 'Headset'];
+  readonly departments = [
+    'IT',
+    'Sales',
+    'Finance',
+    'Operations',
+    'Human Resources'
+  ];
+
+  readonly itemTypes = [
+    'Laptop',
+    'Desktop',
+    'Monitor',
+    'Mouse',
+    'Keyboard',
+    'Headset'
+  ];
+
   readonly reasonOptions = [
     'New Starter',
     'Replacement',
@@ -40,18 +59,27 @@ export class AssetRequestComponent {
     'Additional Equipment'
   ];
 
+  /*
+   * The UI collects the request.
+   * Validation remains enforced by the API.
+   */
   readonly form = this.formBuilder.nonNullable.group({
-    branch: ['Durban Passenger'],
-    department: ['IT'],
-    itemType: ['Laptop'],
+    branch: [''],
+    department: [''],
+    itemType: [''],
     quantity: [1],
-    reason: ['New Starter'],
+    reason: [''],
     additionalNotes: ['']
   });
 
   submitting = false;
+
   submittedRequest: AssetRequestResponse | null = null;
+
   errorMessage = '';
+
+  fieldErrors: Record<string, string> = {};
+
   showContactModal = false;
 
   get requestPreview() {
@@ -60,12 +88,20 @@ export class AssetRequestComponent {
 
   decreaseQuantity(): void {
     const quantity = this.form.controls.quantity.value;
-    if (quantity > 1) this.form.controls.quantity.setValue(quantity - 1);
+
+    if (quantity > 1) {
+      this.form.controls.quantity.setValue(quantity - 1);
+      delete this.fieldErrors['quantity'];
+    }
   }
 
   increaseQuantity(): void {
     const quantity = this.form.controls.quantity.value;
-    if (quantity < 10) this.form.controls.quantity.setValue(quantity + 1);
+
+    if (quantity < 10) {
+      this.form.controls.quantity.setValue(quantity + 1);
+      delete this.fieldErrors['quantity'];
+    }
   }
 
   openContactModal(): void {
@@ -78,6 +114,7 @@ export class AssetRequestComponent {
 
   submit(): void {
     this.errorMessage = '';
+    this.fieldErrors = {};
     this.submitting = true;
 
     const value = this.form.getRawValue();
@@ -88,25 +125,37 @@ export class AssetRequestComponent {
       department: value.department,
       itemType: value.itemType,
       quantity: value.quantity,
-      reason: notes ? `${value.reason} - ${notes}` : value.reason
+      reason: notes
+        ? `${value.reason} - ${notes}`
+        : value.reason
     };
 
-    this.service.create(request)
-      .pipe(finalize(() => this.submitting = false))
+    this.service
+      .create(request)
+      .pipe(
+        finalize(() => {
+          this.submitting = false;
+        })
+      )
       .subscribe({
-        next: response => this.submittedRequest = response,
+        next: response => {
+          this.submittedRequest = response;
+        },
+
         error: (error: HttpErrorResponse) => {
           if (error.status === 400) {
-            this.errorMessage = this.getValidationMessage(error);
+            this.setValidationErrors(error);
             return;
           }
 
           if (error.status === 401) {
-            this.errorMessage = 'Authentication failed. The API rejected the request with 401 Unauthorized.';
+            this.errorMessage =
+              'Authentication failed. The API rejected the request with 401 Unauthorized.';
             return;
           }
 
-          this.errorMessage = 'The request could not be submitted. Confirm that the API is running and try again.';
+          this.errorMessage =
+            'The request could not be submitted. Confirm that the API is running and try again.';
         }
       });
   }
@@ -114,23 +163,41 @@ export class AssetRequestComponent {
   submitAnotherRequest(): void {
     this.submittedRequest = null;
     this.errorMessage = '';
+    this.fieldErrors = {};
+
     this.form.reset({
-      branch: 'Durban Passenger',
-      department: 'IT',
-      itemType: 'Laptop',
+      branch: '',
+      department: '',
+      itemType: '',
       quantity: 1,
-      reason: 'New Starter',
+      reason: '',
       additionalNotes: ''
     });
   }
 
-  private getValidationMessage(error: HttpErrorResponse): string {
-    const errors = error.error?.errors as Record<string, string[]> | undefined;
-    if (!errors) return 'The API rejected the request because one or more fields are invalid.';
+  clearFieldError(field: string): void {
+    delete this.fieldErrors[field.toLowerCase()];
+  }
 
-    const messages = Object.values(errors).flat();
-    return messages.length > 0
-      ? messages.join(' ')
-      : 'The API rejected the request because one or more fields are invalid.';
+  private setValidationErrors(
+    error: HttpErrorResponse
+  ): void {
+    const errors =
+      error.error?.errors as
+        | Record<string, string[]>
+        | undefined;
+
+    if (!errors) {
+      this.errorMessage =
+        'The API rejected the request because one or more fields are invalid.';
+      return;
+    }
+
+    this.fieldErrors = {};
+
+    Object.entries(errors).forEach(([field, messages]) => {
+      this.fieldErrors[field.toLowerCase()] =
+        messages.join(' ');
+    });
   }
 }
