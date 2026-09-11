@@ -20,3 +20,39 @@ select,
 textarea {
   font: inherit;
 }
+
+/* Temporary brand-safe overrides: avoid broken local binaries and keep the portal presentable. */
+app-asset-request .brand-logo,
+app-asset-request .footer-brand img {
+  display: none !important;
+}
+
+app-asset-request .brand::before,
+app-asset-request .footer-brand::before {
+  content: "♕  ROYAL TYRES\A    EST. 1939";
+  white-space: pre;
+  display: inline-block;
+  color: #26358f;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: .4px;
+}
+
+app-asset-request .brand::before {
+  font-size: 21px;
+}
+
+app-asset-request .footer-brand::before {
+  color: #fff;
+  font-size: 18px;
+}
+
+app-asset-request .footer-brand {
+  background: transparent !important;
+}
+
+app-asset-request .hero {
+  background-image: url('https://static.wixstatic.com/media/828cf9_d57a8f3e8fd34d55b9c728e0800f094c~mv2.jpg/v1/fill/w_1200,h_700,al_c,q_85/828cf9_d57a8f3e8fd34d55b9c728e0800f094c~mv2.jpg') !important;
+  background-size: cover !important;
+  background-position: center !important;
+}
