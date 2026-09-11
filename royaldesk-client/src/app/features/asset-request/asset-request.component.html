@@ -81,13 +81,10 @@
 
       <form [formGroup]="form" (ngSubmit)="submit()">
         <div class="form-group">
-          <label for="branch">
-            Branch <span>*</span>
-          </label>
+          <label for="branch">Branch <span>*</span></label>
 
           <select id="branch" formControlName="branch" [disabled]="!!submittedRequest">
             <option value="">Select branch</option>
-
             @for (branch of branches; track branch) {
               <option [value]="branch">{{ branch }}</option>
             }
@@ -99,17 +96,10 @@
         </div>
 
         <div class="form-group">
-          <label for="department">
-            Department <span>*</span>
-          </label>
+          <label for="department">Department <span>*</span></label>
 
-          <select
-            id="department"
-            formControlName="department"
-            [disabled]="!!submittedRequest"
-          >
+          <select id="department" formControlName="department" [disabled]="!!submittedRequest">
             <option value="">Select department</option>
-
             @for (department of departments; track department) {
               <option [value]="department">{{ department }}</option>
             }
@@ -121,13 +111,10 @@
         </div>
 
         <div class="form-group">
-          <label for="itemType">
-            Item Type <span>*</span>
-          </label>
+          <label for="itemType">Item Type <span>*</span></label>
 
           <select id="itemType" formControlName="itemType" [disabled]="!!submittedRequest">
             <option value="">Select equipment</option>
-
             @for (item of itemTypes; track item) {
               <option [value]="item">{{ item }}</option>
             }
@@ -139,37 +126,17 @@
         </div>
 
         <div class="form-group">
-          <label>
-            Quantity <span>*</span>
-          </label>
+          <label>Quantity <span>*</span></label>
 
           <div class="quantity-control">
-            <button
-              type="button"
-              aria-label="Decrease quantity"
-              (click)="decreaseQuantity()"
-              [disabled]="!!submittedRequest"
-            >
-              −
-            </button>
-
+            <button type="button" aria-label="Decrease quantity" (click)="decreaseQuantity()" [disabled]="!!submittedRequest">−</button>
             <input type="number" formControlName="quantity" readonly />
-
-            <button
-              type="button"
-              aria-label="Increase quantity"
-              (click)="increaseQuantity()"
-              [disabled]="!!submittedRequest"
-            >
-              +
-            </button>
+            <button type="button" aria-label="Increase quantity" (click)="increaseQuantity()" [disabled]="!!submittedRequest">+</button>
           </div>
         </div>
 
         <div class="form-group">
-          <label for="reason">
-            Reason for Request <span>*</span>
-          </label>
+          <label for="reason">Reason for Request <span>*</span></label>
 
           <textarea
             id="reason"
@@ -182,34 +149,24 @@
 
           <div class="field-footer">
             @if (form.controls.reason.touched && form.controls.reason.invalid) {
-              <small class="validation">
-                Enter a reason between 10 and 500 characters.
-              </small>
+              <small class="validation">Enter a reason between 10 and 500 characters.</small>
             } @else {
               <span></span>
             }
-
             <small class="character-count">{{ reasonLength }}/500</small>
           </div>
         </div>
 
         @if (errorMessage) {
-          <div class="error-message" role="alert">
-            {{ errorMessage }}
-          </div>
+          <div class="error-message" role="alert">{{ errorMessage }}</div>
         }
 
         @if (!submittedRequest) {
-          <button
-            class="submit-button"
-            type="submit"
-            [disabled]="form.invalid || submitting"
-          >
+          <button class="submit-button" type="submit" [disabled]="form.invalid || submitting">
             @if (submitting) {
               Submitting...
             } @else {
-              <span>➤</span>
-              Submit Request
+              <span>➤</span> Submit Request
             }
           </button>
         }
@@ -221,22 +178,17 @@
         <div class="support-card">
           <div class="support-left">
             <div class="support-icon">◉</div>
-
             <div>
               <strong>Need urgent assistance?</strong>
               <p>For IT support issues, contact the IT Helpdesk.</p>
             </div>
           </div>
-
-          <button type="button" class="contact-button">
-            Contact IT
-          </button>
+          <button type="button" class="contact-button">Contact IT</button>
         </div>
 
         <div class="summary-card">
           <div class="section-heading">
             <div class="heading-icon">▤</div>
-
             <div>
               <h2>Your Request</h2>
               <p>A summary of the information you are about to submit.</p>
@@ -244,49 +196,25 @@
           </div>
 
           <div class="summary-content">
-            <div class="summary-row">
-              <span>Branch</span>
-              <strong>{{ requestPreview.branch || 'Not selected' }}</strong>
-            </div>
-
-            <div class="summary-row">
-              <span>Department</span>
-              <strong>{{ requestPreview.department || 'Not selected' }}</strong>
-            </div>
-
-            <div class="summary-row">
-              <span>Item Type</span>
-              <strong>{{ requestPreview.itemType || 'Not selected' }}</strong>
-            </div>
-
-            <div class="summary-row">
-              <span>Quantity</span>
-              <strong>{{ requestPreview.quantity }}</strong>
-            </div>
-
-            <div class="summary-row reason-row">
-              <span>Reason</span>
-              <strong>{{ requestPreview.reason || 'Not provided' }}</strong>
-            </div>
+            <div class="summary-row"><span>Branch</span><strong>{{ requestPreview.branch || 'Not selected' }}</strong></div>
+            <div class="summary-row"><span>Department</span><strong>{{ requestPreview.department || 'Not selected' }}</strong></div>
+            <div class="summary-row"><span>Item Type</span><strong>{{ requestPreview.itemType || 'Not selected' }}</strong></div>
+            <div class="summary-row"><span>Quantity</span><strong>{{ requestPreview.quantity }}</strong></div>
+            <div class="summary-row reason-row"><span>Reason</span><strong>{{ requestPreview.reason || 'Not provided' }}</strong></div>
           </div>
         </div>
 
         <div class="info-card">
           <div class="info-icon">i</div>
-
-          <span>
-            Once submitted, your request is securely sent to the IT team for processing.
-          </span>
+          <span>Once submitted, your request is securely sent to the IT team for processing.</span>
         </div>
       } @else {
         <div class="success-card">
           <div class="success-icon">✓</div>
-
           <div class="success-copy">
             <h2>Request Submitted Successfully!</h2>
             <p>Your IT asset request has been created.</p>
           </div>
-
           <div class="request-number">
             <span>Request</span>
             <strong>#{{ submittedRequest.id }}</strong>
@@ -296,7 +224,6 @@
         <div class="summary-card">
           <div class="section-heading">
             <div class="heading-icon">▤</div>
-
             <div>
               <h2>Request Details</h2>
               <p>A summary of your submitted request.</p>
@@ -304,56 +231,24 @@
           </div>
 
           <div class="summary-content">
-            <div class="summary-row">
-              <span>Branch</span>
-              <strong>{{ submittedRequest.branch }}</strong>
-            </div>
-
-            <div class="summary-row">
-              <span>Department</span>
-              <strong>{{ submittedRequest.department }}</strong>
-            </div>
-
-            <div class="summary-row">
-              <span>Item Type</span>
-              <strong>{{ submittedRequest.itemType }}</strong>
-            </div>
-
-            <div class="summary-row">
-              <span>Quantity</span>
-              <strong>{{ submittedRequest.quantity }}</strong>
-            </div>
-
-            <div class="summary-row reason-row">
-              <span>Reason</span>
-              <strong>{{ submittedRequest.reason }}</strong>
-            </div>
-
-            <div class="summary-row">
-              <span>Requested By</span>
-              <strong>{{ submittedRequest.requestedBy }}</strong>
-            </div>
+            <div class="summary-row"><span>Branch</span><strong>{{ submittedRequest.branch }}</strong></div>
+            <div class="summary-row"><span>Department</span><strong>{{ submittedRequest.department }}</strong></div>
+            <div class="summary-row"><span>Item Type</span><strong>{{ submittedRequest.itemType }}</strong></div>
+            <div class="summary-row"><span>Quantity</span><strong>{{ submittedRequest.quantity }}</strong></div>
+            <div class="summary-row reason-row"><span>Reason</span><strong>{{ submittedRequest.reason }}</strong></div>
+            <div class="summary-row"><span>Requested By</span><strong>{{ submittedRequest.requestedBy }}</strong></div>
           </div>
         </div>
 
         <div class="next-card">
           <div class="next-icon">✓</div>
-
           <div>
             <strong>Request received</strong>
-            <p>
-              The request has been recorded successfully and is ready for IT processing.
-            </p>
+            <p>The request has been recorded successfully and is ready for IT processing.</p>
           </div>
         </div>
 
-        <button
-          type="button"
-          class="another-button"
-          (click)="submitAnotherRequest()"
-        >
-          + Submit Another Request
-        </button>
+        <button type="button" class="another-button" (click)="submitAnotherRequest()">+ Submit Another Request</button>
       }
     </section>
   </main>
@@ -361,10 +256,7 @@
   <footer>
     <div class="footer-content">
       <div class="footer-brand">
-        <img
-          src="assets/images/royal-tyres-logo.png"
-          alt="Royal Tyres"
-        />
+        <img src="assets/images/royal-tyres-logo-footer.png" alt="Royal Tyres" />
       </div>
 
       <div class="footer-copy">
