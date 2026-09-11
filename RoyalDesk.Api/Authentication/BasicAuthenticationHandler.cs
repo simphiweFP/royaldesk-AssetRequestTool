@@ -55,10 +55,13 @@ public sealed class BasicAuthenticationHandler(
         }
     }
 
-    protected override async Task HandleChallengeAsync(AuthenticationProperties properties)
+    protected override Task HandleChallengeAsync(AuthenticationProperties properties)
     {
-        Response.Headers.WWWAuthenticate = "Basic realm=\"" + Options.Realm + "\"";
-        await base.HandleChallengeAsync(properties);
+        // Return the API status directly instead of sending a WWW-Authenticate
+        // Basic challenge. Browsers react to that header by opening their native
+        // username/password dialog, which is not part of the RoyalDesk UI.
+        Response.StatusCode = StatusCodes.Status401Unauthorized;
+        return Task.CompletedTask;
     }
 
     private static bool Matches(string supplied, string configured) =>
