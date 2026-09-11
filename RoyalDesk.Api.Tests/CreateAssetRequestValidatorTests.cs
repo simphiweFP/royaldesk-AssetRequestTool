@@ -14,14 +14,14 @@ public sealed class CreateAssetRequestValidatorTests
             Department = "Workshop",
             ItemType = "Barcode Scanner",
             Quantity = 1,
-            Reason = "The existing scanner is damaged."
+            Reason = "Replacement"
         };
 
         Assert.Empty(new CreateAssetRequestValidator().Validate(request));
     }
 
     [Fact]
-    public void Validate_WithHtml_ReturnsReasonError()
+    public void Validate_WithoutReason_ReturnsSelectionMessage()
     {
         var request = new CreateAssetRequestDto
         {
@@ -29,10 +29,32 @@ public sealed class CreateAssetRequestValidatorTests
             Department = "IT",
             ItemType = "Laptop",
             Quantity = 1,
-            Reason = "<script>alert('xss')</script>"
+            Reason = string.Empty
         };
 
-        Assert.Contains(nameof(request.Reason),
-            new CreateAssetRequestValidator().Validate(request).Keys);
+        var errors = new CreateAssetRequestValidator().Validate(request);
+
+        Assert.Equal(
+            "Please select a reason for the request.",
+            Assert.Single(errors[nameof(request.Reason)]));
+    }
+
+    [Fact]
+    public void Validate_WithUnsupportedReason_ReturnsSelectionMessage()
+    {
+        var request = new CreateAssetRequestDto
+        {
+            Branch = "Phoenix",
+            Department = "IT",
+            ItemType = "Laptop",
+            Quantity = 1,
+            Reason = "Something Else"
+        };
+
+        var errors = new CreateAssetRequestValidator().Validate(request);
+
+        Assert.Equal(
+            "Please select a valid reason for the request.",
+            Assert.Single(errors[nameof(request.Reason)]));
     }
 }

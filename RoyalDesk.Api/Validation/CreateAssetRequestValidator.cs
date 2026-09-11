@@ -13,6 +13,9 @@ public sealed class CreateAssetRequestValidator
     public static readonly string[] ItemTypes =
         ["Laptop", "Monitor", "Keyboard", "Mouse", "Headset", "Printer", "Barcode Scanner", "POS Peripheral"];
 
+    public static readonly string[] Reasons =
+        ["New Starter", "Replacement", "Upgrade", "Damaged Equipment", "Additional Equipment"];
+
     public IDictionary<string, string[]> Validate(CreateAssetRequestDto request)
     {
         var errors = new Dictionary<string, string[]>();
@@ -25,10 +28,17 @@ public sealed class CreateAssetRequestValidator
             errors[nameof(request.Quantity)] = ["Quantity must be between 1 and 10."];
 
         var reason = request.Reason?.Trim() ?? string.Empty;
-        if (reason.Length is < 10 or > 500)
-            errors[nameof(request.Reason)] = ["Reason must be between 10 and 500 characters."];
-        else if (reason.Contains('<') || reason.Contains('>'))
-            errors[nameof(request.Reason)] = ["Reason cannot contain HTML markup."];
+
+        if (string.IsNullOrWhiteSpace(reason))
+        {
+            errors[nameof(request.Reason)] =
+                ["Please select a reason for the request."];
+        }
+        else if (!Reasons.Contains(reason, StringComparer.OrdinalIgnoreCase))
+        {
+            errors[nameof(request.Reason)] =
+                ["Please select a valid reason for the request."];
+        }
 
         return errors;
     }
