@@ -1,86 +1,378 @@
-<main class="page">
-  <section class="intro">
-    <span class="eyebrow">Royal Tyres · Internal IT</span>
-    <h1>Request IT equipment</h1>
-    <p>Send your equipment request to the RoyalDesk support team.</p>
+<div class="royaldesk-page">
+  <header class="app-header">
+    <div class="header-content">
+      <div class="brand">
+        <img
+          src="assets/images/royal-tyres-logo.png"
+          alt="Royal Tyres"
+          class="brand-logo"
+        />
+
+        <div class="brand-divider"></div>
+
+        <div class="product-name">
+          <strong>RoyalDesk</strong>
+          <span>IT Asset Request Portal</span>
+        </div>
+      </div>
+
+      <div class="logged-user" aria-label="Signed in demo user">
+        <div class="avatar">{{ currentUser.initials }}</div>
+
+        <div class="user-copy">
+          <strong>{{ currentUser.name }}</strong>
+          <span>{{ currentUser.username }}</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-shade"></div>
+
+    <div class="hero-content">
+      <div class="hero-copy">
+        <p class="eyebrow">ROYAL TYRES · INTERNAL IT</p>
+
+        <h1>Royal<span>Desk</span></h1>
+
+        <h2>IT Asset Request Portal</h2>
+
+        <p class="hero-description">
+          Request the IT equipment you need to keep Royal Tyres moving.
+        </p>
+
+        <div class="hero-benefits">
+          <div class="benefit">
+            <div class="benefit-icon">⚙</div>
+            <span>Right Tools<br />for the Job</span>
+          </div>
+
+          <div class="benefit">
+            <div class="benefit-icon">👥</div>
+            <span>Stronger<br />Teams</span>
+          </div>
+
+          <div class="benefit">
+            <div class="benefit-icon">▥</div>
+            <span>A Better<br />Tomorrow</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-slogan">
+        KEEPING<br />
+        SOUTH AFRICA<br />
+        MOVING
+      </div>
+    </div>
   </section>
 
-  <section class="card">
-    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
-      <div class="grid">
-        <label>
-          <span>Branch</span>
-          <select formControlName="branch">
-            <option value="">Select a branch</option>
+  <main class="main-layout">
+    <section class="form-card">
+      <div class="section-heading">
+        <div class="heading-icon">▣</div>
+
+        <div>
+          <h2>Request IT Equipment</h2>
+          <p>Fill in the details below to submit your request.</p>
+        </div>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <div class="form-group">
+          <label for="branch">
+            Branch <span>*</span>
+          </label>
+
+          <select id="branch" formControlName="branch" [disabled]="!!submittedRequest">
+            <option value="">Select branch</option>
+
             @for (branch of branches; track branch) {
               <option [value]="branch">{{ branch }}</option>
             }
           </select>
-          @if (form.controls.branch.touched && form.controls.branch.invalid) {
-            <small>Please select your branch.</small>
-          }
-        </label>
 
-        <label>
-          <span>Department</span>
-          <select formControlName="department">
-            <option value="">Select a department</option>
+          @if (form.controls.branch.touched && form.controls.branch.invalid) {
+            <small class="validation">Branch is required.</small>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="department">
+            Department <span>*</span>
+          </label>
+
+          <select
+            id="department"
+            formControlName="department"
+            [disabled]="!!submittedRequest"
+          >
+            <option value="">Select department</option>
+
             @for (department of departments; track department) {
               <option [value]="department">{{ department }}</option>
             }
           </select>
-          @if (form.controls.department.touched && form.controls.department.invalid) {
-            <small>Please select your department.</small>
-          }
-        </label>
 
-        <label>
-          <span>Item</span>
-          <select formControlName="itemType">
-            <option value="">Select an item</option>
+          @if (form.controls.department.touched && form.controls.department.invalid) {
+            <small class="validation">Department is required.</small>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="itemType">
+            Item Type <span>*</span>
+          </label>
+
+          <select id="itemType" formControlName="itemType" [disabled]="!!submittedRequest">
+            <option value="">Select equipment</option>
+
             @for (item of itemTypes; track item) {
               <option [value]="item">{{ item }}</option>
             }
           </select>
-          @if (form.controls.itemType.touched && form.controls.itemType.invalid) {
-            <small>Please select an item.</small>
-          }
-        </label>
 
-        <label>
-          <span>Quantity</span>
-          <input type="number" min="1" max="10" formControlName="quantity">
-          @if (form.controls.quantity.touched && form.controls.quantity.invalid) {
-            <small>Quantity must be between 1 and 10.</small>
+          @if (form.controls.itemType.touched && form.controls.itemType.invalid) {
+            <small class="validation">Item type is required.</small>
           }
-        </label>
+        </div>
+
+        <div class="form-group">
+          <label>
+            Quantity <span>*</span>
+          </label>
+
+          <div class="quantity-control">
+            <button
+              type="button"
+              aria-label="Decrease quantity"
+              (click)="decreaseQuantity()"
+              [disabled]="!!submittedRequest"
+            >
+              −
+            </button>
+
+            <input type="number" formControlName="quantity" readonly />
+
+            <button
+              type="button"
+              aria-label="Increase quantity"
+              (click)="increaseQuantity()"
+              [disabled]="!!submittedRequest"
+            >
+              +
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="reason">
+            Reason for Request <span>*</span>
+          </label>
+
+          <textarea
+            id="reason"
+            rows="4"
+            maxlength="500"
+            formControlName="reason"
+            [readonly]="!!submittedRequest"
+            placeholder="Briefly explain why the equipment is needed"
+          ></textarea>
+
+          <div class="field-footer">
+            @if (form.controls.reason.touched && form.controls.reason.invalid) {
+              <small class="validation">
+                Enter a reason between 10 and 500 characters.
+              </small>
+            } @else {
+              <span></span>
+            }
+
+            <small class="character-count">{{ reasonLength }}/500</small>
+          </div>
+        </div>
+
+        @if (errorMessage) {
+          <div class="error-message" role="alert">
+            {{ errorMessage }}
+          </div>
+        }
+
+        @if (!submittedRequest) {
+          <button
+            class="submit-button"
+            type="submit"
+            [disabled]="form.invalid || submitting"
+          >
+            @if (submitting) {
+              Submitting...
+            } @else {
+              <span>➤</span>
+              Submit Request
+            }
+          </button>
+        }
+      </form>
+    </section>
+
+    <section class="right-column">
+      @if (!submittedRequest) {
+        <div class="support-card">
+          <div class="support-left">
+            <div class="support-icon">◉</div>
+
+            <div>
+              <strong>Need urgent assistance?</strong>
+              <p>For IT support issues, contact the IT Helpdesk.</p>
+            </div>
+          </div>
+
+          <button type="button" class="contact-button">
+            Contact IT
+          </button>
+        </div>
+
+        <div class="summary-card">
+          <div class="section-heading">
+            <div class="heading-icon">▤</div>
+
+            <div>
+              <h2>Your Request</h2>
+              <p>A summary of the information you are about to submit.</p>
+            </div>
+          </div>
+
+          <div class="summary-content">
+            <div class="summary-row">
+              <span>Branch</span>
+              <strong>{{ requestPreview.branch || 'Not selected' }}</strong>
+            </div>
+
+            <div class="summary-row">
+              <span>Department</span>
+              <strong>{{ requestPreview.department || 'Not selected' }}</strong>
+            </div>
+
+            <div class="summary-row">
+              <span>Item Type</span>
+              <strong>{{ requestPreview.itemType || 'Not selected' }}</strong>
+            </div>
+
+            <div class="summary-row">
+              <span>Quantity</span>
+              <strong>{{ requestPreview.quantity }}</strong>
+            </div>
+
+            <div class="summary-row reason-row">
+              <span>Reason</span>
+              <strong>{{ requestPreview.reason || 'Not provided' }}</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-icon">i</div>
+
+          <span>
+            Once submitted, your request is securely sent to the IT team for processing.
+          </span>
+        </div>
+      } @else {
+        <div class="success-card">
+          <div class="success-icon">✓</div>
+
+          <div class="success-copy">
+            <h2>Request Submitted Successfully!</h2>
+            <p>Your IT asset request has been created.</p>
+          </div>
+
+          <div class="request-number">
+            <span>Request</span>
+            <strong>#{{ submittedRequest.id }}</strong>
+          </div>
+        </div>
+
+        <div class="summary-card">
+          <div class="section-heading">
+            <div class="heading-icon">▤</div>
+
+            <div>
+              <h2>Request Details</h2>
+              <p>A summary of your submitted request.</p>
+            </div>
+          </div>
+
+          <div class="summary-content">
+            <div class="summary-row">
+              <span>Branch</span>
+              <strong>{{ submittedRequest.branch }}</strong>
+            </div>
+
+            <div class="summary-row">
+              <span>Department</span>
+              <strong>{{ submittedRequest.department }}</strong>
+            </div>
+
+            <div class="summary-row">
+              <span>Item Type</span>
+              <strong>{{ submittedRequest.itemType }}</strong>
+            </div>
+
+            <div class="summary-row">
+              <span>Quantity</span>
+              <strong>{{ submittedRequest.quantity }}</strong>
+            </div>
+
+            <div class="summary-row reason-row">
+              <span>Reason</span>
+              <strong>{{ submittedRequest.reason }}</strong>
+            </div>
+
+            <div class="summary-row">
+              <span>Requested By</span>
+              <strong>{{ submittedRequest.requestedBy }}</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="next-card">
+          <div class="next-icon">✓</div>
+
+          <div>
+            <strong>Request received</strong>
+            <p>
+              The request has been recorded successfully and is ready for IT processing.
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="another-button"
+          (click)="submitAnotherRequest()"
+        >
+          + Submit Another Request
+        </button>
+      }
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-content">
+      <div class="footer-brand">
+        <img
+          src="assets/images/royal-tyres-logo.png"
+          alt="Royal Tyres"
+        />
       </div>
 
-      <label class="reason">
-        <span>Reason for request</span>
-        <textarea rows="4" maxlength="500" formControlName="reason"
-          placeholder="Briefly explain why the equipment is needed"></textarea>
-        <div class="reason-meta">
-          @if (form.controls.reason.touched && form.controls.reason.invalid) {
-            <small>Enter a reason of at least 10 characters.</small>
-          } @else {
-            <span></span>
-          }
-          <span>{{ form.controls.reason.value.length }}/500</span>
-        </div>
-      </label>
+      <div class="footer-copy">
+        <strong>RoyalDesk | IT Asset Request Portal</strong>
+        <span>Supporting Royal Tyres internal equipment requests.</span>
+      </div>
 
-      @if (successMessage) {
-        <div class="message success" role="status">{{ successMessage }}</div>
-      }
-
-      @if (errorMessage) {
-        <div class="message error" role="alert">{{ errorMessage }}</div>
-      }
-
-      <button type="submit" [disabled]="submitting">
-        {{ submitting ? 'Submitting request…' : 'Submit request' }}
-      </button>
-    </form>
-  </section>
-</main>
+      <span class="copyright">© Royal Tyres</span>
+    </div>
+  </footer>
+</div>

@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { AssetRequestService } from '../../core/services/asset-request.service';
+import { AssetRequestResponse, CreateAssetRequest } from '../../core/models/asset-request.model';
 
 @Component({
   selector: 'app-asset-request',
@@ -13,6 +14,12 @@ import { AssetRequestService } from '../../core/services/asset-request.service';
 export class AssetRequestComponent {
   private readonly service = inject(AssetRequestService);
   private readonly formBuilder = inject(FormBuilder);
+
+  readonly currentUser = {
+    name: 'Demo User',
+    username: 'demo.user',
+    initials: 'DU'
+  };
 
   readonly branches = [
     'Durban Passenger',
@@ -34,11 +41,34 @@ export class AssetRequestComponent {
   });
 
   submitting = false;
-  successMessage = '';
+  submittedRequest: AssetRequestResponse | null = null;
   errorMessage = '';
 
+  get requestPreview(): CreateAssetRequest {
+    return this.form.getRawValue();
+  }
+
+  get reasonLength(): number {
+    return this.form.controls.reason.value.length;
+  }
+
+  decreaseQuantity(): void {
+    const quantity = this.form.controls.quantity.value;
+
+    if (quantity > 1) {
+      this.form.controls.quantity.setValue(quantity - 1);
+    }
+  }
+
+  increaseQuantity(): void {
+    const quantity = this.form.controls.quantity.value;
+
+    if (quantity < 10) {
+      this.form.controls.quantity.setValue(quantity + 1);
+    }
+  }
+
   submit(): void {
-    this.successMessage = '';
     this.errorMessage = '';
 
     if (this.form.invalid) {
@@ -47,16 +77,29 @@ export class AssetRequestComponent {
     }
 
     this.submitting = true;
+
     this.service.create(this.form.getRawValue())
       .pipe(finalize(() => this.submitting = false))
       .subscribe({
         next: response => {
-          this.successMessage = 'Request #' + response.id + ' was submitted successfully.';
-          this.form.reset({ branch: '', department: '', itemType: '', quantity: 1, reason: '' });
+          this.submittedRequest = response;
         },
         error: () => {
-          this.errorMessage = 'The request could not be submitted. Confirm that the API is running and try again.';
+          this.errorMessage =
+            'The request could not be submitted. Confirm that the API is running and try again.';
         }
       });
+  }
+
+  submitAnotherRequest(): void {
+    this.submittedRequest = null;
+    this.errorMessage = '';
+    this.form.reset({
+      branch: '',
+      department: '',
+      itemType: '',
+      quantity: 1,
+      reason: ''
+    });
   }
 }
