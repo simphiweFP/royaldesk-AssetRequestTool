@@ -1,6 +1,14 @@
 # RoyalDesk Asset Request Tool
 
-A small full-stack IT asset request tool prepared for the Royal Tyres technical assessment. Employees can submit equipment requests for a Royal Tyres branch and department, while the API validates, stores and audits each request.
+A small full-stack IT asset request tool prepared for the Royal Tyres technical assessment.
+
+## Problem and value
+
+Employees often request laptops, monitors and other IT equipment through informal channels such as email, phone calls or chat messages. These requests can be incomplete, difficult to trace and disconnected from the employee's branch or department.
+
+RoyalDesk provides one consistent request process. It captures the branch, department, item, quantity and business reason; validates the information before submission; stores the request in a searchable database; links it to an authenticated employee; and creates an audit record for support follow-up.
+
+For Royal Tyres, this means fewer incomplete requests, clearer accountability across branches, less manual administration for IT support and a reliable foundation for future approval or helpdesk workflows.
 
 ## Requirements covered
 
@@ -92,15 +100,6 @@ Run the backend test suite with:
     dotnet test RoyalDesk.sln
 
 The tests cover validation rules, repository persistence, the authenticated requestor and file audit logging.
-
-## 15-minute presentation flow
-
-1. **Problem and scope — 2 min:** Explain the employee request journey and why registration, roles and extra endpoints were excluded.
-2. **Frontend demo — 3 min:** Show required fields, invalid input feedback and a successful request.
-3. **API and database — 4 min:** Walk through controller, validator, service, parameterised Dapper insert and FluentMigrator migration.
-4. **Security and logging — 3 min:** Demonstrate 401, Basic Auth identity, validation and the audit log.
-5. **Tests and trade-offs — 2 min:** Show focused tests and explain what would change for production.
-6. **Close — 1 min:** Confirm every assessment requirement and invite questions.
 
 ## Key trade-offs
 
