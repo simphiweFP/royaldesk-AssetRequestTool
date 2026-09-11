@@ -1,5 +1,6 @@
 import { Component, inject } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 import { finalize } from 'rxjs';
 import { AssetRequestService } from '../../core/services/asset-request.service';
 import { AssetRequestResponse, CreateAssetRequest } from '../../core/models/asset-request.model';
@@ -16,9 +17,9 @@ export class AssetRequestComponent {
   private readonly formBuilder = inject(FormBuilder);
 
   readonly currentUser = {
-    name: 'Demo User',
+    name: 'Simphiwe Dlamuka',
     username: 'demo.user',
-    initials: 'DU'
+    initials: 'SD'
   };
 
   readonly branches = [
@@ -32,12 +33,14 @@ export class AssetRequestComponent {
   readonly departments = ['IT', 'Sales', 'Finance', 'Operations', 'Human Resources'];
   readonly itemTypes = ['Laptop', 'Desktop', 'Monitor', 'Mouse', 'Keyboard', 'Headset'];
 
+  // The API owns request validation for this assessment so invalid requests can
+  // reach the endpoint and demonstrate the 400 Bad Request path.
   readonly form = this.formBuilder.nonNullable.group({
-    branch: ['', Validators.required],
-    department: ['', Validators.required],
-    itemType: ['', Validators.required],
-    quantity: [1, [Validators.required, Validators.min(1), Validators.max(10)]],
-    reason: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]]
+    branch: [''],
+    department: [''],
+    itemType: [''],
+    quantity: [1],
+    reason: ['']
   });
 
   submitting = false;
@@ -70,12 +73,6 @@ export class AssetRequestComponent {
 
   submit(): void {
     this.errorMessage = '';
-
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
-
     this.submitting = true;
 
     this.service.create(this.form.getRawValue())
@@ -84,7 +81,17 @@ export class AssetRequestComponent {
         next: response => {
           this.submittedRequest = response;
         },
-        error: () => {
+        error: (error: HttpErrorResponse) => {
+          if (error.status === 400) {
+            this.errorMessage = this.getValidationMessage(error);
+            return;
+          }
+
+          if (error.status === 401) {
+            this.errorMessage = 'Authentication failed. The API rejected the request with 401 Unauthorized.';
+            return;
+          }
+
           this.errorMessage =
             'The request could not be submitted. Confirm that the API is running and try again.';
         }
@@ -101,5 +108,18 @@ export class AssetRequestComponent {
       quantity: 1,
       reason: ''
     });
+  }
+
+  private getValidationMessage(error: HttpErrorResponse): string {
+    const errors = error.error?.errors as Record<string, string[]> | undefined;
+
+    if (!errors) {
+      return 'The API rejected the request because one or more fields are invalid.';
+    }
+
+    const messages = Object.values(errors).flat();
+    return messages.length > 0
+      ? messages.join(' ')
+      : 'The API rejected the request because one or more fields are invalid.';
   }
 }
