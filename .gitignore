@@ -1,0 +1,22 @@
+# .NET
+**/bin/
+**/obj/
+.vs/
+*.user
+*.suo
+
+# Runtime data
+*.db
+*.db-shm
+*.db-wal
+**/logs/
+
+# Angular
+**/node_modules/
+**/dist/
+.angular/
+
+# Editors and OS
+.vscode/
+.DS_Store
+Thumbs.db
