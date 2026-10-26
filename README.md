@@ -1,112 +1,79 @@
-# RoyalDesk Asset Request Tool
+# RoyalDesk — Employee & Asset Lifecycle Portal
 
-A small full-stack IT asset request tool prepared for the Royal Tyres technical assessment.
+RoyalDesk started as a small full-stack IT asset request assessment and now includes an end-to-end employee/equipment lifecycle workflow while preserving the original request feature.
 
-## Problem and value
+## What it does
 
-Employees often request laptops, monitors and other IT equipment through informal channels such as email, phone calls or chat messages. These requests can be incomplete, difficult to trace and disconnected from the employee's branch or department.
+- Equipment requests with API validation and audit logging
+- Central asset register with branch, department, serial, value, condition and lifecycle status
+- Employee register
+- Asset assignment history
+- Digital employee acceptance and generated acceptance PDF
+- Employee account/setup profile for Email, SAP, CisTech, VPN, phone, groups, print/scan, folders and printers
+- Onboarding and offboarding checklists
+- Asset returns, transfers, repair/status changes and audit history
+- Write-off approval and e-waste disposal
+- Legacy e-waste workbook import endpoint and local import utility
+- E-waste CSV export
+- Management dashboard with asset value, availability, utilisation inputs and reuse opportunity
 
-RoyalDesk provides one consistent request process. It captures the branch, department, item, quantity and business reason; validates the request on the API; stores it in a searchable database; links it to an authenticated employee; and creates an audit record for support follow-up.
+See `docs/ROYALDESK-LIFECYCLE.md` for the workflow and business mapping.
 
-For Royal Tyres, this means fewer incomplete requests, clearer accountability across branches, less manual administration for IT support and a reliable foundation for future approval or helpdesk workflows.
+## Stack
 
-## Requirements covered
-
-- Angular request form for capturing the required request details
-- ASP.NET Core POST API
-- Server-side request validation in the API
-- SQLite persistence with Dapper
-- FluentMigrator database migrations
-- Basic Authentication with a simulated user
-- Server-side allow-list and length validation
-- Parameterised SQL to prevent SQL injection
-- Angular interpolation to avoid unsafe HTML rendering
-- File-based JSON audit logging
-- Focused service, validation and repository tests
-
-## Project structure
-
-- RoyalDesk.Api — ASP.NET Core API, authentication, validation, persistence and logging
-- RoyalDesk.Api.Tests — focused backend tests
-- royaldesk-client — standalone Angular client
-
-## Prerequisites
-
-- .NET 10 SDK
-- Node.js 20 or later
-- npm
-
-SQLite does not need a separate database server. The API creates royaldesk.db and applies migrations at startup.
+- Angular 20 standalone client
+- ASP.NET Core / .NET 10 API
+- Dapper
+- SQLite for the local assessment/demo
+- FluentMigrator
 
 ## Run locally
 
-From the repository root, start the API:
+```bash
+dotnet restore
+dotnet run --project RoyalDesk.Api
+```
 
-    dotnet restore
-    dotnet run --project RoyalDesk.Api
+The API runs at `https://localhost:7080`.
 
-The API runs at https://localhost:7080.
+Then:
 
-In a second terminal, start Angular:
+```bash
+cd royaldesk-client
+npm install
+npm start
+```
 
-    cd royaldesk-client
-    npm install
-    npm start
-
-Open http://localhost:4200.
+Open `http://localhost:4200`.
 
 ## Demo authentication
 
-This assessment uses Basic Auth to simulate a logged-in employee without adding registration or roles that were not requested.
+The public assessment continues to use the original simulated credentials:
 
-- Username: demo.user
-- Password: RoyalDesk123!
+- Username: `demo.user`
+- Password: `RoyalDesk123!`
 
-The Angular service sends these demonstration credentials. In production, credentials would come from a secure identity provider and secrets store, and Basic Auth would only be used over HTTPS.
+Production should replace this with the company identity provider and secrets management; do not commit live RT-Auth credentials to this repository.
 
-## API
+## Import the existing E-Waste workbook
 
-### Create an asset request
+Keep the company workbook outside source control, then run:
 
-POST /api/asset-requests
+```bash
+pip install openpyxl
+python tools/import-ewaste.py "E-Waste Asset Write-Off Register.xlsx"
+```
 
-Example body:
-
-    {
-      "branch": "Phoenix",
-      "department": "IT",
-      "itemType": "Laptop",
-      "quantity": 1,
-      "reason": "Required for a new employee starting next week."
-    }
-
-Successful requests return 201 Created. Invalid input returns 400 Bad Request, and missing or incorrect credentials return 401 Unauthorized.
-
-## Validation and security choices
-
-Validation belongs to the API so the same rules are enforced regardless of which client calls the endpoint. The Angular form guides the user through the expected fields, but the backend remains responsible for deciding whether a request is valid.
-
-The API checks branch, department and item type against allow-lists, restricts quantity to 1–10 and restricts the reason to 10–500 characters. Invalid requests return 400 Bad Request. Dapper parameters keep user input separate from SQL, and the Angular client does not render user-provided HTML.
-
-Basic Auth is intentionally small because the requirement asks for simulated authentication, not account registration or role management.
-
-## Logging
-
-After a request is stored, a JSON audit entry is appended to RoyalDesk.Api/logs/asset-requests.log.
-
-Each entry includes the request ID, authenticated username, timestamp, branch, department, item and quantity. The reason is excluded to keep the audit log focused.
+The importer validates the workbook headers and posts rows to `/api/lifecycle/imports/e-waste`. Duplicate serial numbers are skipped with warnings.
 
 ## Tests
 
-Run the backend test suite with:
+```bash
+dotnet test RoyalDesk.sln
+```
 
-    dotnet test RoyalDesk.sln
+The original request validation/repository/service/audit tests remain in place. Lifecycle code is structured behind `ILifecycleRepository` so workflow tests can be expanded independently.
 
-The tests cover validation rules, repository persistence, the authenticated requestor and file audit logging.
+## Architecture note
 
-## Key trade-offs
-
-- SQLite keeps the assessment easy to run; the connection factory allows another SQL provider later.
-- One POST endpoint matches the requested workflow; listing and approval endpoints can be added when required.
-- Configuration-based Basic Auth avoids unnecessary user tables and roles for a simulated login.
-- Audit logging occurs after persistence so only successfully created requests are recorded.
+RoyalDesk owns the employee/equipment lifecycle. SAP should remain the financial/procurement system of record. When procurement integration is added, RoyalDesk should request purchasing only after available internal inventory has been checked.
