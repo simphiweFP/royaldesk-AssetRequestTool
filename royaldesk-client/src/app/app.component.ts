@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
-import { AssetRequestComponent } from './features/asset-request/asset-request.component';
+import { LifecycleComponent } from './features/lifecycle/lifecycle.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [AssetRequestComponent],
-  template: '<app-asset-request />'
+  imports: [LifecycleComponent],
+  template: '<app-lifecycle />'
 })
 export class AppComponent {}

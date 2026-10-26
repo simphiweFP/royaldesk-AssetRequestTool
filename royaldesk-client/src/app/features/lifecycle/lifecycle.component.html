@@ -1,0 +1,78 @@
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand"><span class="crown">♛</span><div><strong>RoyalDesk</strong><small>Employee & Asset Lifecycle</small></div></div>
+    <nav>
+      <button [class.active]="section==='dashboard'" (click)="open('dashboard')">▦ Dashboard</button>
+      <button [class.active]="section==='request'" (click)="open('request')">＋ Request Equipment</button>
+      <button [class.active]="section==='assets'" (click)="open('assets')">▣ Asset Register</button>
+      <button [class.active]="section==='employees'" (click)="open('employees')">👤 Employees</button>
+      <button [class.active]="section==='assignments'" (click)="open('assignments')">⇄ Assignments & Returns</button>
+      <button [class.active]="section==='onboarding'" (click)="open('onboarding'); loadTasks('Onboarding')">✓ Onboarding</button>
+      <button [class.active]="section==='offboarding'" (click)="open('offboarding'); loadTasks('Offboarding')">↩ Offboarding</button>
+      <button [class.active]="section==='writeoffs'" (click)="open('writeoffs')">♻ Write-Offs & E-Waste</button>
+      <button [class.active]="section==='reports'" (click)="open('reports')">▥ Business Value</button>
+    </nav>
+    <div class="user"><span>DU</span><div>demo.user<small>Administrator demo</small></div></div>
+  </aside>
+
+  <main>
+    <header><div><h1>{{ section==='dashboard' ? 'Operations Dashboard' : section | titlecase }}</h1><p>One company workflow from request to disposal.</p></div><button class="refresh" (click)="refresh()">↻ Refresh</button></header>
+    <div class="error" *ngIf="error">{{ error }}</div>
+    <div class="loading" *ngIf="loading">Loading RoyalDesk…</div>
+
+    <ng-container *ngIf="!loading">
+      <section *ngIf="section==='dashboard' && dashboard" class="page-section">
+        <div class="metrics">
+          <article><span>Total assets</span><strong>{{dashboard.totalAssets}}</strong><small>{{dashboard.totalAssetValue | currency:'ZAR':'symbol-narrow':'1.0-0'}} tracked value</small></article>
+          <article><span>Assigned</span><strong>{{dashboard.assignedAssets}}</strong><small>Currently with employees</small></article>
+          <article><span>Available</span><strong>{{dashboard.availableAssets}}</strong><small>{{dashboard.availableAssetValue | currency:'ZAR':'symbol-narrow':'1.0-0'}} ready to reuse</small></article>
+          <article><span>Pending requests</span><strong>{{dashboard.pendingRequests}}</strong><small>Need action</small></article>
+          <article><span>Write-offs</span><strong>{{dashboard.pendingWriteOffs}}</strong><small>Awaiting approval</small></article>
+          <article class="value"><span>Reuse opportunity</span><strong>{{dashboard.estimatedReuseValue | currency:'ZAR':'symbol-narrow':'1.0-0'}}</strong><small>Available inventory value</small></article>
+        </div>
+        <div class="grid two">
+          <article class="card"><h2>Lifecycle</h2><div class="flow"><span>Request</span><b>→</b><span>Approve</span><b>→</b><span>Assign</span><b>→</b><span>Accept</span><b>→</b><span>Return</span><b>→</b><span>Reuse / Write-Off</span></div></article>
+          <article class="card"><h2>People</h2><div class="big-number">{{dashboard.activeEmployees}}</div><p>Active employees registered in RoyalDesk.</p></article>
+        </div>
+      </section>
+
+      <section *ngIf="section==='request'" class="embedded"><app-asset-request /></section>
+
+      <section *ngIf="section==='assets'" class="page-section">
+        <div class="grid two">
+          <article class="card form-card"><h2>Register asset</h2>
+            <div class="form-grid"><label>Asset tag<input [(ngModel)]="assetForm.assetTag" placeholder="LAP-001"></label><label>Serial number<input [(ngModel)]="assetForm.serialNumber"></label><label>Category<select [(ngModel)]="assetForm.category"><option>Laptop</option><option>Desktop</option><option>Monitor</option><option>Phone</option><option>Network</option><option>Other</option></select></label><label>Make<input [(ngModel)]="assetForm.make"></label><label>Model<input [(ngModel)]="assetForm.model"></label><label>Condition<select [(ngModel)]="assetForm.condition"><option>Good</option><option>Fair</option><option>Damaged</option><option>Obsolete</option></select></label><label>Branch<select [(ngModel)]="assetForm.branchId"><option [ngValue]="undefined">Unassigned</option><option *ngFor="let b of branches" [ngValue]="b.id">{{b.name}}</option></select></label><label>Department<select [(ngModel)]="assetForm.departmentId"><option [ngValue]="undefined">Unassigned</option><option *ngFor="let d of departments" [ngValue]="d.id">{{d.name}}</option></select></label><label>Purchase value<input type="number" [(ngModel)]="assetForm.purchaseValue"></label><label class="check"><input type="checkbox" [(ngModel)]="assetForm.fullyDepreciated"> Fully depreciated</label></div>
+            <button class="primary" (click)="createAsset()">Register asset</button>
+          </article>
+          <article class="card"><h2>Asset register</h2><input class="search" [(ngModel)]="assetSearch" placeholder="Search tag, serial, make, user or status…"><div class="table-wrap"><table><thead><tr><th>Asset</th><th>Category</th><th>Location</th><th>Assigned to</th><th>Status</th></tr></thead><tbody><tr *ngFor="let a of filteredAssets"><td><strong>{{a.assetTag}}</strong><small>{{a.make}} {{a.model}} · {{a.serialNumber || 'No serial'}}</small></td><td>{{a.category}}</td><td>{{a.branchName || '—'}}</td><td>{{a.assignedEmployeeName || '—'}}</td><td><span class="pill">{{a.status}}</span></td></tr></tbody></table></div></article>
+        </div>
+      </section>
+
+      <section *ngIf="section==='employees'" class="page-section">
+        <div class="grid two"><article class="card form-card"><h2>Add employee</h2><div class="form-grid"><label>Employee #<input [(ngModel)]="employeeForm.employeeNumber"></label><label>First name<input [(ngModel)]="employeeForm.firstName"></label><label>Last name<input [(ngModel)]="employeeForm.lastName"></label><label>Email<input [(ngModel)]="employeeForm.email"></label><label>Username<input [(ngModel)]="employeeForm.username"></label><label>Job title<input [(ngModel)]="employeeForm.jobTitle"></label><label>Branch<select [(ngModel)]="employeeForm.branchId"><option [ngValue]="undefined">Select</option><option *ngFor="let b of branches" [ngValue]="b.id">{{b.name}}</option></select></label><label>Department<select [(ngModel)]="employeeForm.departmentId"><option [ngValue]="undefined">Select</option><option *ngFor="let d of departments" [ngValue]="d.id">{{d.name}}</option></select></label></div><button class="primary" (click)="createEmployee()">Add employee</button></article>
+          <article class="card"><h2>Employees</h2><div class="table-wrap"><table><thead><tr><th>Employee</th><th>Department</th><th>Branch</th><th>Status</th></tr></thead><tbody><tr *ngFor="let e of employees"><td><strong>{{e.firstName}} {{e.lastName}}</strong><small>{{e.employeeNumber}} · {{e.email}}</small></td><td>{{e.departmentName || '—'}}</td><td>{{e.branchName || '—'}}</td><td><span class="pill">{{e.employmentStatus}}</span></td></tr></tbody></table></div></article></div>
+      </section>
+
+      <section *ngIf="section==='assignments'" class="page-section">
+        <article class="card form-card"><h2>Assign available equipment</h2><div class="inline-form"><label>Asset<select [(ngModel)]="assignmentForm.assetId"><option [ngValue]="undefined">Select asset</option><option *ngFor="let a of availableAssets" [ngValue]="a.id">{{a.assetTag}} · {{a.category}}</option></select></label><label>Employee<select [(ngModel)]="assignmentForm.employeeId"><option [ngValue]="undefined">Select employee</option><option *ngFor="let e of employees" [ngValue]="e.id">{{e.firstName}} {{e.lastName}}</option></select></label><label>Condition<select [(ngModel)]="assignmentForm.condition"><option>Good</option><option>Fair</option></select></label><button class="primary" (click)="assignAsset()">Assign</button></div></article>
+        <article class="card"><h2>Assignment history</h2><div class="table-wrap"><table><thead><tr><th>Asset</th><th>Employee</th><th>Assigned</th><th>Acceptance</th><th>Status</th><th>Actions</th></tr></thead><tbody><tr *ngFor="let a of assignments"><td>{{a.assetTag}}</td><td>{{a.employeeName}}</td><td>{{a.assignedAtUtc | date:'mediumDate'}}</td><td>{{a.employeeAcceptedAtUtc ? 'Signed' : 'Pending'}}</td><td><span class="pill">{{a.status}}</span></td><td class="actions"><button *ngIf="a.status==='Assigned' && !a.employeeAcceptedAtUtc" (click)="accept(a)">Sign</button><button (click)="downloadAcceptance(a)">PDF</button><button *ngIf="a.status==='Assigned'" (click)="returnAsset(a)">Return</button></td></tr></tbody></table></div></article>
+      </section>
+
+      <section *ngIf="section==='onboarding' || section==='offboarding'" class="page-section">
+        <article class="card"><div class="card-head"><div><h2>{{section==='onboarding' ? 'Employee onboarding' : 'Employee offboarding'}}</h2><p>{{section==='onboarding' ? 'Accounts, access, equipment and acceptance.' : 'Recover assets and remove company access.'}}</p></div><select [(ngModel)]="selectedEmployeeId" (ngModelChange)="loadTasks(section==='onboarding' ? 'Onboarding' : 'Offboarding')"><option [ngValue]="undefined">Select employee</option><option *ngFor="let e of employees" [ngValue]="e.id">{{e.firstName}} {{e.lastName}}</option></select></div>
+          <div class="checklist" *ngIf="selectedEmployeeId"><button *ngFor="let task of tasks" [class.done]="task.isCompleted" (click)="toggleTask(task)"><span>{{task.isCompleted ? '✓' : '○'}}</span><div><strong>{{task.taskName}}</strong><small *ngIf="task.completedBy">Completed by {{task.completedBy}}</small></div></button></div>
+        </article>
+      </section>
+
+      <section *ngIf="section==='writeoffs'" class="page-section">
+        <article class="card form-card"><h2>Request write-off</h2><div class="inline-form"><label>Asset<select [(ngModel)]="writeOffForm.assetId"><option [ngValue]="undefined">Select asset</option><option *ngFor="let a of assets" [ngValue]="a.id">{{a.assetTag}} · {{a.status}}</option></select></label><label>Reason<select [(ngModel)]="writeOffForm.reason"><option>Beyond economical repair</option><option>Obsolete</option><option>Damaged</option><option>End of useful life</option><option>Lost</option><option>Stolen</option></select></label><label>Condition<select [(ngModel)]="writeOffForm.condition"><option>Damaged</option><option>Obsolete</option><option>Poor</option></select></label><label>Current value<input type="number" [(ngModel)]="writeOffForm.currentValue"></label><button class="primary" (click)="createWriteOff()">Submit</button></div></article>
+        <article class="card"><h2>Write-off & e-waste register</h2><div class="table-wrap"><table><thead><tr><th>Asset</th><th>Condition</th><th>Value</th><th>Approval</th><th>Disposal</th><th>Actions</th></tr></thead><tbody><tr *ngFor="let w of writeOffs"><td><strong>{{w.assetTag}}</strong><small>{{w.make}} {{w.model}} · {{w.serialNumber}}</small></td><td>{{w.condition}}</td><td>{{w.currentValue | currency:'ZAR':'symbol-narrow'}}</td><td><span class="pill">{{w.approvalStatus}}</span></td><td>{{w.disposalMethod || 'Pending'}}</td><td class="actions"><button *ngIf="w.approvalStatus==='Pending'" (click)="approveWriteOff(w,true)">Approve</button><button *ngIf="w.approvalStatus==='Pending'" (click)="approveWriteOff(w,false)">Reject</button><button *ngIf="w.approvalStatus==='Approved' && !w.disposalDate" (click)="dispose(w)">Dispose</button></td></tr></tbody></table></div></article>
+      </section>
+
+      <section *ngIf="section==='reports' && dashboard" class="page-section">
+        <div class="metrics reports"><article><span>Tracked asset value</span><strong>{{dashboard.totalAssetValue | currency:'ZAR':'symbol-narrow':'1.0-0'}}</strong></article><article class="value"><span>Reusable stock value</span><strong>{{dashboard.availableAssetValue | currency:'ZAR':'symbol-narrow':'1.0-0'}}</strong></article><article><span>Utilisation</span><strong>{{dashboard.totalAssets ? (dashboard.assignedAssets / dashboard.totalAssets | percent:'1.0-0') : '0%'}}</strong></article></div>
+        <article class="card"><h2>Business-value model</h2><p>RoyalDesk now measures the lifecycle instead of only recording requests. Available inventory can be reused before new purchasing, assignments establish accountability, returns prevent lost equipment, and approved write-offs create an auditable e-waste register.</p><div class="flow"><span>Reuse existing stock</span><b>→</b><span>Avoid unnecessary purchase</span><b>→</b><span>Track value recovered</span></div></article>
+      </section>
+    </ng-container>
+  </main>
+</div>
