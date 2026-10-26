@@ -2,6 +2,7 @@ using FluentMigrator.Runner;
 using RoyalDesk.Api.Authentication;
 using RoyalDesk.Api.Data;
 using RoyalDesk.Api.Exceptions;
+using RoyalDesk.Api.Lifecycle;
 using RoyalDesk.Api.Logging;
 using RoyalDesk.Api.Migrations;
 using RoyalDesk.Api.Repositories;
@@ -33,10 +34,10 @@ builder.Services.AddAuthorization();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' is not configured.");
 
-builder.Services.AddSingleton<IDbConnectionFactory>(
-    new SqliteConnectionFactory(connectionString));
+builder.Services.AddSingleton<IDbConnectionFactory>(new SqliteConnectionFactory(connectionString));
 builder.Services.AddScoped<IAssetRequestRepository, AssetRequestRepository>();
 builder.Services.AddScoped<IAssetRequestService, AssetRequestService>();
+builder.Services.AddScoped<ILifecycleRepository, LifecycleRepository>();
 builder.Services.AddSingleton<IAssetRequestAuditLogger, FileAssetRequestAuditLogger>();
 builder.Services.AddSingleton<CreateAssetRequestValidator>();
 
@@ -49,11 +50,7 @@ builder.Services
     .AddLogging(logging => logging.AddFluentMigratorConsole());
 
 var app = builder.Build();
-
-using (var scope = app.Services.CreateScope())
-{
-    scope.ServiceProvider.GetRequiredService<IMigrationRunner>().MigrateUp();
-}
+using (var scope = app.Services.CreateScope()) scope.ServiceProvider.GetRequiredService<IMigrationRunner>().MigrateUp();
 
 if (app.Environment.IsDevelopment())
 {
@@ -67,9 +64,6 @@ app.UseCors("RoyalDeskClient");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-
 app.Run();
 
-public partial class Program
-{
-}
+public partial class Program { }
