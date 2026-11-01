@@ -3,11 +3,12 @@ import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HelpDeskTicket, TicketStatusHistory } from '../../core/models/helpdesk.model';
 import { HelpDeskService } from '../../core/services/helpdesk.service';
+import { TicketTrackingComponent } from '../ticket-tracking/ticket-tracking.component';
 
 @Component({
   selector: 'app-help-desk-tickets',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TicketTrackingComponent],
   templateUrl: './help-desk-tickets.component.html',
   styleUrl: './help-desk-tickets.component.scss'
 })
@@ -15,6 +16,7 @@ export class HelpDeskTicketsComponent implements OnInit {
   private readonly api = inject(HelpDeskService);
 
   readonly statuses = ['All', 'New', 'Assigned', 'In Progress', 'Waiting for User', 'Waiting for Third Party', 'Escalated to Just ICT', 'Resolved', 'Closed'];
+  mode: 'team' | 'track' = 'team';
   tickets: HelpDeskTicket[] = [];
   history: TicketStatusHistory[] = [];
   selected?: HelpDeskTicket;
