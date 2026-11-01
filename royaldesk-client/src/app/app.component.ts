@@ -20,22 +20,21 @@ import { LifecycleComponent } from './features/lifecycle/lifecycle.component';
       display: none !important;
     }
 
-    /* Request Equipment is the layout reference. */
+    /* Request IT Equipment is the single layout reference. */
     :host ::ng-deep app-lifecycle .page-section {
       width: min(1220px, calc(100% - 64px)) !important;
       margin: 22px auto !important;
+      margin-bottom: 22px !important;
       gap: 20px !important;
       min-height: 0 !important;
     }
 
-    /* Keep one constant gap between page content and the footer on every view. */
-    :host ::ng-deep app-lifecycle .shared-footer {
-      margin-top: 0 !important;
-    }
-
-    :host ::ng-deep app-lifecycle .page-section,
     :host ::ng-deep app-lifecycle .request-embedded {
       margin-bottom: 22px !important;
+    }
+
+    :host ::ng-deep app-lifecycle .shared-footer {
+      margin-top: 0 !important;
     }
 
     :host ::ng-deep app-lifecycle .grid.two {
@@ -57,7 +56,6 @@ import { LifecycleComponent } from './features/lifecycle/lifecycle.component';
       box-shadow: 0 1px 5px rgba(24, 44, 80, .035) !important;
     }
 
-    /* Never stretch the form/table cards just to make columns equal. */
     :host ::ng-deep app-lifecycle .balanced-card,
     :host ::ng-deep app-lifecycle .stable-table-card,
     :host ::ng-deep app-lifecycle .operational-grid > .form-card,
@@ -74,7 +72,7 @@ import { LifecycleComponent } from './features/lifecycle/lifecycle.component';
       align-self: start;
     }
 
-    /* Assignments and Write-Offs use the same left-form/right-view pattern. */
+    /* Assignments and Write-Offs follow the same left-form/right-view pattern. */
     :host ::ng-deep app-lifecycle .page-section:has(> .compact-form-card):has(> .table-card) {
       grid-template-columns: 520px minmax(0, 1fr) !important;
       grid-template-rows: auto auto !important;
@@ -100,7 +98,6 @@ import { LifecycleComponent } from './features/lifecycle/lifecycle.component';
       align-self: start !important;
     }
 
-    /* Let empty tables look polished without becoming taller than the form. */
     :host ::ng-deep app-lifecycle .table-wrap {
       min-height: 0 !important;
       max-height: 530px !important;
@@ -111,7 +108,7 @@ import { LifecycleComponent } from './features/lifecycle/lifecycle.component';
       padding: 26px 20px !important;
     }
 
-    /* Exact compact information box from Request IT Equipment. */
+    /* Exact compact information box used by Request IT Equipment. */
     :host ::ng-deep app-lifecycle .information-box.lifecycle-information-box {
       position: relative;
       width: 100%;
@@ -128,6 +125,7 @@ import { LifecycleComponent } from './features/lifecycle/lifecycle.component';
       background: linear-gradient(100deg, #f5f8fd, #f7f8fa);
       color: #53627a;
       font-size: 12px;
+      font-weight: 400;
       line-height: 1.45;
       box-sizing: border-box;
     }
@@ -156,6 +154,7 @@ import { LifecycleComponent } from './features/lifecycle/lifecycle.component';
       box-sizing: border-box;
     }
 
+    /* Exact Request IT Equipment typography hierarchy. */
     :host ::ng-deep app-lifecycle .card-heading {
       margin-bottom: 16px !important;
       gap: 13px !important;
@@ -164,35 +163,36 @@ import { LifecycleComponent } from './features/lifecycle/lifecycle.component';
     :host ::ng-deep app-lifecycle .heading-symbol {
       color: #143f91 !important;
       font-size: 23px !important;
-    }
-
-    :host ::ng-deep app-lifecycle .card-heading h2,
-    :host ::ng-deep app-lifecycle .card-heading h3,
-    :host ::ng-deep app-lifecycle td strong,
-    :host ::ng-deep app-lifecycle .checklist strong,
-    :host ::ng-deep app-lifecycle .table-empty strong,
-    :host ::ng-deep app-lifecycle .lifecycle-empty strong {
-      color: #0f347d !important;
+      font-weight: 400 !important;
     }
 
     :host ::ng-deep app-lifecycle .card-heading h2,
     :host ::ng-deep app-lifecycle .card-heading h3 {
       margin: 0 !important;
+      color: #0f347d !important;
       font-size: 21px !important;
-      font-weight: 700 !important;
       line-height: 1.15 !important;
     }
 
-    :host ::ng-deep app-lifecycle .card-heading p,
+    :host ::ng-deep app-lifecycle .card-heading p {
+      margin: 4px 0 0 !important;
+      color: #69758b !important;
+      font-size: 12px !important;
+      font-weight: 400 !important;
+      line-height: 1.45 !important;
+    }
+
     :host ::ng-deep app-lifecycle .card p,
     :host ::ng-deep app-lifecycle td small,
     :host ::ng-deep app-lifecycle .table-empty p,
     :host ::ng-deep app-lifecycle .lifecycle-empty p {
       color: #69758b !important;
       font-size: 12px !important;
+      font-weight: 400 !important;
       line-height: 1.45 !important;
     }
 
+    /* Request form labels are bold, values are not. */
     :host ::ng-deep app-lifecycle label {
       gap: 6px !important;
       color: #17243f !important;
@@ -216,6 +216,7 @@ import { LifecycleComponent } from './features/lifecycle/lifecycle.component';
       background: #fff !important;
       color: #1d2941 !important;
       font-size: 13px !important;
+      font-weight: 400 !important;
       outline: none !important;
     }
 
@@ -231,6 +232,57 @@ import { LifecycleComponent } from './features/lifecycle/lifecycle.component';
       box-shadow: 0 0 0 2px rgba(20, 63, 145, .08) !important;
     }
 
+    :host ::ng-deep app-lifecycle input::placeholder,
+    :host ::ng-deep app-lifecycle textarea::placeholder {
+      color: #9aa5b6 !important;
+      font-weight: 400 !important;
+    }
+
+    /* Request summary uses normal/500-weight values rather than bold admin text. */
+    :host ::ng-deep app-lifecycle td,
+    :host ::ng-deep app-lifecycle td strong,
+    :host ::ng-deep app-lifecycle .pill,
+    :host ::ng-deep app-lifecycle .metrics span,
+    :host ::ng-deep app-lifecycle .metrics small,
+    :host ::ng-deep app-lifecycle .checklist strong,
+    :host ::ng-deep app-lifecycle .checklist small {
+      font-weight: 400 !important;
+    }
+
+    :host ::ng-deep app-lifecycle td strong {
+      color: #17243f !important;
+      font-weight: 500 !important;
+    }
+
+    :host ::ng-deep app-lifecycle th {
+      padding: 11px 10px !important;
+      color: #64728a !important;
+      background: #fff !important;
+      border-bottom: 1px solid #dce2ea !important;
+      font-size: 10px !important;
+      font-weight: 500 !important;
+      letter-spacing: 0 !important;
+    }
+
+    :host ::ng-deep app-lifecycle td {
+      padding: 12px 10px !important;
+      color: #17243f !important;
+      border-bottom: 1px solid #e4e8ef !important;
+      font-size: 12px !important;
+    }
+
+    :host ::ng-deep app-lifecycle .table-empty strong,
+    :host ::ng-deep app-lifecycle .lifecycle-empty strong {
+      color: #0f347d !important;
+      font-size: 15px !important;
+      font-weight: 600 !important;
+    }
+
+    :host ::ng-deep app-lifecycle .pill {
+      color: #143f91 !important;
+    }
+
+    /* Same primary action typography as Submit Request. */
     :host ::ng-deep app-lifecycle .form-card > .primary,
     :host ::ng-deep app-lifecycle .compact-form-card > .primary {
       width: 100% !important;
@@ -250,25 +302,32 @@ import { LifecycleComponent } from './features/lifecycle/lifecycle.component';
       background: #dc1929 !important;
     }
 
-    :host ::ng-deep app-lifecycle th {
-      padding: 11px 10px !important;
-      color: #69758b !important;
-      background: #fff !important;
-      border-bottom: 1px solid #dce2ea !important;
-      font-size: 10px !important;
+    /* Shared hero uses the Request Portal values exactly. */
+    :host ::ng-deep app-lifecycle .shared-hero-copy h1 {
+      font-size: 58px !important;
+      line-height: .95 !important;
+      letter-spacing: -2.5px !important;
       font-weight: 700 !important;
     }
 
-    :host ::ng-deep app-lifecycle td {
-      padding: 12px 10px !important;
-      color: #17243f !important;
-      border-bottom: 1px solid #e4e8ef !important;
-      font-size: 12px !important;
+    :host ::ng-deep app-lifecycle .shared-hero-copy h2 {
+      color: #0f347d !important;
+      font-size: 28px !important;
+      font-weight: 600 !important;
     }
 
-    :host ::ng-deep app-lifecycle .pill,
-    :host ::ng-deep app-lifecycle .refresh {
+    :host ::ng-deep app-lifecycle .shared-hero-copy > p {
+      color: #26395c !important;
+      font-size: 17px !important;
+      font-weight: 400 !important;
+      line-height: 1.45 !important;
+    }
+
+    :host ::ng-deep app-lifecycle .hero-benefit {
       color: #143f91 !important;
+      font-size: 13px !important;
+      font-weight: 600 !important;
+      line-height: 1.15 !important;
     }
 
     @media (max-width: 900px) {
