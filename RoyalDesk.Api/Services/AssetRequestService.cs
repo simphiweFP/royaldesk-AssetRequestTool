@@ -1,4 +1,6 @@
 using RoyalDesk.Api.DTOs;
+using RoyalDesk.Api.Email;
+using RoyalDesk.Api.HelpDesk;
 using RoyalDesk.Api.Logging;
 using RoyalDesk.Api.Models;
 using RoyalDesk.Api.Repositories;
@@ -7,19 +9,24 @@ namespace RoyalDesk.Api.Services;
 
 public sealed class AssetRequestService(
     IAssetRequestRepository repository,
-    IAssetRequestAuditLogger auditLogger) : IAssetRequestService
+    IAssetRequestAuditLogger auditLogger,
+    TicketNotificationService notifications) : IAssetRequestService
 {
     public async Task<AssetRequestResponseDto> CreateAsync(
         CreateAssetRequestDto request,
         string requestedBy,
         CancellationToken cancellationToken = default)
     {
+        var requesterEmail = string.IsNullOrWhiteSpace(request.RequesterEmail)
+            ? null
+            : request.RequesterEmail.Trim();
+        var trackingPin = requesterEmail is null ? TrackingPinSecurity.GeneratePin() : null;
+
         var entity = new AssetRequest
         {
             RequesterName = request.RequesterName.Trim(),
-            RequesterEmail = string.IsNullOrWhiteSpace(request.RequesterEmail)
-                ? null
-                : request.RequesterEmail.Trim(),
+            RequesterEmail = requesterEmail,
+            TrackingPinHash = trackingPin is null ? null : TrackingPinSecurity.Hash(trackingPin),
             Branch = request.Branch.Trim(),
             Department = request.Department.Trim(),
             ItemType = request.ItemType.Trim(),
@@ -38,6 +45,7 @@ public sealed class AssetRequestService(
             TicketNumber = entity.TicketNumber ?? $"RT-IT-{entity.Id:000000}",
             RequesterName = entity.RequesterName,
             RequesterEmail = entity.RequesterEmail,
+            TrackingPin = trackingPin,
             Branch = entity.Branch,
             Department = entity.Department,
             ItemType = entity.ItemType,
@@ -49,6 +57,18 @@ public sealed class AssetRequestService(
         };
 
         await auditLogger.LogCreatedAsync(response, cancellationToken);
+        await notifications.TicketCreatedAsync(
+            entity.Id,
+            response.TicketNumber,
+            entity.RequesterName,
+            entity.RequesterEmail,
+            entity.Branch,
+            entity.Department,
+            entity.ItemType,
+            entity.Reason,
+            trackingPin,
+            cancellationToken);
+
         return response;
     }
 }
