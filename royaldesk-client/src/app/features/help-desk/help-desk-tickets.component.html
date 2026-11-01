@@ -1,87 +1,96 @@
 <section class="ticket-page">
-  <div class="ticket-metrics">
-    <article><span>New</span><strong>{{ newCount }}</strong><small>Waiting to be picked up</small></article>
-    <article><span>Active</span><strong>{{ activeCount }}</strong><small>Assigned or in progress</small></article>
-    <article><span>Waiting</span><strong>{{ waitingCount }}</strong><small>User or third-party dependency</small></article>
-    <article><span>Resolved</span><strong>{{ resolvedCount }}</strong><small>Completed requests in this view</small></article>
+  <div class="mode-switch">
+    <button type="button" [class.active]="mode==='team'" (click)="mode='team'">IT Team Queue</button>
+    <button type="button" [class.active]="mode==='track'" (click)="mode='track'">Track My Request</button>
   </div>
 
-  <article class="ticket-card">
-    <div class="ticket-card-heading">
-      <div class="heading-symbol">▤</div>
-      <div>
-        <h2>IT Ticket Queue</h2>
-        <p>Assign requests, start investigations and keep ownership visible.</p>
-      </div>
+  <ng-container *ngIf="mode==='team'">
+    <div class="ticket-metrics">
+      <article><span>New</span><strong>{{ newCount }}</strong><small>Waiting to be picked up</small></article>
+      <article><span>Active</span><strong>{{ activeCount }}</strong><small>Assigned or in progress</small></article>
+      <article><span>Waiting</span><strong>{{ waitingCount }}</strong><small>User or third-party dependency</small></article>
+      <article><span>Resolved</span><strong>{{ resolvedCount }}</strong><small>Completed requests in this view</small></article>
     </div>
 
-    <div class="ticket-toolbar">
-      <input [(ngModel)]="search" placeholder="Search ticket, requester, branch, issue or technician…" />
-      <select [(ngModel)]="statusFilter" (ngModelChange)="load()">
-        <option *ngFor="let status of statuses" [value]="status">{{ status }}</option>
-      </select>
-    </div>
-
-    <div class="ticket-error" *ngIf="error">{{ error }}</div>
-    <div class="ticket-loading" *ngIf="loading">Loading IT tickets…</div>
-
-    <div class="ticket-table-wrap" *ngIf="!loading">
-      <table>
-        <thead><tr><th>Ticket</th><th>Requester</th><th>Issue</th><th>Assigned Technician</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
-        <tbody>
-          <tr *ngFor="let ticket of filteredTickets" [class.selected]="selected?.id===ticket.id" (click)="select(ticket)">
-            <td><strong>{{ ticket.ticketNumber }}</strong><small>{{ ticket.branch }} · {{ ticket.department }}</small></td>
-            <td><strong>{{ ticket.requesterName }}</strong><small>{{ ticket.requesterEmail || 'No email supplied' }}</small></td>
-            <td><strong>{{ ticket.itemType }}</strong><small>{{ ticket.reason }}</small></td>
-            <td>{{ ticket.assignedToName || 'Unassigned' }}</td>
-            <td><span class="status-pill">{{ ticket.status }}</span></td>
-            <td>{{ ticket.requestedAtUtc | date:'dd MMM yyyy HH:mm' }}</td>
-            <td class="row-actions" (click)="$event.stopPropagation()">
-              <button *ngIf="!ticket.assignedToId && ticket.status==='New'" (click)="assignToMe(ticket)">Assign to Me</button>
-              <button *ngIf="ticket.assignedToId && ticket.status==='Assigned'" (click)="start(ticket)">Start</button>
-              <button *ngIf="ticket.status==='In Progress'" (click)="setWaitingForUser(ticket)">Waiting</button>
-              <button *ngIf="['Assigned','In Progress','Waiting for User'].includes(ticket.status)" class="resolve" (click)="resolve(ticket)">Resolve</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      <div class="empty-state" *ngIf="filteredTickets.length===0">
-        <div class="empty-icon">▤</div>
-        <strong>No tickets in this view</strong>
-        <p>New IT requests will appear here as soon as they are submitted.</p>
-      </div>
-    </div>
-  </article>
-
-  <div class="ticket-lower-grid" *ngIf="selected">
-    <article class="ticket-card detail-card">
-      <div class="ticket-card-heading"><div class="heading-symbol">◎</div><div><h2>{{ selected.ticketNumber }}</h2><p>Current ownership and request details.</p></div></div>
-      <div class="detail-grid">
-        <div><span>Requester</span><strong>{{ selected.requesterName }}</strong></div>
-        <div><span>Status</span><strong>{{ selected.status }}</strong></div>
-        <div><span>Assigned Technician</span><strong>{{ selected.assignedToName || 'Unassigned' }}</strong></div>
-        <div><span>Branch / Department</span><strong>{{ selected.branch }} · {{ selected.department }}</strong></div>
-        <div><span>Issue</span><strong>{{ selected.itemType }}</strong></div>
-        <div><span>Requested</span><strong>{{ selected.requestedAtUtc | date:'medium' }}</strong></div>
-      </div>
-    </article>
-
-    <article class="ticket-card history-card">
-      <div class="ticket-card-heading"><div class="heading-symbol">↻</div><div><h2>Ticket History</h2><p>Who changed the ticket and when.</p></div></div>
-      <div class="history-list">
-        <div class="history-item" *ngFor="let item of history">
-          <span class="history-dot"></span>
-          <div><strong>{{ item.toStatus }}</strong><p>{{ item.comment || 'Status updated.' }}</p><small>{{ item.changedByName || item.changedBy }} · {{ item.changedAtUtc | date:'medium' }}</small></div>
+    <article class="ticket-card">
+      <div class="ticket-card-heading">
+        <div class="heading-symbol">▤</div>
+        <div>
+          <h2>IT Ticket Queue</h2>
+          <p>Assign requests, start investigations and keep ownership visible.</p>
         </div>
-        <div class="empty-history" *ngIf="history.length===0">No history available yet.</div>
+      </div>
+
+      <div class="ticket-toolbar">
+        <input [(ngModel)]="search" placeholder="Search ticket, requester, branch, issue or technician…" />
+        <select [(ngModel)]="statusFilter" (ngModelChange)="load()">
+          <option *ngFor="let status of statuses" [value]="status">{{ status }}</option>
+        </select>
+      </div>
+
+      <div class="ticket-error" *ngIf="error">{{ error }}</div>
+      <div class="ticket-loading" *ngIf="loading">Loading IT tickets…</div>
+
+      <div class="ticket-table-wrap" *ngIf="!loading">
+        <table>
+          <thead><tr><th>Ticket</th><th>Requester</th><th>Issue</th><th>Assigned Technician</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let ticket of filteredTickets" [class.selected]="selected?.id===ticket.id" (click)="select(ticket)">
+              <td><strong>{{ ticket.ticketNumber }}</strong><small>{{ ticket.branch }} · {{ ticket.department }}</small></td>
+              <td><strong>{{ ticket.requesterName }}</strong><small>{{ ticket.requesterEmail || 'No email supplied' }}</small></td>
+              <td><strong>{{ ticket.itemType }}</strong><small>{{ ticket.reason }}</small></td>
+              <td>{{ ticket.assignedToName || 'Unassigned' }}</td>
+              <td><span class="status-pill">{{ ticket.status }}</span></td>
+              <td>{{ ticket.requestedAtUtc | date:'dd MMM yyyy HH:mm' }}</td>
+              <td class="row-actions" (click)="$event.stopPropagation()">
+                <button *ngIf="!ticket.assignedToId && ticket.status==='New'" (click)="assignToMe(ticket)">Assign to Me</button>
+                <button *ngIf="ticket.assignedToId && ticket.status==='Assigned'" (click)="start(ticket)">Start</button>
+                <button *ngIf="ticket.status==='In Progress'" (click)="setWaitingForUser(ticket)">Waiting</button>
+                <button *ngIf="['Assigned','In Progress','Waiting for User'].includes(ticket.status)" class="resolve" (click)="resolve(ticket)">Resolve</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="empty-state" *ngIf="filteredTickets.length===0">
+          <div class="empty-icon">▤</div>
+          <strong>No tickets in this view</strong>
+          <p>New IT requests will appear here as soon as they are submitted.</p>
+        </div>
       </div>
     </article>
-  </div>
 
-  <div class="information-box">
-    <div class="info-circle">i</div>
-    <div>Ticket ownership is recorded against the IT employee who takes the request.<br />Requesters will see the assigned technician name once tracking and notifications are enabled in Step 3.</div>
-    <div class="tyre-decoration"></div>
-  </div>
+    <div class="ticket-lower-grid" *ngIf="selected">
+      <article class="ticket-card detail-card">
+        <div class="ticket-card-heading"><div class="heading-symbol">◎</div><div><h2>{{ selected.ticketNumber }}</h2><p>Current ownership and request details.</p></div></div>
+        <div class="detail-grid">
+          <div><span>Requester</span><strong>{{ selected.requesterName }}</strong></div>
+          <div><span>Status</span><strong>{{ selected.status }}</strong></div>
+          <div><span>Assigned Technician</span><strong>{{ selected.assignedToName || 'Unassigned' }}</strong></div>
+          <div><span>Branch / Department</span><strong>{{ selected.branch }} · {{ selected.department }}</strong></div>
+          <div><span>Issue</span><strong>{{ selected.itemType }}</strong></div>
+          <div><span>Requested</span><strong>{{ selected.requestedAtUtc | date:'medium' }}</strong></div>
+        </div>
+      </article>
+
+      <article class="ticket-card history-card">
+        <div class="ticket-card-heading"><div class="heading-symbol">↻</div><div><h2>Ticket History</h2><p>Who changed the ticket and when.</p></div></div>
+        <div class="history-list">
+          <div class="history-item" *ngFor="let item of history">
+            <span class="history-dot"></span>
+            <div><strong>{{ item.toStatus }}</strong><p>{{ item.comment || 'Status updated.' }}</p><small>{{ item.changedByName || item.changedBy }} · {{ item.changedAtUtc | date:'medium' }}</small></div>
+          </div>
+          <div class="empty-history" *ngIf="history.length===0">No history available yet.</div>
+        </div>
+      </article>
+    </div>
+
+    <div class="information-box">
+      <div class="info-circle">i</div>
+      <div>Assigning a ticket records the IT employee responsible and immediately notifies the requester when an email was supplied.<br />Requester-visible progress is available under Track My Request.</div>
+      <div class="tyre-decoration"></div>
+    </div>
+  </ng-container>
+
+  <app-ticket-tracking *ngIf="mode==='track'"></app-ticket-tracking>
 </section>
