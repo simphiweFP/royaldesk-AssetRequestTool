@@ -8,18 +8,34 @@ public sealed class AssetRequestRepository(IDbConnectionFactory connectionFactor
 {
     public async Task<int> CreateAsync(AssetRequest request, CancellationToken cancellationToken = default)
     {
-        const string sql = """
+        const string insertSql = """
             INSERT INTO AssetRequests
-                (Branch, Department, ItemType, Quantity, Reason, RequestedBy, RequestedAtUtc)
+                (TicketNumber, RequesterName, RequesterEmail, Branch, Department, ItemType, Quantity, Reason, Status, RequestedBy, RequestedAtUtc)
             VALUES
-                (@Branch, @Department, @ItemType, @Quantity, @Reason, @RequestedBy, @RequestedAtUtc);
+                (NULL, @RequesterName, @RequesterEmail, @Branch, @Department, @ItemType, @Quantity, @Reason, @Status, @RequestedBy, @RequestedAtUtc);
             SELECT last_insert_rowid();
             """;
 
         await using var connection = connectionFactory.CreateConnection();
         await connection.OpenAsync(cancellationToken);
 
-        return await connection.ExecuteScalarAsync<int>(
-            new CommandDefinition(sql, request, cancellationToken: cancellationToken));
+        var id = await connection.ExecuteScalarAsync<int>(
+            new CommandDefinition(insertSql, request, cancellationToken: cancellationToken));
+
+        request.TicketNumber = $"RT-IT-{id:000000}";
+
+        const string updateSql = """
+            UPDATE AssetRequests
+            SET TicketNumber = @TicketNumber
+            WHERE Id = @Id;
+            """;
+
+        await connection.ExecuteAsync(
+            new CommandDefinition(
+                updateSql,
+                new { Id = id, request.TicketNumber },
+                cancellationToken: cancellationToken));
+
+        return id;
     }
 }
