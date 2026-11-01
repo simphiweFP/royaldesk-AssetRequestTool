@@ -2,6 +2,7 @@ using FluentMigrator.Runner;
 using RoyalDesk.Api.Authentication;
 using RoyalDesk.Api.Data;
 using RoyalDesk.Api.Exceptions;
+using RoyalDesk.Api.HelpDesk;
 using RoyalDesk.Api.Lifecycle;
 using RoyalDesk.Api.Logging;
 using RoyalDesk.Api.Migrations;
@@ -39,6 +40,8 @@ builder.Services.AddScoped<IAssetRequestRepository, AssetRequestRepository>();
 builder.Services.AddScoped<IAssetRequestService, AssetRequestService>();
 builder.Services.AddScoped<ILifecycleRepository, LifecycleRepository>();
 builder.Services.AddScoped<ILifecycleService, LifecycleService>();
+builder.Services.AddScoped<IHelpDeskRepository, HelpDeskRepository>();
+builder.Services.AddScoped<HelpDeskService>();
 builder.Services.AddSingleton<IAssetRequestAuditLogger, FileAssetRequestAuditLogger>();
 builder.Services.AddSingleton<CreateAssetRequestValidator>();
 
