@@ -6,6 +6,7 @@ public sealed class AssetRequestResponseDto
     public string TicketNumber { get; init; } = string.Empty;
     public string RequesterName { get; init; } = string.Empty;
     public string? RequesterEmail { get; init; }
+    public string? TrackingPin { get; init; }
     public string Branch { get; init; } = string.Empty;
     public string Department { get; init; } = string.Empty;
     public string ItemType { get; init; } = string.Empty;
