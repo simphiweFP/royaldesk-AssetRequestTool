@@ -1,0 +1,119 @@
+<section class="tracking-page">
+  <article class="card tracking-search-card">
+    <div class="card-heading">
+      <div class="heading-symbol">⌕</div>
+      <div>
+        <h2>Track My Request</h2>
+        <p>Search using your name and department to see the progress of your RoyalDesk requests.</p>
+      </div>
+    </div>
+
+    <div class="search-grid">
+      <label>
+        Employee Name
+        <input [(ngModel)]="name" placeholder="Type your name">
+      </label>
+
+      <label>
+        Department
+        <input [(ngModel)]="department" placeholder="e.g. Finance">
+      </label>
+    </div>
+
+    <button class="primary" type="button" (click)="search()" [disabled]="loading">
+      {{ loading ? 'Searching...' : 'Search My Requests' }}
+    </button>
+  </article>
+
+  <div class="tracking-error" *ngIf="error">{{ error }}</div>
+
+  <section class="results" *ngIf="results.length && !detail">
+    <article class="card result-card" *ngFor="let ticket of results" [class.selected]="selected?.ticketNumber === ticket.ticketNumber" (click)="select(ticket)">
+      <div class="ticket-line">
+        <div>
+          <strong>{{ ticket.ticketNumber }}</strong>
+          <span>{{ ticket.itemType }}</span>
+        </div>
+        <span class="status-pill">{{ ticket.status }}</span>
+      </div>
+
+      <div class="result-meta">
+        <span><b>Requester</b>{{ ticket.requesterName }}</span>
+        <span><b>Department</b>{{ ticket.department }}</span>
+        <span><b>Technician</b>{{ ticket.assignedToName || 'Not assigned yet' }}</span>
+        <span><b>Submitted</b>{{ ticket.requestedAtUtc | date:'medium' }}</span>
+      </div>
+
+      <div class="latest-update" *ngIf="ticket.latestPublicUpdate">
+        {{ ticket.latestPublicUpdate }}
+      </div>
+    </article>
+  </section>
+
+  <article class="card verify-card" *ngIf="selected && !detail">
+    <div class="card-heading">
+      <div class="heading-symbol">✓</div>
+      <div>
+        <h2>Verify & View Full Progress</h2>
+        <p>{{ selected.ticketNumber }} · Enter the email used on the request, or the tracking PIN if no email was supplied.</p>
+      </div>
+    </div>
+
+    <label>
+      Email or Tracking PIN
+      <input [(ngModel)]="verification" placeholder="name@royaltyres.co.za or 6-digit PIN" (keyup.enter)="verify()">
+    </label>
+
+    <button class="primary" type="button" (click)="verify()" [disabled]="verifying">
+      {{ verifying ? 'Verifying...' : 'View Full Progress' }}
+    </button>
+  </article>
+
+  <section class="detail-grid" *ngIf="detail">
+    <article class="card detail-card">
+      <div class="ticket-line detail-title">
+        <div>
+          <strong>{{ detail.ticketNumber }}</strong>
+          <span>{{ detail.itemType }}</span>
+        </div>
+        <span class="status-pill">{{ detail.status }}</span>
+      </div>
+
+      <div class="detail-summary">
+        <div><span>Employee</span><strong>{{ detail.requesterName }}</strong></div>
+        <div><span>Department</span><strong>{{ detail.department }}</strong></div>
+        <div><span>Branch</span><strong>{{ detail.branch }}</strong></div>
+        <div><span>Assigned Technician</span><strong>{{ detail.assignedToName || 'Not assigned yet' }}</strong></div>
+      </div>
+
+      <div class="issue-box">
+        <span>Request / Issue</span>
+        <strong>{{ detail.reason }}</strong>
+      </div>
+    </article>
+
+    <article class="card timeline-card">
+      <div class="card-heading">
+        <div class="heading-symbol">▤</div>
+        <div>
+          <h2>Progress</h2>
+          <p>Only updates intended for the requester are shown here.</p>
+        </div>
+      </div>
+
+      <div class="timeline">
+        <div class="timeline-item" *ngFor="let item of detail.history">
+          <span class="timeline-dot"></span>
+          <div>
+            <strong>{{ item.status }}</strong>
+            <small>{{ item.changedAtUtc | date:'medium' }}</small>
+            <p *ngIf="item.technicianName">Handled by {{ item.technicianName }}</p>
+            <p *ngIf="item.update">{{ item.update }}</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <button class="outline" type="button" (click)="reset()">Search Another Request</button>
+  </section>
+</section>
