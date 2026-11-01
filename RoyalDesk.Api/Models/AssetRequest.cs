@@ -6,6 +6,7 @@ public sealed class AssetRequest
     public string? TicketNumber { get; set; }
     public string RequesterName { get; set; } = string.Empty;
     public string? RequesterEmail { get; set; }
+    public string? TrackingPinHash { get; set; }
     public string Branch { get; set; } = string.Empty;
     public string Department { get; set; } = string.Empty;
     public string ItemType { get; set; } = string.Empty;
