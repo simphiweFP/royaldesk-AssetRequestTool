@@ -38,3 +38,32 @@ export interface ITTeamMember {
   role: string;
   isActive: boolean;
 }
+
+export interface PublicTicketSummary {
+  ticketNumber: string;
+  requesterName: string;
+  department: string;
+  itemType: string;
+  status: string;
+  assignedToName?: string;
+  requestedAtUtc: string;
+  lastUpdatedAtUtc?: string;
+  latestPublicUpdate?: string;
+}
+
+export interface PublicTicketHistory {
+  status: string;
+  technicianName?: string;
+  update?: string;
+  changedAtUtc: string;
+}
+
+export interface PublicTicketDetail extends PublicTicketSummary {
+  branch: string;
+  quantity: number;
+  reason: string;
+  assignedAtUtc?: string;
+  startedAtUtc?: string;
+  resolvedAtUtc?: string;
+  history: PublicTicketHistory[];
+}
