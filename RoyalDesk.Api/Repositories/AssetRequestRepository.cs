@@ -10,9 +10,9 @@ public sealed class AssetRequestRepository(IDbConnectionFactory connectionFactor
     {
         const string insertSql = """
             INSERT INTO AssetRequests
-                (TicketNumber, RequesterName, RequesterEmail, Branch, Department, ItemType, Quantity, Reason, Status, RequestedBy, RequestedAtUtc)
+                (TicketNumber, RequesterName, RequesterEmail, TrackingPinHash, Branch, Department, ItemType, Quantity, Reason, Status, RequestedBy, RequestedAtUtc)
             VALUES
-                (NULL, @RequesterName, @RequesterEmail, @Branch, @Department, @ItemType, @Quantity, @Reason, @Status, @RequestedBy, @RequestedAtUtc);
+                (NULL, @RequesterName, @RequesterEmail, @TrackingPinHash, @Branch, @Department, @ItemType, @Quantity, @Reason, @Status, @RequestedBy, @RequestedAtUtc);
             SELECT last_insert_rowid();
             """;
 
