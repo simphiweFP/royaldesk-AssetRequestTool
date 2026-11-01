@@ -204,7 +204,6 @@ app-lifecycle .shared-footer {
   color: #fff;
 }
 
-/* Defensive rule: if duplicate shared footers ever enter the DOM, show only the first. */
 app-lifecycle .shared-footer ~ .shared-footer { display: none !important; }
 
 app-lifecycle .shared-footer-inner {
@@ -327,6 +326,123 @@ app-lifecycle .lifecycle-empty {
 app-lifecycle .checklist {
   min-height: 230px;
   align-content: start;
+}
+
+/* Exact Request IT Equipment typography and colour system shared across lifecycle pages. */
+app-lifecycle {
+  color: #17243f;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+app-lifecycle .card,
+app-lifecycle .metrics article {
+  border-color: #dce2ea !important;
+  background: #fff !important;
+}
+
+app-lifecycle .card-heading h2,
+app-lifecycle .card-heading h3,
+app-lifecycle .people-card strong,
+app-lifecycle .big-number,
+app-lifecycle td strong,
+app-lifecycle .checklist strong {
+  color: #0f347d !important;
+}
+
+app-lifecycle .card-heading h2,
+app-lifecycle .card-heading h3 {
+  font-size: 21px !important;
+  font-weight: 700 !important;
+  line-height: 1.15 !important;
+}
+
+app-lifecycle .card-heading p,
+app-lifecycle .card p,
+app-lifecycle .metrics span,
+app-lifecycle .metrics small,
+app-lifecycle td small,
+app-lifecycle .checklist small,
+app-lifecycle .table-empty,
+app-lifecycle .lifecycle-empty {
+  color: #69758b !important;
+}
+
+app-lifecycle .card-heading p,
+app-lifecycle .card p {
+  font-size: 12px !important;
+  line-height: 1.45 !important;
+}
+
+app-lifecycle label {
+  color: #17243f !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+}
+
+app-lifecycle input,
+app-lifecycle select,
+app-lifecycle textarea {
+  border-color: #cbd4df !important;
+  background: #fff !important;
+  color: #1d2941 !important;
+  font-size: 13px !important;
+}
+
+app-lifecycle input:focus,
+app-lifecycle select:focus,
+app-lifecycle textarea:focus {
+  border-color: #143f91 !important;
+  box-shadow: 0 0 0 2px rgba(20, 63, 145, .08) !important;
+}
+
+app-lifecycle input::placeholder,
+app-lifecycle textarea::placeholder {
+  color: #9aa5b6 !important;
+}
+
+app-lifecycle th {
+  color: #69758b !important;
+  background: #fff !important;
+  border-bottom-color: #dce2ea !important;
+}
+
+app-lifecycle td {
+  color: #17243f !important;
+  border-bottom-color: #e4e8ef !important;
+}
+
+app-lifecycle .heading-symbol,
+app-lifecycle .pill,
+app-lifecycle .actions button:not(.danger-action),
+app-lifecycle .refresh {
+  color: #143f91 !important;
+}
+
+app-lifecycle .pill {
+  background: #edf2fb !important;
+}
+
+app-lifecycle .shared-info {
+  border-color: #e0e5ed !important;
+  background: linear-gradient(100deg, #f5f8fd, #f7f8fa) !important;
+  color: #53627a !important;
+  font-size: 12px !important;
+}
+
+app-lifecycle .shared-info-icon {
+  background: #bcc7d6 !important;
+  color: #fff !important;
+}
+
+app-lifecycle .form-card > .primary,
+app-lifecycle .compact-form-card > .primary {
+  background: #f11d2f !important;
+  color: #fff !important;
+}
+
+app-lifecycle .form-card > .primary:hover,
+app-lifecycle .compact-form-card > .primary:hover {
+  background: #dc1929 !important;
 }
 
 @media (max-width: 900px) {
