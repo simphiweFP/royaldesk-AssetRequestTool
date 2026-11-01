@@ -40,18 +40,9 @@
       <form [formGroup]="form" (ngSubmit)="submit()">
         <div class="field">
           <label>Employee Name <span>*</span></label>
-          <input
-            formControlName="requesterName"
-            list="royaldesk-employees"
-            autocomplete="off"
-            placeholder="Start typing an employee name"
-            [class.field-invalid]="fieldErrors['requestername']"
-            (input)="onRequesterNameInput()"
-          />
+          <input formControlName="requesterName" list="royaldesk-employees" autocomplete="off" placeholder="Start typing an employee name" [class.field-invalid]="fieldErrors['requestername']" (input)="onRequesterNameInput()" />
           <datalist id="royaldesk-employees">
-            @for (name of employeeNames; track name) {
-              <option [value]="name"></option>
-            }
+            @for (name of employeeNames; track name) { <option [value]="name"></option> }
           </datalist>
           <div class="field-hint">Select a matching employee or continue typing a name that is not in the list.</div>
           @if (fieldErrors['requestername']) { <div class="field-error">{{ fieldErrors['requestername'] }}</div> }
@@ -59,13 +50,7 @@
 
         <div class="field">
           <label class="notes-label">Employee Email <small>(Optional)</small></label>
-          <input
-            type="email"
-            formControlName="requesterEmail"
-            placeholder="employee@royaltyres.co.za"
-            [class.field-invalid]="fieldErrors['requesteremail']"
-            (input)="clearFieldError('requesteremail')"
-          />
+          <input type="email" formControlName="requesterEmail" placeholder="employee@royaltyres.co.za" [class.field-invalid]="fieldErrors['requesteremail']" (input)="clearFieldError('requesteremail')" />
           <div class="field-hint">Used for request progress notifications when available.</div>
           @if (fieldErrors['requesteremail']) { <div class="field-error">{{ fieldErrors['requesteremail'] }}</div> }
         </div>
@@ -121,9 +106,7 @@
           <textarea formControlName="additionalNotes" placeholder="Add any extra details here..."></textarea>
         </div>
 
-        @if (errorMessage) {
-          <div class="api-error"><strong>Request could not be submitted</strong><span>{{ errorMessage }}</span></div>
-        }
+        @if (errorMessage) { <div class="api-error"><strong>Request could not be submitted</strong><span>{{ errorMessage }}</span></div> }
 
         @if (!submittedRequest) {
           <button class="submit" type="submit" [disabled]="submitting">
@@ -136,18 +119,12 @@
     <section class="right-column">
       @if (!submittedRequest) {
         <div class="support-box">
-          <div class="support-message">
-            <div class="headset">☏</div>
-            <div><strong>Need urgent assistance?</strong><p>For IT support issues, contact the IT Helpdesk.</p></div>
-          </div>
+          <div class="support-message"><div class="headset">☏</div><div><strong>Need urgent assistance?</strong><p>For IT support issues, contact the IT Helpdesk.</p></div></div>
           <button class="outline-button" type="button" (click)="openContactModal()">Contact IT</button>
         </div>
 
         <div class="card summary-card">
-          <div class="card-heading summary-heading">
-            <div class="heading-symbol">▤</div>
-            <div><h3>Your Request</h3><p>A summary of the information you are about to submit.</p></div>
-          </div>
+          <div class="card-heading summary-heading"><div class="heading-symbol">▤</div><div><h3>Your Request</h3><p>A summary of the information you are about to submit.</p></div></div>
           <div class="summary-list">
             <div class="summary-row"><span class="summary-name">● &nbsp; Employee</span><strong>{{ requestPreview.requesterName || 'Not entered' }}</strong></div>
             <div class="summary-row"><span class="summary-name">✉ &nbsp; Email</span><strong>{{ requestPreview.requesterEmail || 'Not provided' }}</strong></div>
@@ -160,17 +137,21 @@
           </div>
         </div>
 
-        <div class="information-box">
-          <div class="info-circle">i</div>
-          <div>Once submitted, your request will be sent to the IT team for review.<br />If an email is provided, progress notifications will be sent there.</div>
-          <div class="tyre-decoration"></div>
-        </div>
+        <div class="information-box"><div class="info-circle">i</div><div>Once submitted, your request will be sent to the IT team for review.<br />If an email is provided, progress notifications will be sent there.</div><div class="tyre-decoration"></div></div>
       } @else {
         <div class="success-card">
           <div class="success-icon">✓</div>
           <div class="success-copy"><h3>Request Submitted Successfully!</h3><p>Your RoyalDesk request has been created.</p></div>
           <div class="request-number"><span>Ticket</span><strong>{{ submittedRequest.ticketNumber }}</strong></div>
         </div>
+
+        @if (submittedRequest.trackingPin) {
+          <div class="information-box">
+            <div class="info-circle">#</div>
+            <div><strong>Tracking PIN: {{ submittedRequest.trackingPin }}</strong><br />No email was supplied. Keep this PIN together with your ticket number to view the full request progress later.</div>
+            <div class="tyre-decoration"></div>
+          </div>
+        }
 
         <div class="card summary-card">
           <div class="card-heading"><div class="heading-symbol">▤</div><div><h3>Request Details</h3><p>A summary of your submitted request.</p></div></div>
@@ -194,19 +175,9 @@
   @if (showContactModal) {
     <div class="modal-backdrop" (click)="closeContactModal()">
       <section class="modal" role="dialog" aria-modal="true" aria-labelledby="contact-title" (click)="$event.stopPropagation()">
-        <div class="modal-top">
-          <div><small>RoyalDesk · Internal IT</small><h3 id="contact-title">Contact IT Helpdesk</h3></div>
-          <button type="button" aria-label="Close" (click)="closeContactModal()">×</button>
-        </div>
+        <div class="modal-top"><div><small>RoyalDesk · Internal IT</small><h3 id="contact-title">Contact IT Helpdesk</h3></div><button type="button" aria-label="Close" (click)="closeContactModal()">×</button></div>
         <div class="modal-content">
-          <div class="modal-information">
-            <div class="modal-info-icon">i</div>
-            <div>
-              <strong>Need technical support?</strong>
-              <p>Please use the Royal Tyres internal IT support channel for incidents, access problems or urgent technical support.</p>
-              <p>RoyalDesk will be expanded to track IT support issues and equipment requests in one workflow.</p>
-            </div>
-          </div>
+          <div class="modal-information"><div class="modal-info-icon">i</div><div><strong>Need technical support?</strong><p>Please use the Royal Tyres internal IT support channel for incidents, access problems or urgent technical support.</p><p>RoyalDesk will be expanded to track IT support issues and equipment requests in one workflow.</p></div></div>
           <div class="modal-actions"><button class="outline-button" type="button" (click)="closeContactModal()">Close</button></div>
         </div>
       </section>
