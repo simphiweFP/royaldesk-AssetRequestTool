@@ -4,6 +4,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { finalize } from 'rxjs';
 
 import { AssetRequestService } from '../../core/services/asset-request.service';
+import { LifecycleService } from '../../core/services/lifecycle.service';
+import { Employee } from '../../core/models/lifecycle.model';
 import {
   AssetRequestResponse,
   CreateAssetRequest
@@ -18,6 +20,7 @@ import {
 })
 export class AssetRequestComponent {
   private readonly service = inject(AssetRequestService);
+  private readonly lifecycleService = inject(LifecycleService);
   private readonly formBuilder = inject(FormBuilder);
 
   readonly currentUser = {
@@ -25,6 +28,8 @@ export class AssetRequestComponent {
     username: 'demo.user',
     initials: 'DU'
   };
+
+  employees: Employee[] = [];
 
   readonly branches = [
     'Durban Passenger',
@@ -35,20 +40,24 @@ export class AssetRequestComponent {
   ];
 
   readonly departments = [
+    'Administration',
     'IT',
     'Sales',
     'Finance',
     'Operations',
-    'Human Resources'
+    'Human Resources',
+    'Workshop'
   ];
 
   readonly itemTypes = [
     'Laptop',
-    'Desktop',
     'Monitor',
-    'Mouse',
     'Keyboard',
-    'Headset'
+    'Mouse',
+    'Headset',
+    'Printer',
+    'Barcode Scanner',
+    'POS Peripheral'
   ];
 
   readonly reasonOptions = [
@@ -59,11 +68,9 @@ export class AssetRequestComponent {
     'Additional Equipment'
   ];
 
-  /*
-   * The UI collects the request.
-   * Validation remains enforced by the API.
-   */
   readonly form = this.formBuilder.nonNullable.group({
+    requesterName: [''],
+    requesterEmail: [''],
     branch: [''],
     department: [''],
     itemType: [''],
@@ -73,17 +80,51 @@ export class AssetRequestComponent {
   });
 
   submitting = false;
-
   submittedRequest: AssetRequestResponse | null = null;
-
   errorMessage = '';
-
   fieldErrors: Record<string, string> = {};
-
   showContactModal = false;
+
+  constructor() {
+    this.lifecycleService.employees().subscribe({
+      next: employees => {
+        this.employees = employees.filter(e => e.employmentStatus !== 'Inactive');
+      },
+      error: () => {
+        this.employees = [];
+      }
+    });
+  }
 
   get requestPreview() {
     return this.form.getRawValue();
+  }
+
+  get employeeNames(): string[] {
+    return this.employees.map(e => `${e.firstName} ${e.lastName}`.trim());
+  }
+
+  onRequesterNameInput(): void {
+    this.clearFieldError('requestername');
+
+    const enteredName = this.form.controls.requesterName.value.trim();
+    const employee = this.employees.find(
+      e => `${e.firstName} ${e.lastName}`.trim().localeCompare(enteredName, undefined, { sensitivity: 'accent' }) === 0
+    );
+
+    if (!employee) {
+      return;
+    }
+
+    this.form.patchValue({
+      requesterEmail: employee.email ?? '',
+      branch: employee.branchName && this.branches.includes(employee.branchName)
+        ? employee.branchName
+        : this.form.controls.branch.value,
+      department: employee.departmentName && this.departments.includes(employee.departmentName)
+        ? employee.departmentName
+        : this.form.controls.department.value
+    });
   }
 
   decreaseQuantity(): void {
@@ -121,6 +162,8 @@ export class AssetRequestComponent {
     const notes = value.additionalNotes.trim();
 
     const request: CreateAssetRequest = {
+      requesterName: value.requesterName.trim(),
+      requesterEmail: value.requesterEmail.trim() || undefined,
       branch: value.branch,
       department: value.department,
       itemType: value.itemType,
@@ -132,11 +175,9 @@ export class AssetRequestComponent {
 
     this.service
       .create(request)
-      .pipe(
-        finalize(() => {
-          this.submitting = false;
-        })
-      )
+      .pipe(finalize(() => {
+        this.submitting = false;
+      }))
       .subscribe({
         next: response => {
           this.submittedRequest = response;
@@ -166,6 +207,8 @@ export class AssetRequestComponent {
     this.fieldErrors = {};
 
     this.form.reset({
+      requesterName: '',
+      requesterEmail: '',
       branch: '',
       department: '',
       itemType: '',
@@ -179,13 +222,8 @@ export class AssetRequestComponent {
     delete this.fieldErrors[field.toLowerCase()];
   }
 
-  private setValidationErrors(
-    error: HttpErrorResponse
-  ): void {
-    const errors =
-      error.error?.errors as
-        | Record<string, string[]>
-        | undefined;
+  private setValidationErrors(error: HttpErrorResponse): void {
+    const errors = error.error?.errors as Record<string, string[]> | undefined;
 
     if (!errors) {
       this.errorMessage =
@@ -196,8 +234,7 @@ export class AssetRequestComponent {
     this.fieldErrors = {};
 
     Object.entries(errors).forEach(([field, messages]) => {
-      this.fieldErrors[field.toLowerCase()] =
-        messages.join(' ');
+      this.fieldErrors[field.toLowerCase()] = messages.join(' ');
     });
   }
 }
