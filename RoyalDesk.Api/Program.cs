@@ -1,6 +1,7 @@
 using FluentMigrator.Runner;
 using RoyalDesk.Api.Authentication;
 using RoyalDesk.Api.Data;
+using RoyalDesk.Api.Email;
 using RoyalDesk.Api.Exceptions;
 using RoyalDesk.Api.HelpDesk;
 using RoyalDesk.Api.Lifecycle;
@@ -35,6 +36,17 @@ builder.Services.AddAuthorization();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' is not configured.");
 
+builder.Services.Configure<SmtpOptions>(options =>
+{
+    builder.Configuration.GetSection("Smtp").Bind(options);
+    options.Host = builder.Configuration["SMTP_HOST"] ?? options.Host;
+    if (int.TryParse(builder.Configuration["SMTP_PORT"], out var port)) options.Port = port;
+    options.Username = builder.Configuration["SMTP_USERNAME"] ?? options.Username;
+    options.Password = builder.Configuration["SMTP_PASSWORD"] ?? builder.Configuration["Smtp:Password"] ?? string.Empty;
+    if (bool.TryParse(builder.Configuration["SMTP_USE_TLS"], out var useTls)) options.UseTls = useTls;
+    options.FromAddress = builder.Configuration["SMTP_FROM"] ?? options.FromAddress;
+});
+
 builder.Services.AddSingleton<IDbConnectionFactory>(new SqliteConnectionFactory(connectionString));
 builder.Services.AddScoped<IAssetRequestRepository, AssetRequestRepository>();
 builder.Services.AddScoped<IAssetRequestService, AssetRequestService>();
@@ -42,6 +54,10 @@ builder.Services.AddScoped<ILifecycleRepository, LifecycleRepository>();
 builder.Services.AddScoped<ILifecycleService, LifecycleService>();
 builder.Services.AddScoped<IHelpDeskRepository, HelpDeskRepository>();
 builder.Services.AddScoped<HelpDeskService>();
+builder.Services.AddScoped<PublicTrackingService>();
+builder.Services.AddScoped<IEmailOutbox, EmailOutbox>();
+builder.Services.AddScoped<TicketNotificationService>();
+builder.Services.AddHostedService<EmailOutboxWorker>();
 builder.Services.AddSingleton<IAssetRequestAuditLogger, FileAssetRequestAuditLogger>();
 builder.Services.AddSingleton<CreateAssetRequestValidator>();
 
