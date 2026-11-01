@@ -42,9 +42,10 @@ tbody tr { cursor:pointer; }
 tbody tr:hover,
 tbody tr.selected { background:#f7f9fd; }
 .status-pill { display:inline-block; padding:5px 8px; border-radius:12px; background:#edf2fb; color:$blue; font-size:10px; font-weight:500; white-space:nowrap; }
-.row-actions { min-width:170px; }
+.row-actions { min-width:205px; }
 .row-actions button { margin:0 4px 4px 0; padding:6px 9px; border:1px solid #aebed5; border-radius:6px; background:#fff; color:$blue; font-size:10px; font-weight:500; cursor:pointer; }
 .row-actions button.resolve { border-color:#b9dcc5; color:#16743b; }
+.row-actions button.escalate { border-color:#d5b5ba; color:$red; background:#fff9fa; }
 
 .ticket-error { margin-bottom:12px; padding:10px 12px; border:1px solid #f5c8ce; border-radius:6px; background:#fff1f3; color:#a52534; font-size:12px; }
 .ticket-loading { padding:36px; color:$muted; text-align:center; font-size:12px; }
@@ -70,9 +71,39 @@ tbody tr.selected { background:#f7f9fd; }
 .info-circle { width:44px; height:44px; flex:0 0 44px; display:grid; place-items:center; border-radius:50%; background:#bcc7d6; color:#fff; font-size:21px; font-weight:700; }
 .tyre-decoration { position:absolute; width:145px; height:145px; right:-26px; bottom:-62px; border:18px solid rgba(183,194,210,.21); border-radius:50%; }
 
+.modal-backdrop { position:fixed; inset:0; z-index:120; padding:28px; display:grid; place-items:center; background:rgba(9,21,44,.52); }
+.escalation-modal { width:min(820px,100%); max-height:calc(100vh - 56px); overflow:auto; padding:22px; border:1px solid $border; border-radius:10px; background:#fff; box-shadow:0 20px 60px rgba(10,27,61,.24); }
+.modal-head { display:flex; justify-content:space-between; gap:20px; padding-bottom:16px; border-bottom:1px solid #e9edf2; }
+.modal-head small { color:$blue; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; }
+.modal-head h2 { margin:5px 0 3px; color:$darkBlue; font-size:22px; }
+.modal-head p { margin:0; color:$muted; font-size:12px; }
+.modal-head > button { width:34px; height:34px; border:1px solid #d2d9e2; border-radius:6px; background:#fff; color:$muted; font-size:20px; cursor:pointer; }
+.escalation-grid { margin-top:18px; display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.escalation-grid label { display:grid; gap:6px; color:$text; font-size:12px; font-weight:700; }
+.escalation-grid input,
+.escalation-grid textarea { width:100%; border:1px solid #cbd4df; border-radius:6px; background:#fff; color:$text; font:inherit; font-weight:400; outline:none; }
+.escalation-grid input { height:40px; padding:0 12px; }
+.escalation-grid textarea { min-height:100px; padding:10px 12px; resize:vertical; }
+.escalation-grid input:focus,
+.escalation-grid textarea:focus { border-color:$blue; box-shadow:0 0 0 2px rgba(20,63,145,.08); }
+.email-editor { grid-column:1 / -1; }
+.email-editor textarea { min-height:260px; font-family:Arial,Helvetica,sans-serif; line-height:1.45; }
+.email-editor small { color:$muted; font-size:10px; font-weight:400; }
+.security-note { margin-top:14px; padding:12px 14px; display:grid; gap:4px; border:1px solid #dce4ef; border-radius:7px; background:#f7f9fd; }
+.security-note strong { color:$darkBlue; font-size:11px; }
+.security-note span { color:$muted; font-size:11px; line-height:1.45; }
+.modal-actions { margin-top:18px; display:flex; justify-content:flex-end; gap:10px; }
+.modal-actions button { height:40px; padding:0 16px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer; }
+.modal-actions .secondary { border:1px solid #b8c3d2; background:#fff; color:$blue; }
+.modal-actions .primary-action { border:0; background:$red; color:#fff; }
+.modal-actions button:disabled { opacity:.6; cursor:not-allowed; }
+
 @media (max-width: 900px) {
   .ticket-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .ticket-toolbar,
   .ticket-lower-grid,
-  .detail-grid { grid-template-columns:1fr; }
+  .detail-grid,
+  .escalation-grid { grid-template-columns:1fr; }
+  .email-editor { grid-column:1; }
+  .modal-backdrop { padding:14px; }
 }
