@@ -1,3 +1,4 @@
+using System.Net.Mail;
 using RoyalDesk.Api.DTOs;
 
 namespace RoyalDesk.Api.Validation;
@@ -20,6 +21,14 @@ public sealed class CreateAssetRequestValidator
     {
         var errors = new Dictionary<string, string[]>();
 
+        if (string.IsNullOrWhiteSpace(request.RequesterName))
+            errors[nameof(request.RequesterName)] = ["Employee name is required."];
+        else if (request.RequesterName.Trim().Length > 150)
+            errors[nameof(request.RequesterName)] = ["Employee name must be 150 characters or fewer."];
+
+        if (!string.IsNullOrWhiteSpace(request.RequesterEmail) && !IsValidEmail(request.RequesterEmail))
+            errors[nameof(request.RequesterEmail)] = ["Please enter a valid email address or leave it blank."];
+
         AddSelectionError(errors, nameof(request.Branch), request.Branch, Branches);
         AddSelectionError(errors, nameof(request.Department), request.Department, Departments);
         AddSelectionError(errors, nameof(request.ItemType), request.ItemType, ItemTypes);
@@ -34,13 +43,27 @@ public sealed class CreateAssetRequestValidator
             errors[nameof(request.Reason)] =
                 ["Please select a reason for the request."];
         }
-        else if (!Reasons.Contains(reason, StringComparer.OrdinalIgnoreCase))
+        else if (!Reasons.Any(r => reason.Equals(r, StringComparison.OrdinalIgnoreCase) ||
+                                   reason.StartsWith(r + " - ", StringComparison.OrdinalIgnoreCase)))
         {
             errors[nameof(request.Reason)] =
                 ["Please select a valid reason for the request."];
         }
 
         return errors;
+    }
+
+    private static bool IsValidEmail(string email)
+    {
+        try
+        {
+            var address = new MailAddress(email.Trim());
+            return address.Address.Equals(email.Trim(), StringComparison.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     private static void AddSelectionError(
