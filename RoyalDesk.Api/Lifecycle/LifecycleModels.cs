@@ -67,10 +67,19 @@ public sealed record CreateWriteOffDto(int AssetId, string Reason, string Condit
 public sealed record ApproveWriteOffDto(bool Approved, string? Notes);
 public sealed record DisposeWriteOffDto(string DisposalMethod, string? DisposalCompany, DateTime DisposalDate, string? CertificateReference, string? Notes);
 
-public sealed record DashboardDto(
-    int TotalAssets, int AssignedAssets, int AvailableAssets, int InRepairAssets,
-    int PendingWriteOffs, decimal TotalAssetValue, decimal AvailableAssetValue,
-    int PendingRequests, int ActiveEmployees, decimal EstimatedReuseValue);
+public sealed class DashboardDto
+{
+    public int TotalAssets { get; set; }
+    public int AssignedAssets { get; set; }
+    public int AvailableAssets { get; set; }
+    public int InRepairAssets { get; set; }
+    public int PendingWriteOffs { get; set; }
+    public decimal TotalAssetValue { get; set; }
+    public decimal AvailableAssetValue { get; set; }
+    public int PendingRequests { get; set; }
+    public int ActiveEmployees { get; set; }
+    public decimal EstimatedReuseValue { get; set; }
+}
 
 public sealed record UpdateRequestWorkflowDto(string Status, string? ManagerApprovalStatus, string? ITStatus);
 
