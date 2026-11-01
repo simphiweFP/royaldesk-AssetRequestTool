@@ -27,6 +27,37 @@ textarea {
   font: inherit;
 }
 
+/* Request portal text inputs follow the exact existing select/textarea styling. */
+app-asset-request .request-card input[type='text'],
+app-asset-request .request-card input[type='email'],
+app-asset-request .request-card input:not([type]) {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid #cbd4df;
+  border-radius: 6px;
+  background: #fff;
+  color: #1d2941;
+  outline: none;
+}
+
+app-asset-request .request-card input:focus {
+  border-color: #143f91;
+  box-shadow: 0 0 0 2px rgba(20, 63, 145, .08);
+}
+
+app-asset-request .request-card input.field-invalid {
+  border-color: #d32f2f;
+  background: #fffafa;
+}
+
+app-asset-request .field-hint {
+  margin-top: 5px;
+  color: #69758b;
+  font-size: 10px;
+  line-height: 1.35;
+}
+
 /* Shared workflow canvas.
    Request IT Equipment is the visual reference: form on the left,
    view on the right, action anchored at the bottom. Pages with fewer
