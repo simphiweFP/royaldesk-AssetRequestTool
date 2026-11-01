@@ -59,13 +59,8 @@ app-lifecycle .shared-hero-copy h1 {
   letter-spacing: -2.5px !important;
 }
 
-app-lifecycle .shared-hero-copy .royal {
-  color: #143f91;
-}
-
-app-lifecycle .shared-hero-copy .desk {
-  color: #f11d2f;
-}
+app-lifecycle .shared-hero-copy .royal { color: #143f91; }
+app-lifecycle .shared-hero-copy .desk { color: #f11d2f; }
 
 app-lifecycle .shared-hero-copy h2 {
   margin: 12px 0 17px;
@@ -98,9 +93,7 @@ app-lifecycle .hero-benefit {
   line-height: 1.15;
 }
 
-app-lifecycle .hero-benefit + .hero-benefit {
-  border-left: 1px solid #ccd3dd;
-}
+app-lifecycle .hero-benefit + .hero-benefit { border-left: 1px solid #ccd3dd; }
 
 app-lifecycle .hero-benefit-icon {
   height: 34px;
@@ -123,9 +116,11 @@ app-lifecycle .page-heading .refresh {
   right: 24px;
 }
 
-/* Keep the Request Equipment component as the visual reference, but let the shell own header/footer. */
-app-lifecycle .request-embedded app-asset-request .topbar,
-app-lifecycle .request-embedded app-asset-request footer {
+/* The lifecycle shell owns the one and only footer. */
+app-asset-request footer,
+app-lifecycle app-asset-request footer,
+app-lifecycle .request-embedded app-asset-request footer,
+app-lifecycle .request-embedded app-asset-request .topbar {
   display: none !important;
 }
 
@@ -150,23 +145,19 @@ app-lifecycle .compact-form-card > .primary {
 }
 
 app-lifecycle .form-card > .primary::before,
-app-lifecycle .compact-form-card > .primary::before {
-  content: none !important;
-}
+app-lifecycle .compact-form-card > .primary::before { content: none !important; }
 
 app-lifecycle .form-card > .primary:hover,
-app-lifecycle .compact-form-card > .primary:hover {
-  background: #dc1929 !important;
-}
+app-lifecycle .compact-form-card > .primary:hover { background: #dc1929 !important; }
 
-/* Shared information panel used below operational screens. */
+/* Shared information panel: only table/register views use this extra block. */
 app-lifecycle .shared-info {
   position: relative;
   width: min(1220px, calc(100% - 64px));
   min-height: 108px;
   margin: 0 auto 22px;
   padding: 19px;
-  display: flex;
+  display: none;
   align-items: center;
   gap: 14px;
   overflow: hidden;
@@ -175,6 +166,11 @@ app-lifecycle .shared-info {
   background: linear-gradient(100deg, #f5f8fd, #f7f8fa);
   color: #53627a;
   font-size: 12px;
+}
+
+/* Assets, Employees, Assignments and Write-Offs all render a table-card. */
+app-lifecycle .workspace:has(.table-card) > .shared-info {
+  display: flex;
 }
 
 app-lifecycle .shared-info-icon {
@@ -208,6 +204,9 @@ app-lifecycle .shared-footer {
   color: #fff;
 }
 
+/* Defensive rule: if duplicate shared footers ever enter the DOM, show only the first. */
+app-lifecycle .shared-footer ~ .shared-footer { display: none !important; }
+
 app-lifecycle .shared-footer-inner {
   width: min(1220px, calc(100% - 64px));
   min-height: 105px;
@@ -232,10 +231,7 @@ app-lifecycle .shared-footer-middle {
   font-size: 12px;
 }
 
-app-lifecycle .shared-footer-middle span {
-  font-size: 10px;
-  opacity: .78;
-}
+app-lifecycle .shared-footer-middle span { font-size: 10px; opacity: .78; }
 
 app-lifecycle .shared-footer-right {
   display: flex;
@@ -245,9 +241,7 @@ app-lifecycle .shared-footer-right {
   font-size: 10px;
 }
 
-app-lifecycle .shared-footer-right span {
-  opacity: .8;
-}
+app-lifecycle .shared-footer-right span { opacity: .8; }
 
 /* Consistent page height with and without data. */
 app-lifecycle .workspace {
@@ -261,17 +255,9 @@ app-lifecycle .page-section {
   min-height: 330px;
 }
 
-app-lifecycle .balanced-card {
-  min-height: 430px;
-}
-
-app-lifecycle .stable-table-card {
-  min-height: 350px;
-}
-
-app-lifecycle .stable-lifecycle-card {
-  min-height: 360px;
-}
+app-lifecycle .balanced-card { min-height: 430px; }
+app-lifecycle .stable-table-card { min-height: 350px; }
+app-lifecycle .stable-lifecycle-card { min-height: 360px; }
 
 app-lifecycle .table-card {
   display: flex;
@@ -284,9 +270,7 @@ app-lifecycle .table-wrap {
   flex-direction: column;
 }
 
-app-lifecycle .table-wrap table {
-  flex: 0 0 auto;
-}
+app-lifecycle .table-wrap table { flex: 0 0 auto; }
 
 /* Empty registers keep the table header and use the same polished empty state. */
 app-lifecycle .table-empty {
@@ -346,15 +330,11 @@ app-lifecycle .checklist {
 }
 
 @media (max-width: 900px) {
-  app-lifecycle .page-heading {
-    min-height: 285px !important;
-  }
+  app-lifecycle .page-heading { min-height: 285px !important; }
 
   app-lifecycle .balanced-card,
   app-lifecycle .stable-table-card,
-  app-lifecycle .stable-lifecycle-card {
-    min-height: auto;
-  }
+  app-lifecycle .stable-lifecycle-card { min-height: auto; }
 
   app-lifecycle .shared-footer-inner {
     width: calc(100% - 32px);
@@ -365,44 +345,22 @@ app-lifecycle .checklist {
     text-align: center;
   }
 
-  app-lifecycle .shared-footer-right {
-    align-items: center;
-  }
+  app-lifecycle .shared-footer-right { align-items: center; }
 }
 
 @media (max-width: 650px) {
-  app-lifecycle .shared-hero-copy {
-    width: 100%;
-  }
-
-  app-lifecycle .shared-hero-copy h1 {
-    font-size: 49px !important;
-  }
-
-  app-lifecycle .shared-hero-copy h2 {
-    font-size: 22px;
-  }
-
-  app-lifecycle .page-heading::before {
-    background: rgba(255,255,255,.88) !important;
-  }
-
-  app-lifecycle .hero-benefit {
-    width: 110px;
-  }
+  app-lifecycle .shared-hero-copy { width: 100%; }
+  app-lifecycle .shared-hero-copy h1 { font-size: 49px !important; }
+  app-lifecycle .shared-hero-copy h2 { font-size: 22px; }
+  app-lifecycle .page-heading::before { background: rgba(255,255,255,.88) !important; }
+  app-lifecycle .hero-benefit { width: 110px; }
 
   app-lifecycle .shared-info,
-  app-lifecycle .shared-footer-inner {
-    width: calc(100% - 24px);
-  }
+  app-lifecycle .shared-footer-inner { width: calc(100% - 24px); }
 
-  app-lifecycle .page-section {
-    min-height: auto;
-  }
+  app-lifecycle .page-section { min-height: auto; }
 
   app-lifecycle .table-wrap,
   app-lifecycle .table-empty,
-  app-lifecycle .lifecycle-empty {
-    min-height: 200px;
-  }
+  app-lifecycle .lifecycle-empty { min-height: 200px; }
 }
