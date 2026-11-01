@@ -21,7 +21,38 @@ import { LifecycleComponent } from './features/lifecycle/lifecycle.component';
       display: none !important;
     }
 
-    /* Match the Request IT Equipment right-column structure. */
+    /* Use the Request IT Equipment page dimensions as the shared page standard. */
+    :host ::ng-deep app-lifecycle .page-section {
+      width: min(1220px, calc(100% - 64px)) !important;
+      margin: 22px auto !important;
+      gap: 20px !important;
+    }
+
+    :host ::ng-deep app-lifecycle .grid.two {
+      grid-template-columns: 520px minmax(0, 1fr) !important;
+      gap: 20px !important;
+      align-items: start !important;
+    }
+
+    :host ::ng-deep app-lifecycle .card {
+      padding: 18px !important;
+      border: 1px solid #dce2ea !important;
+      border-radius: 8px !important;
+      background: #fff !important;
+      box-shadow: 0 1px 5px rgba(24, 44, 80, .035) !important;
+    }
+
+    /* Form + right-side view should end on the same visual line, like Request Equipment. */
+    :host ::ng-deep app-lifecycle .operational-grid > .form-card {
+      min-height: 414px !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+
+    :host ::ng-deep app-lifecycle .operational-grid > .form-card > .primary {
+      margin-top: auto !important;
+    }
+
     :host ::ng-deep app-lifecycle .view-column {
       min-width: 0;
       display: flex;
@@ -29,8 +60,18 @@ import { LifecycleComponent } from './features/lifecycle/lifecycle.component';
       gap: 14px;
     }
 
+    :host ::ng-deep app-lifecycle .view-column > .table-card {
+      min-height: 292px !important;
+    }
+
+    :host ::ng-deep app-lifecycle .view-column .table-wrap {
+      min-height: 208px !important;
+    }
+
+    /* Exact Request Equipment information panel. */
     :host ::ng-deep app-lifecycle .information-box.lifecycle-information-box {
       position: relative;
+      width: 100%;
       min-height: 108px;
       padding: 19px;
       display: flex;
@@ -74,7 +115,17 @@ import { LifecycleComponent } from './features/lifecycle/lifecycle.component';
       width: 100%;
     }
 
-    /* Exact Request IT Equipment type and colour hierarchy. */
+    /* Exact Request IT Equipment card heading hierarchy. */
+    :host ::ng-deep app-lifecycle .card-heading {
+      margin-bottom: 16px !important;
+      gap: 13px !important;
+    }
+
+    :host ::ng-deep app-lifecycle .heading-symbol {
+      color: #143f91 !important;
+      font-size: 23px !important;
+    }
+
     :host ::ng-deep app-lifecycle .card-heading h2,
     :host ::ng-deep app-lifecycle .card-heading h3,
     :host ::ng-deep app-lifecycle td strong,
@@ -86,6 +137,7 @@ import { LifecycleComponent } from './features/lifecycle/lifecycle.component';
 
     :host ::ng-deep app-lifecycle .card-heading h2,
     :host ::ng-deep app-lifecycle .card-heading h3 {
+      margin: 0 !important;
       font-size: 21px !important;
       font-weight: 700 !important;
       line-height: 1.15 !important;
@@ -101,19 +153,36 @@ import { LifecycleComponent } from './features/lifecycle/lifecycle.component';
       line-height: 1.45 !important;
     }
 
+    /* Exact Request Equipment form control scale. */
     :host ::ng-deep app-lifecycle label {
+      gap: 6px !important;
       color: #17243f !important;
       font-size: 12px !important;
       font-weight: 700 !important;
     }
 
+    :host ::ng-deep app-lifecycle .form-grid {
+      gap: 12px !important;
+    }
+
     :host ::ng-deep app-lifecycle input,
     :host ::ng-deep app-lifecycle select,
     :host ::ng-deep app-lifecycle textarea {
-      border-color: #cbd4df !important;
+      width: 100% !important;
+      height: 40px !important;
+      min-height: 40px !important;
+      padding: 0 12px !important;
+      border: 1px solid #cbd4df !important;
+      border-radius: 6px !important;
       background: #fff !important;
       color: #1d2941 !important;
       font-size: 13px !important;
+      outline: none !important;
+    }
+
+    :host ::ng-deep app-lifecycle textarea {
+      height: 57px !important;
+      padding: 11px 12px !important;
     }
 
     :host ::ng-deep app-lifecycle input:focus,
@@ -123,32 +192,62 @@ import { LifecycleComponent } from './features/lifecycle/lifecycle.component';
       box-shadow: 0 0 0 2px rgba(20, 63, 145, .08) !important;
     }
 
+    :host ::ng-deep app-lifecycle input::placeholder,
+    :host ::ng-deep app-lifecycle textarea::placeholder {
+      color: #9aa5b6 !important;
+    }
+
+    /* Same full-width red action as Submit Request. */
+    :host ::ng-deep app-lifecycle .form-card > .primary,
+    :host ::ng-deep app-lifecycle .compact-form-card > .primary {
+      width: 100% !important;
+      height: 47px !important;
+      min-height: 47px !important;
+      border: 0 !important;
+      border-radius: 6px !important;
+      background: #f11d2f !important;
+      color: #fff !important;
+      font-size: 15px !important;
+      font-weight: 700 !important;
+    }
+
+    :host ::ng-deep app-lifecycle .form-card > .primary:hover,
+    :host ::ng-deep app-lifecycle .compact-form-card > .primary:hover {
+      background: #dc1929 !important;
+    }
+
+    /* Request-style table hierarchy. */
     :host ::ng-deep app-lifecycle th {
+      padding: 11px 10px !important;
       color: #69758b !important;
       background: #fff !important;
-      border-bottom-color: #dce2ea !important;
+      border-bottom: 1px solid #dce2ea !important;
       font-size: 10px !important;
+      font-weight: 700 !important;
     }
 
     :host ::ng-deep app-lifecycle td {
+      padding: 12px 10px !important;
       color: #17243f !important;
-      border-bottom-color: #e4e8ef !important;
+      border-bottom: 1px solid #e4e8ef !important;
       font-size: 12px !important;
     }
 
-    :host ::ng-deep app-lifecycle .heading-symbol,
     :host ::ng-deep app-lifecycle .pill,
     :host ::ng-deep app-lifecycle .refresh {
       color: #143f91 !important;
     }
 
-    :host ::ng-deep app-lifecycle .form-card > .primary,
-    :host ::ng-deep app-lifecycle .compact-form-card > .primary {
-      background: #f11d2f !important;
-      color: #fff !important;
-    }
-
     @media (max-width: 900px) {
+      :host ::ng-deep app-lifecycle .grid.two {
+        grid-template-columns: 1fr !important;
+      }
+
+      :host ::ng-deep app-lifecycle .operational-grid > .form-card,
+      :host ::ng-deep app-lifecycle .view-column > .table-card {
+        min-height: auto !important;
+      }
+
       :host ::ng-deep app-lifecycle .view-column {
         width: 100%;
       }
