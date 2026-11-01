@@ -11,6 +11,7 @@ export interface CreateAssetRequest {
 export interface AssetRequestResponse extends CreateAssetRequest {
   id: number;
   ticketNumber: string;
+  trackingPin?: string;
   status: string;
   requestedBy: string;
   requestedAtUtc: string;
