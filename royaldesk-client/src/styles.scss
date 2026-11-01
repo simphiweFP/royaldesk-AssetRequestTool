@@ -42,6 +42,53 @@ app-lifecycle .form-card > .primary {
   margin-top: auto;
 }
 
+/* Full forms keep a deliberate final-row-to-action gap. This prevents
+   Purchase value / Fully depreciated from feeling attached to the button. */
+app-lifecycle .balanced-card .form-grid {
+  padding-bottom: 14px;
+}
+
+app-lifecycle .balanced-card .form-grid > .check {
+  min-height: 40px;
+  margin: 0;
+  padding: 0 4px;
+  align-self: end;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  line-height: 1.2;
+}
+
+app-lifecycle .balanced-card .form-grid > .check input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  min-height: 16px;
+  margin: 0;
+  flex: 0 0 16px;
+}
+
+/* Short workflows intentionally retain the Request IT Equipment canvas.
+   The reserved space is presented as a quiet workflow guidance zone so it
+   feels purposeful without introducing another card or new functionality. */
+app-lifecycle .compact-form-card .inline-form::after {
+  content: 'RoyalDesk workflow  •  Complete the details above to continue this lifecycle action.';
+  grid-column: 1 / -1;
+  min-height: 88px;
+  margin-top: 4px;
+  padding: 16px 18px 16px 46px;
+  display: flex;
+  align-items: center;
+  border: 1px dashed #dce2ea;
+  border-radius: 8px;
+  background:
+    radial-gradient(circle at 22px 50%, #edf2fb 0 11px, transparent 12px),
+    linear-gradient(100deg, #fbfcfe, #f7f8fa);
+  color: #69758b;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.45;
+}
+
 /* The right-side view plus 108px information card should visually
    balance the reference form canvas when there is little or no data. */
 app-lifecycle .view-column > .table-card,
@@ -62,8 +109,7 @@ app-lifecycle .page-section:has(> .compact-form-card):has(> .table-card) > .tabl
 }
 
 /* Compact workflows keep the same 445px reference canvas even with
-   only two or three fields. The blank breathing room stays above the
-   submit button, never underneath it. */
+   only two or three fields. The action remains anchored at the bottom. */
 app-lifecycle .page-section:has(> .compact-form-card):has(> .table-card) > .compact-form-card {
   height: auto;
   min-height: 445px;
@@ -77,5 +123,9 @@ app-lifecycle .page-section:has(> .compact-form-card):has(> .table-card) > .comp
   app-lifecycle .view-column > .table-card .table-wrap,
   app-lifecycle .page-section:has(> .compact-form-card):has(> .table-card) > .table-card .table-wrap {
     min-height: 0;
+  }
+
+  app-lifecycle .compact-form-card .inline-form::after {
+    min-height: 64px;
   }
 }
