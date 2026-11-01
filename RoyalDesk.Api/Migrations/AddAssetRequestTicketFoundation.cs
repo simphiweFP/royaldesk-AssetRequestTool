@@ -13,6 +13,14 @@ public sealed class AddAssetRequestTicketFoundation : Migration
             .AddColumn("RequesterEmail").AsString(200).Nullable()
             .AddColumn("Status").AsString(40).NotNullable().WithDefaultValue("New");
 
+        // Keep existing requests usable in the new ticket workflow.
+        Execute.Sql("""
+            UPDATE AssetRequests
+            SET TicketNumber = printf('RT-IT-%06d', Id),
+                RequesterName = COALESCE(NULLIF(RequesterName, ''), RequestedBy)
+            WHERE TicketNumber IS NULL;
+            """);
+
         Create.Index("IX_AssetRequests_TicketNumber")
             .OnTable("AssetRequests")
             .OnColumn("TicketNumber").Ascending()
