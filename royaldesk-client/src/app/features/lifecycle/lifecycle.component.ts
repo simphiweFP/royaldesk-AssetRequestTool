@@ -3,13 +3,14 @@ import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { AssetRequestComponent } from '../asset-request/asset-request.component';
+import { HelpDeskTicketsComponent } from '../help-desk/help-desk-tickets.component';
 import { Asset, Assignment, Branch, Dashboard, Department, Employee, LifecycleTask, WriteOff } from '../../core/models/lifecycle.model';
 import { LifecycleService } from '../../core/services/lifecycle.service';
 
 @Component({
   selector: 'app-lifecycle',
   standalone: true,
-  imports: [CommonModule, FormsModule, AssetRequestComponent],
+  imports: [CommonModule, FormsModule, AssetRequestComponent, HelpDeskTicketsComponent],
   templateUrl: './lifecycle.component.html',
   styleUrl: './lifecycle.component.scss'
 })
@@ -42,6 +43,7 @@ export class LifecycleComponent implements OnInit {
     const titles: Record<string, string> = {
       dashboard: 'Operations Dashboard',
       request: 'Request Equipment',
+      tickets: 'IT Service Desk',
       assets: 'Asset Register',
       employees: 'Employees',
       assignments: 'Assignments & Returns',
@@ -57,6 +59,7 @@ export class LifecycleComponent implements OnInit {
     const subtitles: Record<string, string> = {
       dashboard: 'A clear view of company assets, people and lifecycle activity.',
       request: 'Request the IT equipment you need to keep Royal Tyres moving.',
+      tickets: 'Own, investigate and resolve IT requests with clear accountability.',
       assets: 'Register, search and manage company equipment in one place.',
       employees: 'Maintain employee records used across the asset lifecycle.',
       assignments: 'Assign equipment, capture acceptance and manage returns.',
