@@ -26,3 +26,12 @@ select,
 textarea {
   font: inherit;
 }
+
+/* Keep compact lifecycle forms at their natural height.
+   They still retain the exact Request Equipment proportions and button styling,
+   but no longer stretch to match the table + information stack beside them. */
+app-lifecycle .page-section:has(> .compact-form-card):has(> .table-card) > .compact-form-card {
+  align-self: start;
+  height: auto;
+  min-height: 0;
+}
