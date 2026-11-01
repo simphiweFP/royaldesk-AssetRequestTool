@@ -28,6 +28,16 @@ import { LifecycleComponent } from './features/lifecycle/lifecycle.component';
       min-height: 0 !important;
     }
 
+    /* Keep one constant gap between page content and the footer on every view. */
+    :host ::ng-deep app-lifecycle .shared-footer {
+      margin-top: 0 !important;
+    }
+
+    :host ::ng-deep app-lifecycle .page-section,
+    :host ::ng-deep app-lifecycle .request-embedded {
+      margin-bottom: 22px !important;
+    }
+
     :host ::ng-deep app-lifecycle .grid.two {
       grid-template-columns: 520px minmax(0, 1fr) !important;
       gap: 20px !important;
