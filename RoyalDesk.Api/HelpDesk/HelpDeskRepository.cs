@@ -5,6 +5,12 @@ namespace RoyalDesk.Api.HelpDesk;
 
 public sealed class HelpDeskRepository(IDbConnectionFactory connectionFactory) : IHelpDeskRepository
 {
+    private sealed class TicketOwnerRow
+    {
+        public string Status { get; set; } = string.Empty;
+        public int? AssignedToId { get; set; }
+    }
+
     public async Task<IReadOnlyList<HelpDeskTicketDto>> GetTicketsAsync(string? status, CancellationToken ct = default)
     {
         const string sql = """
@@ -99,9 +105,9 @@ public sealed class HelpDeskRepository(IDbConnectionFactory connectionFactory) :
             CreatedAtUtc = DateTime.UtcNow
         }, cancellationToken: ct));
 
-        return (await connection.QuerySingleAsync<ITTeamMemberDto>(new CommandDefinition(
+        return await connection.QuerySingleAsync<ITTeamMemberDto>(new CommandDefinition(
             "SELECT Id, DisplayName, Email, Username, Role, IsActive FROM ITTeamMembers WHERE Id = @Id",
-            new { Id = id }, cancellationToken: ct)));
+            new { Id = id }, cancellationToken: ct));
     }
 
     public async Task AssignAsync(int ticketId, ITTeamMemberDto member, string actor, CancellationToken ct = default)
@@ -137,9 +143,9 @@ public sealed class HelpDeskRepository(IDbConnectionFactory connectionFactory) :
         await connection.OpenAsync(ct);
         await using var transaction = await connection.BeginTransactionAsync(ct);
 
-        var row = await connection.QuerySingleOrDefaultAsync<(string Status, int? AssignedToId)>(new CommandDefinition(
+        var row = await connection.QuerySingleOrDefaultAsync<TicketOwnerRow>(new CommandDefinition(
             "SELECT Status, AssignedToId FROM AssetRequests WHERE Id = @Id", new { Id = ticketId }, transaction, cancellationToken: ct));
-        if (string.IsNullOrWhiteSpace(row.Status)) throw new KeyNotFoundException("Ticket not found.");
+        if (row is null) throw new KeyNotFoundException("Ticket not found.");
         if (row.AssignedToId != member.Id) throw new InvalidOperationException("Only the assigned technician can start this ticket.");
         if (row.Status is "Resolved" or "Closed" or "Cancelled") throw new InvalidOperationException("Completed tickets cannot be started.");
 
