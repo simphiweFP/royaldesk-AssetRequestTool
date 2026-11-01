@@ -1,784 +1,223 @@
 <div class="page">
-
-  <!-- HEADER -->
   <header class="topbar">
     <div class="topbar-inner">
-
       <div class="brand-area">
-        <img
-          class="royal-logo"
-          src="assets/images/royal-tyres-logo-final.png"
-          alt="Royal Tyres"
-        />
-
+        <img class="royal-logo" src="assets/images/royal-tyres-logo-final.png" alt="Royal Tyres" />
         <div class="brand-separator"></div>
-
-        <div class="app-title">
-          <strong>RoyalDesk</strong>
-          <span>IT Asset Request Portal</span>
-        </div>
+        <div class="app-title"><strong>RoyalDesk</strong><span>IT Asset Request Portal</span></div>
       </div>
-
       <div class="current-user">
-        <div class="user-icon">
-          {{ currentUser.initials }}
-        </div>
-
-        <span>{{ currentUser.name }}</span>
-
-        <span class="chevron">⌄</span>
+        <div class="user-icon">{{ currentUser.initials }}</div>
+        <span>{{ currentUser.name }}</span><span class="chevron">⌄</span>
       </div>
-
     </div>
   </header>
 
-
-  <!-- HERO -->
   <section class="hero">
-
-    <img
-      class="hero-background"
-      src="assets/images/royal_tyres_workshop_in_focus.png"
-      alt="Royal Tyres workshop"
-    />
-
+    <img class="hero-background" src="assets/images/royal_tyres_workshop_in_focus.png" alt="Royal Tyres workshop" />
     <div class="hero-overlay"></div>
-
     <div class="hero-inner">
-
       <div class="hero-copy">
-
-        <h1>
-          <span class="royal">Royal</span><span class="desk">Desk</span>
-        </h1>
-
+        <h1><span class="royal">Royal</span><span class="desk">Desk</span></h1>
         <h2>IT Asset Request Portal</h2>
-
-        <p>
-          Request the IT equipment you need<br />
-          to keep Royal Tyres moving.
-        </p>
-
+        <p>Request the IT equipment you need<br />to keep Royal Tyres moving.</p>
         <div class="benefits">
-
-          <div class="benefit">
-            <div class="benefit-icon">⚙</div>
-            <span>
-              Right Tools<br />
-              for the Job
-            </span>
-          </div>
-
-          <div class="benefit divider">
-            <div class="benefit-icon">👥</div>
-            <span>
-              Stronger<br />
-              Teams
-            </span>
-          </div>
-
-          <div class="benefit divider">
-            <div class="benefit-icon bars">▮▮▮</div>
-            <span>
-              A Better<br />
-              Tomorrow
-            </span>
-          </div>
-
+          <div class="benefit"><div class="benefit-icon">⚙</div><span>Right Tools<br />for the Job</span></div>
+          <div class="benefit divider"><div class="benefit-icon">👥</div><span>Stronger<br />Teams</span></div>
+          <div class="benefit divider"><div class="benefit-icon bars">▮▮▮</div><span>A Better<br />Tomorrow</span></div>
         </div>
-
       </div>
-
     </div>
-
   </section>
 
-
-  <!-- MAIN CONTENT -->
   <main class="content">
-
-    <!-- LEFT FORM -->
     <section class="card request-card">
-
       <div class="card-heading">
-
         <div class="heading-symbol">▣</div>
-
-        <div>
-          <h3>Request IT Equipment</h3>
-          <p>Fill in the details below to submit your request.</p>
-        </div>
-
+        <div><h3>Request IT Equipment</h3><p>Fill in the details below to submit your request.</p></div>
       </div>
 
-
-      <form
-        [formGroup]="form"
-        (ngSubmit)="submit()"
-      >
-
-        <!-- BRANCH -->
+      <form [formGroup]="form" (ngSubmit)="submit()">
         <div class="field">
-
-          <label>
-            Branch <span>*</span>
-          </label>
-
-          <select
-            formControlName="branch"
-            [class.field-invalid]="fieldErrors['branch']"
-            (change)="clearFieldError('branch')"
-          >
-
-            <option
-              value=""
-              disabled
-            >
-              Select branch
-            </option>
-
-            @for (branch of branches; track branch) {
-              <option [value]="branch">
-                {{ branch }}
-              </option>
+          <label>Employee Name <span>*</span></label>
+          <input
+            formControlName="requesterName"
+            list="royaldesk-employees"
+            autocomplete="off"
+            placeholder="Start typing an employee name"
+            [class.field-invalid]="fieldErrors['requestername']"
+            (input)="onRequesterNameInput()"
+          />
+          <datalist id="royaldesk-employees">
+            @for (name of employeeNames; track name) {
+              <option [value]="name"></option>
             }
-
-          </select>
-
-          @if (fieldErrors['branch']) {
-            <div class="field-error">
-              {{ fieldErrors['branch'] }}
-            </div>
-          }
-
+          </datalist>
+          <div class="field-hint">Select a matching employee or continue typing a name that is not in the list.</div>
+          @if (fieldErrors['requestername']) { <div class="field-error">{{ fieldErrors['requestername'] }}</div> }
         </div>
 
-
-        <!-- DEPARTMENT -->
         <div class="field">
-
-          <label>
-            Department <span>*</span>
-          </label>
-
-          <select
-            formControlName="department"
-            [class.field-invalid]="fieldErrors['department']"
-            (change)="clearFieldError('department')"
-          >
-
-            <option
-              value=""
-              disabled
-            >
-              Select department
-            </option>
-
-            @for (department of departments; track department) {
-              <option [value]="department">
-                {{ department }}
-              </option>
-            }
-
-          </select>
-
-          @if (fieldErrors['department']) {
-            <div class="field-error">
-              {{ fieldErrors['department'] }}
-            </div>
-          }
-
+          <label class="notes-label">Employee Email <small>(Optional)</small></label>
+          <input
+            type="email"
+            formControlName="requesterEmail"
+            placeholder="employee@royaltyres.co.za"
+            [class.field-invalid]="fieldErrors['requesteremail']"
+            (input)="clearFieldError('requesteremail')"
+          />
+          <div class="field-hint">Used for request progress notifications when available.</div>
+          @if (fieldErrors['requesteremail']) { <div class="field-error">{{ fieldErrors['requesteremail'] }}</div> }
         </div>
 
-
-        <!-- ITEM TYPE -->
         <div class="field">
-
-          <label>
-            Item Type <span>*</span>
-          </label>
-
-          <select
-            formControlName="itemType"
-            [class.field-invalid]="fieldErrors['itemtype']"
-            (change)="clearFieldError('itemtype')"
-          >
-
-            <option
-              value=""
-              disabled
-            >
-              Select item type
-            </option>
-
-            @for (item of itemTypes; track item) {
-              <option [value]="item">
-                {{ item }}
-              </option>
-            }
-
+          <label>Branch <span>*</span></label>
+          <select formControlName="branch" [class.field-invalid]="fieldErrors['branch']" (change)="clearFieldError('branch')">
+            <option value="" disabled>Select branch</option>
+            @for (branch of branches; track branch) { <option [value]="branch">{{ branch }}</option> }
           </select>
-
-          @if (fieldErrors['itemtype']) {
-            <div class="field-error">
-              {{ fieldErrors['itemtype'] }}
-            </div>
-          }
-
+          @if (fieldErrors['branch']) { <div class="field-error">{{ fieldErrors['branch'] }}</div> }
         </div>
 
-
-        <!-- QUANTITY -->
         <div class="field">
+          <label>Department <span>*</span></label>
+          <select formControlName="department" [class.field-invalid]="fieldErrors['department']" (change)="clearFieldError('department')">
+            <option value="" disabled>Select department</option>
+            @for (department of departments; track department) { <option [value]="department">{{ department }}</option> }
+          </select>
+          @if (fieldErrors['department']) { <div class="field-error">{{ fieldErrors['department'] }}</div> }
+        </div>
 
-          <label>
-            Quantity <span>*</span>
-          </label>
+        <div class="field">
+          <label>Item Type <span>*</span></label>
+          <select formControlName="itemType" [class.field-invalid]="fieldErrors['itemtype']" (change)="clearFieldError('itemtype')">
+            <option value="" disabled>Select item type</option>
+            @for (item of itemTypes; track item) { <option [value]="item">{{ item }}</option> }
+          </select>
+          @if (fieldErrors['itemtype']) { <div class="field-error">{{ fieldErrors['itemtype'] }}</div> }
+        </div>
 
-          <div
-            class="quantity"
-            [class.quantity-invalid]="fieldErrors['quantity']"
-          >
-
-            <button
-              type="button"
-              aria-label="Decrease quantity"
-              (click)="decreaseQuantity()"
-            >
-              −
-            </button>
-
-            <div class="quantity-value">
-              {{ form.controls.quantity.value }}
-            </div>
-
-            <button
-              type="button"
-              aria-label="Increase quantity"
-              (click)="increaseQuantity()"
-            >
-              +
-            </button>
-
+        <div class="field">
+          <label>Quantity <span>*</span></label>
+          <div class="quantity" [class.quantity-invalid]="fieldErrors['quantity']">
+            <button type="button" aria-label="Decrease quantity" (click)="decreaseQuantity()">−</button>
+            <div class="quantity-value">{{ form.controls.quantity.value }}</div>
+            <button type="button" aria-label="Increase quantity" (click)="increaseQuantity()">+</button>
           </div>
-
-          @if (fieldErrors['quantity']) {
-            <div class="field-error">
-              {{ fieldErrors['quantity'] }}
-            </div>
-          }
-
+          @if (fieldErrors['quantity']) { <div class="field-error">{{ fieldErrors['quantity'] }}</div> }
         </div>
 
-
-        <!-- REASON -->
         <div class="field">
-
-          <label>
-            Reason for Request <span>*</span>
-          </label>
-
-          <select
-            formControlName="reason"
-            [class.field-invalid]="fieldErrors['reason']"
-            (change)="clearFieldError('reason')"
-          >
-
-            <option
-              value=""
-              disabled
-            >
-              Select reason
-            </option>
-
-            @for (reason of reasonOptions; track reason) {
-              <option [value]="reason">
-                {{ reason }}
-              </option>
-            }
-
+          <label>Reason for Request <span>*</span></label>
+          <select formControlName="reason" [class.field-invalid]="fieldErrors['reason']" (change)="clearFieldError('reason')">
+            <option value="" disabled>Select reason</option>
+            @for (reason of reasonOptions; track reason) { <option [value]="reason">{{ reason }}</option> }
           </select>
-
-          @if (fieldErrors['reason']) {
-            <div class="field-error">
-              {{ fieldErrors['reason'] }}
-            </div>
-          }
-
+          @if (fieldErrors['reason']) { <div class="field-error">{{ fieldErrors['reason'] }}</div> }
         </div>
 
-
-        <!-- NOTES -->
         <div class="field">
-
-          <label class="notes-label">
-            Additional Notes
-            <small>(Optional)</small>
-          </label>
-
-          <textarea
-            formControlName="additionalNotes"
-            placeholder="Add any extra details here..."
-          ></textarea>
-
+          <label class="notes-label">Additional Notes <small>(Optional)</small></label>
+          <textarea formControlName="additionalNotes" placeholder="Add any extra details here..."></textarea>
         </div>
 
-
-        <!-- GENERAL ERROR -->
         @if (errorMessage) {
-
-          <div class="api-error">
-
-            <strong>
-              Request could not be submitted
-            </strong>
-
-            <span>
-              {{ errorMessage }}
-            </span>
-
-          </div>
-
+          <div class="api-error"><strong>Request could not be submitted</strong><span>{{ errorMessage }}</span></div>
         }
 
-
-        <!-- SUBMIT -->
         @if (!submittedRequest) {
-
-          <button
-            class="submit"
-            type="submit"
-            [disabled]="submitting"
-          >
-
-            @if (submitting) {
-
-              Submitting...
-
-            } @else {
-
-              <span class="send-icon">➤</span>
-              Submit Request
-
-            }
-
+          <button class="submit" type="submit" [disabled]="submitting">
+            @if (submitting) { Submitting... } @else { <span class="send-icon">➤</span> Submit Request }
           </button>
-
         }
-
       </form>
-
     </section>
 
-
-    <!-- RIGHT COLUMN -->
     <section class="right-column">
-
       @if (!submittedRequest) {
-
-        <!-- SUPPORT -->
         <div class="support-box">
-
           <div class="support-message">
-
-            <div class="headset">
-              ☏
-            </div>
-
-            <div>
-
-              <strong>
-                Need urgent assistance?
-              </strong>
-
-              <p>
-                For IT support issues, contact the IT Helpdesk.
-              </p>
-
-            </div>
-
+            <div class="headset">☏</div>
+            <div><strong>Need urgent assistance?</strong><p>For IT support issues, contact the IT Helpdesk.</p></div>
           </div>
-
-          <button
-            class="outline-button"
-            type="button"
-            (click)="openContactModal()"
-          >
-            Contact IT
-          </button>
-
+          <button class="outline-button" type="button" (click)="openContactModal()">Contact IT</button>
         </div>
 
-
-        <!-- SUMMARY -->
         <div class="card summary-card">
-
           <div class="card-heading summary-heading">
-
-            <div class="heading-symbol">
-              ▤
-            </div>
-
-            <div>
-
-              <h3>
-                Your Request
-              </h3>
-
-              <p>
-                A summary of the information you are about to submit.
-              </p>
-
-            </div>
-
+            <div class="heading-symbol">▤</div>
+            <div><h3>Your Request</h3><p>A summary of the information you are about to submit.</p></div>
           </div>
-
-
           <div class="summary-list">
-
-            <div class="summary-row">
-
-              <span class="summary-name">
-                ● &nbsp; Branch
-              </span>
-
-              <strong>
-                {{ requestPreview.branch || 'Not selected' }}
-              </strong>
-
-            </div>
-
-
-            <div class="summary-row">
-
-              <span class="summary-name">
-                ♟ &nbsp; Department
-              </span>
-
-              <strong>
-                {{ requestPreview.department || 'Not selected' }}
-              </strong>
-
-            </div>
-
-
-            <div class="summary-row">
-
-              <span class="summary-name">
-                ▣ &nbsp; Item Type
-              </span>
-
-              <strong>
-                {{ requestPreview.itemType || 'Not selected' }}
-              </strong>
-
-            </div>
-
-
-            <div class="summary-row">
-
-              <span class="summary-name">
-                # &nbsp; Quantity
-              </span>
-
-              <strong>
-                {{ requestPreview.quantity }}
-              </strong>
-
-            </div>
-
-
-            <div class="summary-row">
-
-              <span class="summary-name">
-                ▤ &nbsp; Reason
-              </span>
-
-              <strong>
-                {{ requestPreview.reason || 'Not selected' }}
-              </strong>
-
-            </div>
-
-
-            <div class="summary-row no-border">
-
-              <span class="summary-name">
-                ▰ &nbsp; Additional Notes
-              </span>
-
-              <strong>
-                {{ requestPreview.additionalNotes || '-' }}
-              </strong>
-
-            </div>
-
+            <div class="summary-row"><span class="summary-name">● &nbsp; Employee</span><strong>{{ requestPreview.requesterName || 'Not entered' }}</strong></div>
+            <div class="summary-row"><span class="summary-name">✉ &nbsp; Email</span><strong>{{ requestPreview.requesterEmail || 'Not provided' }}</strong></div>
+            <div class="summary-row"><span class="summary-name">● &nbsp; Branch</span><strong>{{ requestPreview.branch || 'Not selected' }}</strong></div>
+            <div class="summary-row"><span class="summary-name">♟ &nbsp; Department</span><strong>{{ requestPreview.department || 'Not selected' }}</strong></div>
+            <div class="summary-row"><span class="summary-name">▣ &nbsp; Item Type</span><strong>{{ requestPreview.itemType || 'Not selected' }}</strong></div>
+            <div class="summary-row"><span class="summary-name"># &nbsp; Quantity</span><strong>{{ requestPreview.quantity }}</strong></div>
+            <div class="summary-row"><span class="summary-name">▤ &nbsp; Reason</span><strong>{{ requestPreview.reason || 'Not selected' }}</strong></div>
+            <div class="summary-row no-border"><span class="summary-name">▰ &nbsp; Additional Notes</span><strong>{{ requestPreview.additionalNotes || '-' }}</strong></div>
           </div>
-
         </div>
 
-
-        <!-- INFO -->
         <div class="information-box">
-
-          <div class="info-circle">
-            i
-          </div>
-
-          <div>
-            Once submitted, your request will be sent to the IT team for review.
-            <br />
-            You will be notified via email once it has been processed.
-          </div>
-
+          <div class="info-circle">i</div>
+          <div>Once submitted, your request will be sent to the IT team for review.<br />If an email is provided, progress notifications will be sent there.</div>
           <div class="tyre-decoration"></div>
-
         </div>
-
       } @else {
-
-        <!-- SUCCESS -->
         <div class="success-card">
-
-          <div class="success-icon">
-            ✓
-          </div>
-
-          <div class="success-copy">
-
-            <h3>
-              Request Submitted Successfully!
-            </h3>
-
-            <p>
-              Your IT asset request has been created.
-            </p>
-
-          </div>
-
-          <div class="request-number">
-
-            <span>
-              Request
-            </span>
-
-            <strong>
-              #{{ submittedRequest.id }}
-            </strong>
-
-          </div>
-
+          <div class="success-icon">✓</div>
+          <div class="success-copy"><h3>Request Submitted Successfully!</h3><p>Your RoyalDesk request has been created.</p></div>
+          <div class="request-number"><span>Ticket</span><strong>{{ submittedRequest.ticketNumber }}</strong></div>
         </div>
 
-
-        <!-- SUBMITTED DETAILS -->
         <div class="card summary-card">
-
-          <div class="card-heading">
-
-            <div class="heading-symbol">
-              ▤
-            </div>
-
-            <div>
-
-              <h3>
-                Request Details
-              </h3>
-
-              <p>
-                A summary of your submitted request.
-              </p>
-
-            </div>
-
-          </div>
-
-
+          <div class="card-heading"><div class="heading-symbol">▤</div><div><h3>Request Details</h3><p>A summary of your submitted request.</p></div></div>
           <div class="summary-list">
-
-            <div class="summary-row">
-              <span class="summary-name">Branch</span>
-              <strong>{{ submittedRequest.branch }}</strong>
-            </div>
-
-            <div class="summary-row">
-              <span class="summary-name">Department</span>
-              <strong>{{ submittedRequest.department }}</strong>
-            </div>
-
-            <div class="summary-row">
-              <span class="summary-name">Item Type</span>
-              <strong>{{ submittedRequest.itemType }}</strong>
-            </div>
-
-            <div class="summary-row">
-              <span class="summary-name">Quantity</span>
-              <strong>{{ submittedRequest.quantity }}</strong>
-            </div>
-
-            <div class="summary-row">
-              <span class="summary-name">Reason</span>
-              <strong>{{ submittedRequest.reason }}</strong>
-            </div>
-
-            <div class="summary-row no-border">
-              <span class="summary-name">Requested By</span>
-              <strong>{{ submittedRequest.requestedBy }}</strong>
-            </div>
-
+            <div class="summary-row"><span class="summary-name">Employee</span><strong>{{ submittedRequest.requesterName }}</strong></div>
+            <div class="summary-row"><span class="summary-name">Email</span><strong>{{ submittedRequest.requesterEmail || 'Not provided' }}</strong></div>
+            <div class="summary-row"><span class="summary-name">Status</span><strong>{{ submittedRequest.status }}</strong></div>
+            <div class="summary-row"><span class="summary-name">Branch</span><strong>{{ submittedRequest.branch }}</strong></div>
+            <div class="summary-row"><span class="summary-name">Department</span><strong>{{ submittedRequest.department }}</strong></div>
+            <div class="summary-row"><span class="summary-name">Item Type</span><strong>{{ submittedRequest.itemType }}</strong></div>
+            <div class="summary-row"><span class="summary-name">Quantity</span><strong>{{ submittedRequest.quantity }}</strong></div>
+            <div class="summary-row no-border"><span class="summary-name">Reason</span><strong>{{ submittedRequest.reason }}</strong></div>
           </div>
-
         </div>
 
-
-        <button
-          class="outline-button another-request"
-          type="button"
-          (click)="submitAnotherRequest()"
-        >
-          + Submit Another Request
-        </button>
-
+        <button class="outline-button another-request" type="button" (click)="submitAnotherRequest()">+ Submit Another Request</button>
       }
-
     </section>
-
   </main>
 
-
-  <!-- CONTACT MODAL -->
   @if (showContactModal) {
-
-    <div
-      class="modal-backdrop"
-      (click)="closeContactModal()"
-    >
-
-      <section
-        class="modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="contact-title"
-        (click)="$event.stopPropagation()"
-      >
-
+    <div class="modal-backdrop" (click)="closeContactModal()">
+      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="contact-title" (click)="$event.stopPropagation()">
         <div class="modal-top">
-
-          <div>
-
-            <small>
-              RoyalDesk · Internal IT
-            </small>
-
-            <h3 id="contact-title">
-              Contact IT Helpdesk
-            </h3>
-
-          </div>
-
-          <button
-            type="button"
-            aria-label="Close"
-            (click)="closeContactModal()"
-          >
-            ×
-          </button>
-
+          <div><small>RoyalDesk · Internal IT</small><h3 id="contact-title">Contact IT Helpdesk</h3></div>
+          <button type="button" aria-label="Close" (click)="closeContactModal()">×</button>
         </div>
-
-
         <div class="modal-content">
-
           <div class="modal-information">
-
-            <div class="modal-info-icon">
-              i
-            </div>
-
+            <div class="modal-info-icon">i</div>
             <div>
-
-              <strong>
-                Need technical support?
-              </strong>
-
-              <p>
-                Please use the Royal Tyres internal IT support channel
-                for incidents, access problems or urgent technical support.
-              </p>
-
-              <p>
-                RoyalDesk is intended for IT equipment requests.
-              </p>
-
+              <strong>Need technical support?</strong>
+              <p>Please use the Royal Tyres internal IT support channel for incidents, access problems or urgent technical support.</p>
+              <p>RoyalDesk will be expanded to track IT support issues and equipment requests in one workflow.</p>
             </div>
-
           </div>
-
-
-          <div class="modal-actions">
-
-            <button
-              class="outline-button"
-              type="button"
-              (click)="closeContactModal()"
-            >
-              Close
-            </button>
-
-          </div>
-
+          <div class="modal-actions"><button class="outline-button" type="button" (click)="closeContactModal()">Close</button></div>
         </div>
-
       </section>
-
     </div>
-
   }
 
-
-  <!-- FOOTER -->
   <footer>
-
     <div class="footer-inner">
-
-      <img
-        src="assets/images/royal-tyres-logo-footer-final.png"
-        alt="Royal Tyres"
-        class="footer-logo"
-      />
-
-      <div class="footer-middle">
-
-        <strong>
-          RoyalDesk &nbsp;|&nbsp; IT Asset Request Portal
-        </strong>
-
-        <span>
-          Your trusted tyre workshop since 1939.
-        </span>
-
-      </div>
-
-
-      <div class="footer-right">
-
-        <div>
-          Privacy Policy
-          &nbsp;|&nbsp;
-          Cookie Notice
-          &nbsp;|&nbsp;
-          Contact Us
-        </div>
-
-        <span>
-          © 2026 Royal Tyres. All rights reserved.
-        </span>
-
-      </div>
-
+      <img src="assets/images/royal-tyres-logo-footer-final.png" alt="Royal Tyres" class="footer-logo" />
+      <div class="footer-middle"><strong>RoyalDesk &nbsp;|&nbsp; IT Asset Request Portal</strong><span>Your trusted tyre workshop since 1939.</span></div>
+      <div class="footer-right"><div>Privacy Policy &nbsp;|&nbsp; Cookie Notice &nbsp;|&nbsp; Contact Us</div><span>© 2026 Royal Tyres. All rights reserved.</span></div>
     </div>
-
   </footer>
-
 </div>
