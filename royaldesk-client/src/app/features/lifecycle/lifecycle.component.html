@@ -84,14 +84,22 @@
             </div>
             <button class="primary" (click)="createAsset()">➤ &nbsp; Register Asset</button>
           </article>
-          <article class="card table-card balanced-card">
-            <div class="card-heading"><div class="heading-symbol">▤</div><div><h2>Asset Register</h2><p>Search and review company equipment.</p></div></div>
-            <input class="search" [(ngModel)]="assetSearch" placeholder="Search tag, serial, make, user or status…">
-            <div class="table-wrap">
-              <table><thead><tr><th>Asset</th><th>Category</th><th>Location</th><th>Assigned to</th><th>Status</th></tr></thead><tbody><tr *ngFor="let a of filteredAssets"><td><strong>{{a.assetTag}}</strong><small>{{a.make}} {{a.model}} · {{a.serialNumber || 'No serial'}}</small></td><td>{{a.category}}</td><td>{{a.branchName || '—'}}</td><td>{{a.assignedEmployeeName || '—'}}</td><td><span class="pill">{{a.status}}</span></td></tr></tbody></table>
-              <div class="table-empty" *ngIf="filteredAssets.length===0"><span class="table-empty-icon">▣</span><strong>No assets registered yet</strong><p>Register an asset using the form on the left. It will appear here once saved.</p></div>
+
+          <div class="view-column">
+            <article class="card table-card balanced-card">
+              <div class="card-heading"><div class="heading-symbol">▤</div><div><h2>Asset Register</h2><p>Search and review company equipment.</p></div></div>
+              <input class="search" [(ngModel)]="assetSearch" placeholder="Search tag, serial, make, user or status…">
+              <div class="table-wrap">
+                <table><thead><tr><th>Asset</th><th>Category</th><th>Location</th><th>Assigned to</th><th>Status</th></tr></thead><tbody><tr *ngFor="let a of filteredAssets"><td><strong>{{a.assetTag}}</strong><small>{{a.make}} {{a.model}} · {{a.serialNumber || 'No serial'}}</small></td><td>{{a.category}}</td><td>{{a.branchName || '—'}}</td><td>{{a.assignedEmployeeName || '—'}}</td><td><span class="pill">{{a.status}}</span></td></tr></tbody></table>
+                <div class="table-empty" *ngIf="filteredAssets.length===0"><span class="table-empty-icon">▣</span><strong>No assets registered yet</strong><p>Register an asset using the form on the left. It will appear here once saved.</p></div>
+              </div>
+            </article>
+            <div class="information-box lifecycle-information-box">
+              <div class="info-circle">i</div>
+              <div>RoyalDesk keeps requests, assets, employees and lifecycle actions in one controlled workflow.<br />Use the relevant section to complete and track each action.</div>
+              <div class="tyre-decoration"></div>
             </div>
-          </article>
+          </div>
         </div>
       </section>
 
@@ -107,13 +115,21 @@
             </div>
             <button class="primary" (click)="createEmployee()">➤ &nbsp; Add Employee</button>
           </article>
-          <article class="card table-card balanced-card">
-            <div class="card-heading"><div class="heading-symbol">▤</div><div><h2>Employees</h2><p>People currently registered in the lifecycle system.</p></div></div>
-            <div class="table-wrap">
-              <table><thead><tr><th>Employee</th><th>Department</th><th>Branch</th><th>Status</th></tr></thead><tbody><tr *ngFor="let e of employees"><td><strong>{{e.firstName}} {{e.lastName}}</strong><small>{{e.employeeNumber}} · {{e.email}}</small></td><td>{{e.departmentName || '—'}}</td><td>{{e.branchName || '—'}}</td><td><span class="pill">{{e.employmentStatus}}</span></td></tr></tbody></table>
-              <div class="table-empty" *ngIf="employees.length===0"><span class="table-empty-icon">●</span><strong>No employees registered yet</strong><p>Add an employee using the form on the left. Their record will appear here.</p></div>
+
+          <div class="view-column">
+            <article class="card table-card balanced-card">
+              <div class="card-heading"><div class="heading-symbol">▤</div><div><h2>Employees</h2><p>People currently registered in the lifecycle system.</p></div></div>
+              <div class="table-wrap">
+                <table><thead><tr><th>Employee</th><th>Department</th><th>Branch</th><th>Status</th></tr></thead><tbody><tr *ngFor="let e of employees"><td><strong>{{e.firstName}} {{e.lastName}}</strong><small>{{e.employeeNumber}} · {{e.email}}</small></td><td>{{e.departmentName || '—'}}</td><td>{{e.branchName || '—'}}</td><td><span class="pill">{{e.employmentStatus}}</span></td></tr></tbody></table>
+                <div class="table-empty" *ngIf="employees.length===0"><span class="table-empty-icon">●</span><strong>No employees registered yet</strong><p>Add an employee using the form on the left. Their record will appear here.</p></div>
+              </div>
+            </article>
+            <div class="information-box lifecycle-information-box">
+              <div class="info-circle">i</div>
+              <div>RoyalDesk keeps employee records and asset lifecycle actions in one controlled workflow.<br />Use this view to review and track registered employees.</div>
+              <div class="tyre-decoration"></div>
             </div>
-          </article>
+          </div>
         </div>
       </section>
 
@@ -130,6 +146,11 @@
             <div class="table-empty" *ngIf="assignments.length===0"><span class="table-empty-icon">⇄</span><strong>No assignment history yet</strong><p>Assign available equipment above. Assignment, acceptance and return history will be shown here.</p></div>
           </div>
         </article>
+        <div class="information-box lifecycle-information-box full-view-info">
+          <div class="info-circle">i</div>
+          <div>Assignment history records equipment acceptance, returns and accountability.<br />Use the table above to review each asset handover.</div>
+          <div class="tyre-decoration"></div>
+        </div>
       </section>
 
       <section *ngIf="section==='onboarding' || section==='offboarding'" class="page-section">
@@ -154,16 +175,15 @@
             <div class="table-empty" *ngIf="writeOffs.length===0"><span class="table-empty-icon">♻</span><strong>No write-off requests yet</strong><p>Submit a write-off request above. Approval and disposal progress will appear here.</p></div>
           </div>
         </article>
+        <div class="information-box lifecycle-information-box full-view-info">
+          <div class="info-circle">i</div>
+          <div>Write-off and e-waste actions stay visible through approval and disposal.<br />Use the register above to track each request.</div>
+          <div class="tyre-decoration"></div>
+        </div>
       </section>
 
       <section *ngIf="section==='reports' && dashboard" class="page-section"><div class="metrics reports"><article><span>Tracked asset value</span><strong>{{dashboard.totalAssetValue | currency:'ZAR':'symbol-narrow':'1.0-0'}}</strong><small>Company equipment recorded</small></article><article class="value"><span>Reusable stock value</span><strong>{{dashboard.availableAssetValue | currency:'ZAR':'symbol-narrow':'1.0-0'}}</strong><small>Available before buying new</small></article><article><span>Utilisation</span><strong>{{dashboard.totalAssets ? (dashboard.assignedAssets / dashboard.totalAssets | percent:'1.0-0') : '0%'}}</strong><small>Assets currently assigned</small></article></div><article class="card value-story"><div class="card-heading"><div class="heading-symbol">▥</div><div><h2>Business Value</h2><p>RoyalDesk turns lifecycle activity into measurable operational value.</p></div></div><div class="flow business-flow"><span>Reuse existing stock</span><b>→</b><span>Avoid unnecessary purchase</span><b>→</b><span>Track value recovered</span></div></article></section>
     </ng-container>
-
-    <section class="shared-info" *ngIf="section!=='request' && !loading">
-      <span class="shared-info-icon">i</span>
-      <div>RoyalDesk keeps requests, assets, employees and lifecycle actions in one controlled workflow.<br />Use the relevant section to complete and track each action.</div>
-      <span class="shared-tyre"></span>
-    </section>
 
     <footer class="shared-footer">
       <div class="shared-footer-inner">
