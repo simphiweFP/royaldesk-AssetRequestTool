@@ -1,7 +1,7 @@
 :root {
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  color: #172033;
-  background: #f4f6f8;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #17243f;
+  background: #f7f8fa;
 }
 
 * {
@@ -12,6 +12,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  background: #f7f8fa;
 }
 
 button,
@@ -21,38 +22,276 @@ textarea {
   font: inherit;
 }
 
-/* Temporary brand-safe overrides: avoid broken local binaries and keep the portal presentable. */
-app-asset-request .brand-logo,
-app-asset-request .footer-brand img {
+/* RoyalDesk uses only the existing Royal Tyres repository assets. */
+
+/* Shared lifecycle hero: mirror the Request Equipment hero language. */
+app-lifecycle .page-heading {
+  min-height: 325px !important;
+  padding: 0 max(32px, calc((100% - 1220px) / 2)) !important;
+  background-image: url('/assets/images/royal_tyres_workshop_in_focus.png') !important;
+  background-size: cover !important;
+  background-position: center !important;
+  align-items: center !important;
+}
+
+app-lifecycle .page-heading::before {
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,.98) 0%,
+    rgba(255,255,255,.95) 20%,
+    rgba(255,255,255,.79) 31%,
+    rgba(255,255,255,.38) 44%,
+    rgba(255,255,255,.08) 55%,
+    rgba(255,255,255,0) 65%
+  ) !important;
+}
+
+app-lifecycle .shared-hero-copy {
+  position: relative;
+  z-index: 2;
+  width: 455px;
+}
+
+app-lifecycle .shared-hero-copy h1 {
+  margin: 0 !important;
+  font-size: 58px !important;
+  line-height: .95 !important;
+  letter-spacing: -2.5px !important;
+}
+
+app-lifecycle .shared-hero-copy .royal {
+  color: #143f91;
+}
+
+app-lifecycle .shared-hero-copy .desk {
+  color: #f11d2f;
+}
+
+app-lifecycle .shared-hero-copy h2 {
+  margin: 12px 0 17px;
+  color: #0f347d;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+app-lifecycle .shared-hero-copy > p {
+  margin: 0;
+  color: #26395c;
+  font-size: 17px;
+  line-height: 1.45;
+}
+
+app-lifecycle .hero-benefits {
+  margin-top: 24px;
+  display: flex;
+}
+
+app-lifecycle .hero-benefit {
+  width: 137px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #143f91;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+app-lifecycle .hero-benefit + .hero-benefit {
+  border-left: 1px solid #ccd3dd;
+}
+
+app-lifecycle .hero-benefit-icon {
+  height: 34px;
+  margin-bottom: 3px;
+  display: flex;
+  align-items: center;
+  font-size: 28px;
+  line-height: 1;
+}
+
+app-lifecycle .hero-benefit-icon.bars {
+  font-size: 19px;
+  letter-spacing: 2px;
+}
+
+app-lifecycle .page-heading .refresh {
+  position: absolute;
+  z-index: 3;
+  top: 20px;
+  right: 24px;
+}
+
+/* Keep the Request Equipment component as the visual reference, but let the shell own header/footer. */
+app-lifecycle .request-embedded app-asset-request .topbar,
+app-lifecycle .request-embedded app-asset-request footer {
   display: none !important;
 }
 
-app-asset-request .brand::before,
-app-asset-request .footer-brand::before {
-  content: "♕  ROYAL TYRES\A    EST. 1939";
-  white-space: pre;
-  display: inline-block;
-  color: #26358f;
-  font-weight: 800;
-  line-height: 1.05;
-  letter-spacing: .4px;
+/* Every lifecycle form uses the same primary action as Submit Request. */
+app-lifecycle .form-card > .primary,
+app-lifecycle .compact-form-card > .primary {
+  width: 100% !important;
+  height: 47px !important;
+  min-height: 47px !important;
+  margin-top: 14px !important;
+  border: 0 !important;
+  border-radius: 6px !important;
+  background: #f11d2f !important;
+  color: #fff !important;
+  cursor: pointer !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
 }
 
-app-asset-request .brand::before {
-  font-size: 21px;
+app-lifecycle .form-card > .primary::before,
+app-lifecycle .compact-form-card > .primary::before {
+  content: '➤';
+  font-size: 13px;
 }
 
-app-asset-request .footer-brand::before {
+app-lifecycle .form-card > .primary:hover,
+app-lifecycle .compact-form-card > .primary:hover {
+  background: #dc1929 !important;
+}
+
+/* Shared information panel used below operational screens. */
+app-lifecycle .shared-info {
+  position: relative;
+  width: min(1220px, calc(100% - 64px));
+  min-height: 108px;
+  margin: 0 auto 22px;
+  padding: 19px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  overflow: hidden;
+  border: 1px solid #e0e5ed;
+  border-radius: 8px;
+  background: linear-gradient(100deg, #f5f8fd, #f7f8fa);
+  color: #53627a;
+  font-size: 12px;
+}
+
+app-lifecycle .shared-info-icon {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #bcc7d6;
   color: #fff;
-  font-size: 18px;
+  font-size: 21px;
+  font-weight: 700;
 }
 
-app-asset-request .footer-brand {
-  background: transparent !important;
+app-lifecycle .shared-tyre {
+  position: absolute;
+  width: 145px;
+  height: 145px;
+  right: -26px;
+  bottom: -62px;
+  border: 18px solid rgba(183,194,210,.21);
+  border-radius: 50%;
 }
 
-app-asset-request .hero {
-  background-image: url('https://static.wixstatic.com/media/828cf9_d57a8f3e8fd34d55b9c728e0800f094c~mv2.jpg/v1/fill/w_1200,h_700,al_c,q_85/828cf9_d57a8f3e8fd34d55b9c728e0800f094c~mv2.jpg') !important;
-  background-size: cover !important;
-  background-position: center !important;
+/* Shared Royal Tyres footer across every page. */
+app-lifecycle .shared-footer {
+  min-height: 105px;
+  margin-top: auto;
+  background: linear-gradient(90deg, #174899, #0e3c8a, #052a70);
+  color: #fff;
+}
+
+app-lifecycle .shared-footer-inner {
+  width: min(1220px, calc(100% - 64px));
+  min-height: 105px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 290px 1fr 350px;
+  align-items: center;
+}
+
+app-lifecycle .shared-footer-inner > img {
+  width: 220px;
+  height: 67px;
+  object-fit: contain;
+  object-position: left center;
+}
+
+app-lifecycle .shared-footer-middle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+}
+
+app-lifecycle .shared-footer-middle span {
+  font-size: 10px;
+  opacity: .78;
+}
+
+app-lifecycle .shared-footer-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 9px;
+  font-size: 10px;
+}
+
+app-lifecycle .shared-footer-right span {
+  opacity: .8;
+}
+
+@media (max-width: 900px) {
+  app-lifecycle .page-heading {
+    min-height: 285px !important;
+  }
+
+  app-lifecycle .shared-footer-inner {
+    width: calc(100% - 32px);
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 12px;
+    padding: 18px 0;
+    text-align: center;
+  }
+
+  app-lifecycle .shared-footer-right {
+    align-items: center;
+  }
+}
+
+@media (max-width: 650px) {
+  app-lifecycle .shared-hero-copy {
+    width: 100%;
+  }
+
+  app-lifecycle .shared-hero-copy h1 {
+    font-size: 49px !important;
+  }
+
+  app-lifecycle .shared-hero-copy h2 {
+    font-size: 22px;
+  }
+
+  app-lifecycle .page-heading::before {
+    background: rgba(255,255,255,.88) !important;
+  }
+
+  app-lifecycle .hero-benefit {
+    width: 110px;
+  }
+
+  app-lifecycle .shared-info,
+  app-lifecycle .shared-footer-inner {
+    width: calc(100% - 24px);
+  }
 }
