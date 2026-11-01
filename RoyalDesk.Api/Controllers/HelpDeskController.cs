@@ -8,7 +8,7 @@ namespace RoyalDesk.Api.Controllers;
 [ApiController]
 [Route("api/helpdesk")]
 [Authorize(AuthenticationSchemes = BasicAuthenticationHandler.SchemeName)]
-public sealed class HelpDeskController(HelpDeskService service) : ControllerBase
+public sealed class HelpDeskController(HelpDeskService service, JustIctEscalationService escalationService) : ControllerBase
 {
     private string Actor => User.Identity?.Name ?? "unknown";
 
@@ -40,6 +40,10 @@ public sealed class HelpDeskController(HelpDeskService service) : ControllerBase
         await service.StartAsync(id, Actor, ct);
         return NoContent();
     }
+
+    [HttpPost("tickets/{id:int}/escalate-just-ict")]
+    public async Task<ActionResult<TicketEscalationDto>> EscalateToJustIct(int id, EscalateToJustIctDto dto, CancellationToken ct)
+        => Ok(await escalationService.EscalateAsync(id, dto, Actor, ct));
 
     [HttpPatch("tickets/{id:int}/status")]
     public async Task<IActionResult> UpdateStatus(int id, UpdateTicketStatusDto dto, CancellationToken ct)
