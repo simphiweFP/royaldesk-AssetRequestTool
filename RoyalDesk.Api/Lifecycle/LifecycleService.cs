@@ -1,6 +1,6 @@
 namespace RoyalDesk.Api.Lifecycle;
 
-public sealed class LifecycleService(ILifecycleRepository repository) : ILifecycleService
+internal sealed class LifecycleService(ILifecycleRepository repository) : ILifecycleService
 {
     public async Task<DashboardDto> GetDashboardAsync(CancellationToken ct)
         => (await repository.GetDashboardAsync(ct)).ToDto();
