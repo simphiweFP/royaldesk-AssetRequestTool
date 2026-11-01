@@ -38,6 +38,7 @@ builder.Services.AddSingleton<IDbConnectionFactory>(new SqliteConnectionFactory(
 builder.Services.AddScoped<IAssetRequestRepository, AssetRequestRepository>();
 builder.Services.AddScoped<IAssetRequestService, AssetRequestService>();
 builder.Services.AddScoped<ILifecycleRepository, LifecycleRepository>();
+builder.Services.AddScoped<ILifecycleService, LifecycleService>();
 builder.Services.AddSingleton<IAssetRequestAuditLogger, FileAssetRequestAuditLogger>();
 builder.Services.AddSingleton<CreateAssetRequestValidator>();
 
