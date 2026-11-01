@@ -1,12 +1,13 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { HelpDeskTicket, ITTeamMember, TicketStatusHistory } from '../models/helpdesk.model';
+import { HelpDeskTicket, ITTeamMember, PublicTicketDetail, PublicTicketSummary, TicketStatusHistory } from '../models/helpdesk.model';
 
 @Injectable({ providedIn: 'root' })
 export class HelpDeskService {
   private readonly http = inject(HttpClient);
   private readonly base = 'https://localhost:7080/api/helpdesk';
+  private readonly publicBase = 'https://localhost:7080/api/public/tickets';
   private readonly headers = new HttpHeaders({ Authorization: 'Basic ' + btoa('demo.user:RoyalDesk123!') });
 
   tickets(status?: string): Observable<HelpDeskTicket[]> {
@@ -36,5 +37,18 @@ export class HelpDeskService {
 
   updateStatus(id: number, status: string, comment?: string, publicVisible = true): Observable<void> {
     return this.http.patch<void>(`${this.base}/tickets/${id}/status`, { status, comment, publicVisible }, { headers: this.headers });
+  }
+
+  searchPublic(name: string, department: string): Observable<PublicTicketSummary[]> {
+    const query = `?name=${encodeURIComponent(name)}&department=${encodeURIComponent(department)}`;
+    return this.http.get<PublicTicketSummary[]>(`${this.publicBase}/search${query}`);
+  }
+
+  verifyPublic(ticketNumber: string, email?: string, trackingPin?: string): Observable<PublicTicketDetail> {
+    return this.http.post<PublicTicketDetail>(`${this.publicBase}/verify`, {
+      ticketNumber,
+      email: email || null,
+      trackingPin: trackingPin || null
+    });
   }
 }
