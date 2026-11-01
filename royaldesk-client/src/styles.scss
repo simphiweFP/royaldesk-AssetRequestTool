@@ -151,8 +151,7 @@ app-lifecycle .compact-form-card > .primary {
 
 app-lifecycle .form-card > .primary::before,
 app-lifecycle .compact-form-card > .primary::before {
-  content: '➤';
-  font-size: 13px;
+  content: none !important;
 }
 
 app-lifecycle .form-card > .primary:hover,
@@ -250,9 +249,111 @@ app-lifecycle .shared-footer-right span {
   opacity: .8;
 }
 
+/* Consistent page height with and without data. */
+app-lifecycle .workspace {
+  min-height: 100vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+app-lifecycle .page-section {
+  flex: 0 0 auto;
+  min-height: 330px;
+}
+
+app-lifecycle .balanced-card {
+  min-height: 430px;
+}
+
+app-lifecycle .stable-table-card {
+  min-height: 350px;
+}
+
+app-lifecycle .stable-lifecycle-card {
+  min-height: 360px;
+}
+
+app-lifecycle .table-card {
+  display: flex;
+  flex-direction: column;
+}
+
+app-lifecycle .table-wrap {
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+}
+
+app-lifecycle .table-wrap table {
+  flex: 0 0 auto;
+}
+
+/* Empty registers keep the table header and use the same polished empty state. */
+app-lifecycle .table-empty {
+  flex: 1;
+  min-height: 225px;
+  padding: 34px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-top: 1px solid #edf0f4;
+  background: linear-gradient(180deg, #fbfcfe 0%, #f7f9fc 100%);
+  color: #69758b;
+}
+
+app-lifecycle .table-empty-icon,
+app-lifecycle .empty-state-icon {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 12px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #edf2fb;
+  color: #143f91;
+  font-size: 21px;
+  font-weight: 700;
+}
+
+app-lifecycle .table-empty strong,
+app-lifecycle .lifecycle-empty strong {
+  color: #0f347d;
+  font-size: 15px;
+}
+
+app-lifecycle .table-empty p,
+app-lifecycle .lifecycle-empty p {
+  max-width: 430px;
+  margin: 7px auto 0 !important;
+  color: #69758b !important;
+  font-size: 12px !important;
+  line-height: 1.5 !important;
+}
+
+app-lifecycle .lifecycle-empty {
+  min-height: 230px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+app-lifecycle .checklist {
+  min-height: 230px;
+  align-content: start;
+}
+
 @media (max-width: 900px) {
   app-lifecycle .page-heading {
     min-height: 285px !important;
+  }
+
+  app-lifecycle .balanced-card,
+  app-lifecycle .stable-table-card,
+  app-lifecycle .stable-lifecycle-card {
+    min-height: auto;
   }
 
   app-lifecycle .shared-footer-inner {
@@ -293,5 +394,15 @@ app-lifecycle .shared-footer-right span {
   app-lifecycle .shared-info,
   app-lifecycle .shared-footer-inner {
     width: calc(100% - 24px);
+  }
+
+  app-lifecycle .page-section {
+    min-height: auto;
+  }
+
+  app-lifecycle .table-wrap,
+  app-lifecycle .table-empty,
+  app-lifecycle .lifecycle-empty {
+    min-height: 200px;
   }
 }
