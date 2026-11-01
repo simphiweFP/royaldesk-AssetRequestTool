@@ -46,7 +46,8 @@
                 <button *ngIf="!ticket.assignedToId && ticket.status==='New'" (click)="assignToMe(ticket)">Assign to Me</button>
                 <button *ngIf="ticket.assignedToId && ticket.status==='Assigned'" (click)="start(ticket)">Start</button>
                 <button *ngIf="ticket.status==='In Progress'" (click)="setWaitingForUser(ticket)">Waiting</button>
-                <button *ngIf="['Assigned','In Progress','Waiting for User'].includes(ticket.status)" class="resolve" (click)="resolve(ticket)">Resolve</button>
+                <button *ngIf="ticket.assignedToId && ['Assigned','In Progress','Waiting for User','Waiting for Third Party'].includes(ticket.status)" class="escalate" (click)="openEscalation(ticket)">Just ICT</button>
+                <button *ngIf="['Assigned','In Progress','Waiting for User','Waiting for Third Party','Escalated to Just ICT'].includes(ticket.status)" class="resolve" (click)="resolve(ticket)">Resolve</button>
               </td>
             </tr>
           </tbody>
@@ -87,10 +88,52 @@
 
     <div class="information-box">
       <div class="info-circle">i</div>
-      <div>Assigning a ticket records the IT employee responsible and immediately notifies the requester when an email was supplied.<br />Requester-visible progress is available under Track My Request.</div>
+      <div>Assigning a ticket records the IT employee responsible. If the issue cannot be resolved internally, the assigned technician can hand it over to Just ICT with the ticket context and troubleshooting already completed.<br />Remote access passwords are not stored in RoyalDesk.</div>
       <div class="tyre-decoration"></div>
     </div>
   </ng-container>
 
   <app-ticket-tracking *ngIf="mode==='track'"></app-ticket-tracking>
+
+  <div class="modal-backdrop" *ngIf="showEscalation" (click)="closeEscalation()">
+    <section class="escalation-modal" role="dialog" aria-modal="true" aria-labelledby="escalation-title" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div>
+          <small>RoyalDesk · Third-Party Support</small>
+          <h2 id="escalation-title">Escalate to Just ICT</h2>
+          <p>{{ escalationTicket?.ticketNumber }} · {{ escalationTicket?.requesterName }}</p>
+        </div>
+        <button type="button" aria-label="Close" (click)="closeEscalation()">×</button>
+      </div>
+
+      <div class="escalation-grid">
+        <label>TeamViewer ID *
+          <input [(ngModel)]="escalationForm.teamViewerId" placeholder="Remote session ID" (ngModelChange)="refreshEscalationEmail()" />
+        </label>
+        <label>Issue Description *
+          <textarea [(ngModel)]="escalationForm.issueDescription"></textarea>
+        </label>
+        <label>Troubleshooting Completed *
+          <textarea [(ngModel)]="escalationForm.troubleshooting" placeholder="List what Royal Tyres IT already checked or tried" (ngModelChange)="refreshEscalationEmail()"></textarea>
+        </label>
+        <label>Additional Notes
+          <textarea [(ngModel)]="escalationForm.additionalNotes" placeholder="Optional handover notes" (ngModelChange)="refreshEscalationEmail()"></textarea>
+        </label>
+        <label class="email-editor">Email to support@justict.co.za *
+          <textarea [(ngModel)]="escalationForm.emailBody"></textarea>
+          <small>CC: itteam@royaltyres.co.za · You can edit this text before sending.</small>
+        </label>
+      </div>
+
+      <div class="security-note">
+        <strong>Remote access security</strong>
+        <span>Only the TeamViewer ID is captured here. Do not store the TeamViewer password in RoyalDesk; provide it directly when the remote session starts.</span>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="secondary" (click)="closeEscalation()" [disabled]="escalating">Cancel</button>
+        <button type="button" class="primary-action" (click)="submitEscalation()" [disabled]="escalating">{{ escalating ? 'Sending…' : 'Send to Just ICT' }}</button>
+      </div>
+    </section>
+  </div>
 </section>
