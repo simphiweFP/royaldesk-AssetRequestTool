@@ -38,6 +38,36 @@ export class LifecycleComponent implements OnInit {
 
   ngOnInit(): void { this.refresh(); }
 
+  get pageTitle(): string {
+    const titles: Record<string, string> = {
+      dashboard: 'Operations Dashboard',
+      request: 'Request Equipment',
+      assets: 'Asset Register',
+      employees: 'Employees',
+      assignments: 'Assignments & Returns',
+      onboarding: 'Employee Onboarding',
+      offboarding: 'Employee Offboarding',
+      writeoffs: 'Write-Offs & E-Waste',
+      reports: 'Business Value'
+    };
+    return titles[this.section] ?? 'RoyalDesk';
+  }
+
+  get pageSubtitle(): string {
+    const subtitles: Record<string, string> = {
+      dashboard: 'A clear view of company assets, people and lifecycle activity.',
+      request: 'Request the IT equipment you need to keep Royal Tyres moving.',
+      assets: 'Register, search and manage company equipment in one place.',
+      employees: 'Maintain employee records used across the asset lifecycle.',
+      assignments: 'Assign equipment, capture acceptance and manage returns.',
+      onboarding: 'Track accounts, access, equipment and employee readiness.',
+      offboarding: 'Recover company assets and close employee access responsibly.',
+      writeoffs: 'Control approvals, disposal and the company e-waste register.',
+      reports: 'See the operational value created through reuse and accountability.'
+    };
+    return subtitles[this.section] ?? 'One company workflow from request to disposal.';
+  }
+
   get filteredAssets(): Asset[] {
     const q = this.assetSearch.trim().toLowerCase();
     if (!q) return this.assets;
@@ -58,7 +88,10 @@ export class LifecycleComponent implements OnInit {
     });
   }
 
-  open(section: string): void { this.section = section; }
+  open(section: string): void {
+    this.section = section;
+    this.error = '';
+  }
 
   createEmployee(): void {
     this.api.createEmployee({ ...this.employeeForm, branchId: this.employeeForm.branchId || null, departmentId: this.employeeForm.departmentId || null, startDate: this.employeeForm.startDate || null }).subscribe({
