@@ -27,11 +27,55 @@ textarea {
   font: inherit;
 }
 
-/* Keep compact lifecycle forms at their natural height.
-   They still retain the exact Request Equipment proportions and button styling,
-   but no longer stretch to match the table + information stack beside them. */
-app-lifecycle .page-section:has(> .compact-form-card):has(> .table-card) > .compact-form-card {
+/* Shared workflow canvas.
+   Request IT Equipment is the visual reference: form on the left,
+   view on the right, action anchored at the bottom. Pages with fewer
+   fields keep the same visual journey instead of collapsing shorter. */
+app-lifecycle .form-card {
+  min-height: 445px;
+  display: flex;
+  flex-direction: column;
   align-self: start;
+}
+
+app-lifecycle .form-card > .primary {
+  margin-top: auto;
+}
+
+/* The right-side view plus 108px information card should visually
+   balance the reference form canvas when there is little or no data. */
+app-lifecycle .view-column > .table-card,
+app-lifecycle .page-section:has(> .compact-form-card):has(> .table-card) > .table-card {
+  min-height: 323px;
+}
+
+app-lifecycle .view-column > .table-card .table-wrap,
+app-lifecycle .page-section:has(> .compact-form-card):has(> .table-card) > .table-card .table-wrap {
+  min-height: 215px;
+  display: flex;
+  flex-direction: column;
+}
+
+app-lifecycle .view-column > .table-card .table-empty,
+app-lifecycle .page-section:has(> .compact-form-card):has(> .table-card) > .table-card .table-empty {
+  flex: 1;
+}
+
+/* Compact workflows keep the same 445px reference canvas even with
+   only two or three fields. The blank breathing room stays above the
+   submit button, never underneath it. */
+app-lifecycle .page-section:has(> .compact-form-card):has(> .table-card) > .compact-form-card {
   height: auto;
-  min-height: 0;
+  min-height: 445px;
+}
+
+@media (max-width: 900px) {
+  app-lifecycle .form-card,
+  app-lifecycle .page-section:has(> .compact-form-card):has(> .table-card) > .compact-form-card,
+  app-lifecycle .view-column > .table-card,
+  app-lifecycle .page-section:has(> .compact-form-card):has(> .table-card) > .table-card,
+  app-lifecycle .view-column > .table-card .table-wrap,
+  app-lifecycle .page-section:has(> .compact-form-card):has(> .table-card) > .table-card .table-wrap {
+    min-height: 0;
+  }
 }
