@@ -1,6 +1,8 @@
+using RoyalDesk.Api.Email;
+
 namespace RoyalDesk.Api.HelpDesk;
 
-public sealed class HelpDeskService(IHelpDeskRepository repository)
+public sealed class HelpDeskService(IHelpDeskRepository repository, TicketNotificationService notifications)
 {
     private static readonly HashSet<string> AllowedStatuses = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -31,12 +33,18 @@ public sealed class HelpDeskService(IHelpDeskRepository repository)
     {
         var member = await RequireTeamMemberAsync(actor, ct);
         await repository.AssignAsync(id, member, actor, ct);
+        var ticket = await repository.GetTicketAsync(id, ct);
+        if (ticket is not null)
+            await notifications.AssignedAsync(ticket, member.DisplayName, ct);
     }
 
     public async Task StartAsync(int id, string actor, CancellationToken ct = default)
     {
         var member = await RequireTeamMemberAsync(actor, ct);
         await repository.StartAsync(id, member, actor, ct);
+        var ticket = await repository.GetTicketAsync(id, ct);
+        if (ticket is not null)
+            await notifications.StartedAsync(ticket, member.DisplayName, ct);
     }
 
     public async Task UpdateStatusAsync(int id, UpdateTicketStatusDto dto, string actor, CancellationToken ct = default)
@@ -44,6 +52,9 @@ public sealed class HelpDeskService(IHelpDeskRepository repository)
         if (!AllowedStatuses.Contains(dto.Status)) throw new ArgumentException("Unsupported ticket status.");
         var member = await RequireTeamMemberAsync(actor, ct);
         await repository.UpdateStatusAsync(id, dto, actor, member.DisplayName, ct);
+        var ticket = await repository.GetTicketAsync(id, ct);
+        if (ticket is not null && dto.PublicVisible)
+            await notifications.StatusChangedAsync(ticket, dto.Status, dto.Comment, ct);
     }
 
     private async Task<ITTeamMemberDto> RequireTeamMemberAsync(string actor, CancellationToken ct)
