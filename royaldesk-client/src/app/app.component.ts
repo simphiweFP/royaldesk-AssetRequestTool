@@ -6,18 +6,20 @@ import { LifecycleComponent } from './features/lifecycle/lifecycle.component';
   standalone: true,
   imports: [LifecycleComponent],
   template: `
-    <app-lifecycle />
+    <app-lifecycle #lifecycle />
 
     <section class="shared-lower-shell" aria-label="RoyalDesk information and footer">
-      <div class="shared-info">
-        <div class="info-circle">i</div>
-        <div>
-          RoyalDesk keeps requests, equipment and employee lifecycle activity in one controlled workflow.
-          <br />
-          Use the navigation to manage each stage from request through disposal.
+      @if (lifecycle.section !== 'request') {
+        <div class="shared-info">
+          <div class="info-circle">i</div>
+          <div>
+            RoyalDesk keeps requests, equipment and employee lifecycle activity in one controlled workflow.
+            <br />
+            Use the navigation to manage each stage from request through disposal.
+          </div>
+          <div class="tyre-decoration"></div>
         </div>
-        <div class="tyre-decoration"></div>
-      </div>
+      }
 
       <footer class="royaldesk-footer">
         <div class="footer-inner">
