@@ -5,7 +5,7 @@ using RoyalDesk.Api.Data;
 
 namespace RoyalDesk.Api.HelpDesk;
 
-public sealed class PublicTicketSummaryDto
+public class PublicTicketSummaryDto
 {
     public string TicketNumber { get; set; } = string.Empty;
     public string RequesterName { get; set; } = string.Empty;
