@@ -52,7 +52,7 @@ public sealed class LifecycleRepository(IDbConnectionFactory connectionFactory) 
                    b.Name BranchName, a.DepartmentId, d.Name DepartmentName, a.Status, a.Condition,
                    a.PurchaseDate, a.PurchaseValue, a.WarrantyExpiry, a.FullyDepreciated, a.Notes,
                    aa.EmployeeId AssignedEmployeeId,
-                   CASE WHEN e.Id IS NULL THEN NULL ELSE e.FirstName || ' ' || e.LastName END AssignedEmployeeName
+                   CASE WHEN e.Id IS NULL THEN NULL ELSE CAST(e.FirstName || ' ' || e.LastName AS TEXT) END AssignedEmployeeName
             FROM Assets a
             LEFT JOIN Branches b ON b.Id = a.BranchId
             LEFT JOIN Departments d ON d.Id = a.DepartmentId
@@ -84,7 +84,7 @@ public sealed class LifecycleRepository(IDbConnectionFactory connectionFactory) 
     {
         const string sql = """
             SELECT aa.Id, aa.AssetId, a.AssetTag, aa.EmployeeId,
-                   e.FirstName || ' ' || e.LastName EmployeeName,
+                   CAST(e.FirstName || ' ' || e.LastName AS TEXT) EmployeeName,
                    aa.AssignedAtUtc, aa.AssignedBy, aa.ConditionAtAssignment, aa.ReturnedAtUtc,
                    aa.ReturnReason, aa.ConditionAtReturn, aa.Status, aa.EmployeeAcceptedAtUtc, aa.EmployeeSignatureName
             FROM AssetAssignments aa
