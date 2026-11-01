@@ -9,6 +9,9 @@ $border: #dce2ea;
 * { box-sizing: border-box; }
 
 .ticket-page { display: grid; gap: 20px; }
+.mode-switch { display:flex; gap:8px; }
+.mode-switch button { height:38px; padding:0 15px; border:1px solid #b7c5d9; border-radius:6px; background:#fff; color:$blue; font-size:11px; font-weight:700; cursor:pointer; }
+.mode-switch button.active { border-color:$blue; background:#edf2fb; }
 .ticket-metrics { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 14px; }
 .ticket-metrics article,
 .ticket-card { background: #fff; border: 1px solid $border; border-radius: 8px; box-shadow: 0 1px 5px rgba(24,44,80,.035); }
