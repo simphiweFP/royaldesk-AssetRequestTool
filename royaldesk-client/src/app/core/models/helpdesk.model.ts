@@ -67,3 +67,24 @@ export interface PublicTicketDetail extends PublicTicketSummary {
   resolvedAtUtc?: string;
   history: PublicTicketHistory[];
 }
+
+export interface EscalateToJustIctRequest {
+  teamViewerId: string;
+  issueDescription: string;
+  troubleshooting: string;
+  additionalNotes?: string;
+  emailBody: string;
+}
+
+export interface TicketEscalation {
+  id: number;
+  ticketId: number;
+  provider: string;
+  providerEmail: string;
+  teamViewerId: string;
+  issueDescription: string;
+  troubleshooting: string;
+  additionalNotes?: string;
+  escalatedByName: string;
+  escalatedAtUtc: string;
+}
