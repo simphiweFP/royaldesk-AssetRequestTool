@@ -54,6 +54,8 @@ builder.Services.AddScoped<ILifecycleRepository, LifecycleRepository>();
 builder.Services.AddScoped<ILifecycleService, LifecycleService>();
 builder.Services.AddScoped<IHelpDeskRepository, HelpDeskRepository>();
 builder.Services.AddScoped<HelpDeskService>();
+builder.Services.AddScoped<JustIctEscalationRepository>();
+builder.Services.AddScoped<JustIctEscalationService>();
 builder.Services.AddScoped<PublicTrackingService>();
 builder.Services.AddScoped<IEmailOutbox, EmailOutbox>();
 builder.Services.AddScoped<TicketNotificationService>();
