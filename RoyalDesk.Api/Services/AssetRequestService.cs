@@ -16,11 +16,16 @@ public sealed class AssetRequestService(
     {
         var entity = new AssetRequest
         {
+            RequesterName = request.RequesterName.Trim(),
+            RequesterEmail = string.IsNullOrWhiteSpace(request.RequesterEmail)
+                ? null
+                : request.RequesterEmail.Trim(),
             Branch = request.Branch.Trim(),
             Department = request.Department.Trim(),
             ItemType = request.ItemType.Trim(),
             Quantity = request.Quantity,
             Reason = request.Reason.Trim(),
+            Status = "New",
             RequestedBy = requestedBy,
             RequestedAtUtc = DateTime.UtcNow
         };
@@ -30,11 +35,15 @@ public sealed class AssetRequestService(
         var response = new AssetRequestResponseDto
         {
             Id = entity.Id,
+            TicketNumber = entity.TicketNumber ?? $"RT-IT-{entity.Id:000000}",
+            RequesterName = entity.RequesterName,
+            RequesterEmail = entity.RequesterEmail,
             Branch = entity.Branch,
             Department = entity.Department,
             ItemType = entity.ItemType,
             Quantity = entity.Quantity,
             Reason = entity.Reason,
+            Status = entity.Status,
             RequestedBy = entity.RequestedBy,
             RequestedAtUtc = entity.RequestedAtUtc
         };
