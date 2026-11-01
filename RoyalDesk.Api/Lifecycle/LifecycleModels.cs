@@ -3,11 +3,23 @@ namespace RoyalDesk.Api.Lifecycle;
 public sealed record LookupDto(int Id, string Code, string Name);
 public sealed record DepartmentDto(int Id, string Name);
 
-public sealed record EmployeeDto(
-    int Id, string EmployeeNumber, string FirstName, string LastName, string? Email,
-    string? Username, string? JobTitle, int? BranchId, string? BranchName,
-    int? DepartmentId, string? DepartmentName, string EmploymentStatus,
-    DateTime? StartDate, DateTime? EndDate);
+public sealed class EmployeeDto
+{
+    public int Id { get; set; }
+    public string EmployeeNumber { get; set; } = string.Empty;
+    public string FirstName { get; set; } = string.Empty;
+    public string LastName { get; set; } = string.Empty;
+    public string? Email { get; set; }
+    public string? Username { get; set; }
+    public string? JobTitle { get; set; }
+    public int? BranchId { get; set; }
+    public string? BranchName { get; set; }
+    public int? DepartmentId { get; set; }
+    public string? DepartmentName { get; set; }
+    public string EmploymentStatus { get; set; } = string.Empty;
+    public DateTime? StartDate { get; set; }
+    public DateTime? EndDate { get; set; }
+}
 
 public sealed record CreateEmployeeDto(
     string EmployeeNumber, string FirstName, string LastName, string? Email,
