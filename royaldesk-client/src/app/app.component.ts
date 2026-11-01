@@ -15,17 +15,17 @@ import { LifecycleComponent } from './features/lifecycle/lifecycle.component';
       font-family: Arial, Helvetica, sans-serif;
     }
 
-    /* The lifecycle shell is the single owner of the application footer. */
     :host ::ng-deep app-asset-request footer,
     :host ::ng-deep app-lifecycle .shared-info {
       display: none !important;
     }
 
-    /* Use the Request IT Equipment page dimensions as the shared page standard. */
+    /* Request Equipment is the layout reference. */
     :host ::ng-deep app-lifecycle .page-section {
       width: min(1220px, calc(100% - 64px)) !important;
       margin: 22px auto !important;
       gap: 20px !important;
+      min-height: 0 !important;
     }
 
     :host ::ng-deep app-lifecycle .grid.two {
@@ -34,7 +34,12 @@ import { LifecycleComponent } from './features/lifecycle/lifecycle.component';
       align-items: start !important;
     }
 
+    :host ::ng-deep app-lifecycle .operational-grid {
+      align-items: start !important;
+    }
+
     :host ::ng-deep app-lifecycle .card {
+      min-height: 0 !important;
       padding: 18px !important;
       border: 1px solid #dce2ea !important;
       border-radius: 8px !important;
@@ -42,15 +47,13 @@ import { LifecycleComponent } from './features/lifecycle/lifecycle.component';
       box-shadow: 0 1px 5px rgba(24, 44, 80, .035) !important;
     }
 
-    /* Form + right-side view should end on the same visual line, like Request Equipment. */
-    :host ::ng-deep app-lifecycle .operational-grid > .form-card {
-      min-height: 414px !important;
-      display: flex !important;
-      flex-direction: column !important;
-    }
-
-    :host ::ng-deep app-lifecycle .operational-grid > .form-card > .primary {
-      margin-top: auto !important;
+    /* Never stretch the form/table cards just to make columns equal. */
+    :host ::ng-deep app-lifecycle .balanced-card,
+    :host ::ng-deep app-lifecycle .stable-table-card,
+    :host ::ng-deep app-lifecycle .operational-grid > .form-card,
+    :host ::ng-deep app-lifecycle .view-column > .table-card {
+      min-height: 0 !important;
+      height: auto !important;
     }
 
     :host ::ng-deep app-lifecycle .view-column {
@@ -58,21 +61,53 @@ import { LifecycleComponent } from './features/lifecycle/lifecycle.component';
       display: flex;
       flex-direction: column;
       gap: 14px;
+      align-self: start;
     }
 
-    :host ::ng-deep app-lifecycle .view-column > .table-card {
-      min-height: 292px !important;
+    /* Assignments and Write-Offs use the same left-form/right-view pattern. */
+    :host ::ng-deep app-lifecycle .page-section:has(> .compact-form-card):has(> .table-card) {
+      grid-template-columns: 520px minmax(0, 1fr) !important;
+      grid-template-rows: auto auto !important;
+      column-gap: 20px !important;
+      row-gap: 14px !important;
+      align-items: start !important;
     }
 
-    :host ::ng-deep app-lifecycle .view-column .table-wrap {
-      min-height: 208px !important;
+    :host ::ng-deep app-lifecycle .page-section:has(> .compact-form-card):has(> .table-card) > .compact-form-card {
+      grid-column: 1 !important;
+      grid-row: 1 / span 2 !important;
     }
 
-    /* Exact Request Equipment information panel. */
+    :host ::ng-deep app-lifecycle .page-section:has(> .compact-form-card):has(> .table-card) > .table-card {
+      grid-column: 2 !important;
+      grid-row: 1 !important;
+    }
+
+    :host ::ng-deep app-lifecycle .page-section:has(> .compact-form-card):has(> .table-card) > .full-view-info {
+      grid-column: 2 !important;
+      grid-row: 2 !important;
+      width: 100% !important;
+      align-self: start !important;
+    }
+
+    /* Let empty tables look polished without becoming taller than the form. */
+    :host ::ng-deep app-lifecycle .table-wrap {
+      min-height: 0 !important;
+      max-height: 530px !important;
+    }
+
+    :host ::ng-deep app-lifecycle .table-empty {
+      min-height: 170px !important;
+      padding: 26px 20px !important;
+    }
+
+    /* Exact compact information box from Request IT Equipment. */
     :host ::ng-deep app-lifecycle .information-box.lifecycle-information-box {
       position: relative;
       width: 100%;
-      min-height: 108px;
+      height: 108px !important;
+      min-height: 108px !important;
+      max-height: 108px !important;
       padding: 19px;
       display: flex;
       align-items: center;
@@ -111,11 +146,6 @@ import { LifecycleComponent } from './features/lifecycle/lifecycle.component';
       box-sizing: border-box;
     }
 
-    :host ::ng-deep app-lifecycle .full-view-info {
-      width: 100%;
-    }
-
-    /* Exact Request IT Equipment card heading hierarchy. */
     :host ::ng-deep app-lifecycle .card-heading {
       margin-bottom: 16px !important;
       gap: 13px !important;
@@ -153,7 +183,6 @@ import { LifecycleComponent } from './features/lifecycle/lifecycle.component';
       line-height: 1.45 !important;
     }
 
-    /* Exact Request Equipment form control scale. */
     :host ::ng-deep app-lifecycle label {
       gap: 6px !important;
       color: #17243f !important;
@@ -192,17 +221,12 @@ import { LifecycleComponent } from './features/lifecycle/lifecycle.component';
       box-shadow: 0 0 0 2px rgba(20, 63, 145, .08) !important;
     }
 
-    :host ::ng-deep app-lifecycle input::placeholder,
-    :host ::ng-deep app-lifecycle textarea::placeholder {
-      color: #9aa5b6 !important;
-    }
-
-    /* Same full-width red action as Submit Request. */
     :host ::ng-deep app-lifecycle .form-card > .primary,
     :host ::ng-deep app-lifecycle .compact-form-card > .primary {
       width: 100% !important;
       height: 47px !important;
       min-height: 47px !important;
+      margin-top: 14px !important;
       border: 0 !important;
       border-radius: 6px !important;
       background: #f11d2f !important;
@@ -216,7 +240,6 @@ import { LifecycleComponent } from './features/lifecycle/lifecycle.component';
       background: #dc1929 !important;
     }
 
-    /* Request-style table hierarchy. */
     :host ::ng-deep app-lifecycle th {
       padding: 11px 10px !important;
       color: #69758b !important;
@@ -239,13 +262,16 @@ import { LifecycleComponent } from './features/lifecycle/lifecycle.component';
     }
 
     @media (max-width: 900px) {
-      :host ::ng-deep app-lifecycle .grid.two {
+      :host ::ng-deep app-lifecycle .grid.two,
+      :host ::ng-deep app-lifecycle .page-section:has(> .compact-form-card):has(> .table-card) {
         grid-template-columns: 1fr !important;
       }
 
-      :host ::ng-deep app-lifecycle .operational-grid > .form-card,
-      :host ::ng-deep app-lifecycle .view-column > .table-card {
-        min-height: auto !important;
+      :host ::ng-deep app-lifecycle .page-section:has(> .compact-form-card):has(> .table-card) > .compact-form-card,
+      :host ::ng-deep app-lifecycle .page-section:has(> .compact-form-card):has(> .table-card) > .table-card,
+      :host ::ng-deep app-lifecycle .page-section:has(> .compact-form-card):has(> .table-card) > .full-view-info {
+        grid-column: 1 !important;
+        grid-row: auto !important;
       }
 
       :host ::ng-deep app-lifecycle .view-column {
