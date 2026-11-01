@@ -1,4 +1,6 @@
 export interface CreateAssetRequest {
+  requesterName: string;
+  requesterEmail?: string;
   branch: string;
   department: string;
   itemType: string;
@@ -8,6 +10,8 @@ export interface CreateAssetRequest {
 
 export interface AssetRequestResponse extends CreateAssetRequest {
   id: number;
+  ticketNumber: string;
+  status: string;
   requestedBy: string;
   requestedAtUtc: string;
 }
