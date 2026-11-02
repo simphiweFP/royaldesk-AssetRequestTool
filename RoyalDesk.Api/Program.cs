@@ -10,6 +10,7 @@ using RoyalDesk.Api.Logging;
 using RoyalDesk.Api.Migrations;
 using RoyalDesk.Api.Repositories;
 using RoyalDesk.Api.Services;
+using RoyalDesk.Api.StaffAccess;
 using RoyalDesk.Api.StoreRoom;
 using RoyalDesk.Api.Validation;
 
@@ -25,7 +26,8 @@ builder.Services.AddCors(options =>
     options.AddPolicy("RoyalDeskClient", policy =>
         policy.WithOrigins("http://localhost:4200")
             .AllowAnyHeader()
-            .AllowAnyMethod());
+            .AllowAnyMethod()
+            .AllowCredentials());
 });
 
 builder.Services
@@ -61,6 +63,7 @@ builder.Services.AddScoped<JustIctEscalationService>();
 builder.Services.AddScoped<PublicTrackingService>();
 builder.Services.AddScoped<StoreRoomService>();
 builder.Services.AddScoped<BusinessValueService>();
+builder.Services.AddScoped<StaffAccessService>();
 builder.Services.AddScoped<IEmailOutbox, EmailOutbox>();
 builder.Services.AddScoped<TicketNotificationService>();
 builder.Services.AddHostedService<EmailOutboxWorker>();
@@ -86,7 +89,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseExceptionHandler();
 app.UseHttpsRedirection();
+app.UseRouting();
 app.UseCors("RoyalDeskClient");
+app.UseMiddleware<StaffAccessMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
