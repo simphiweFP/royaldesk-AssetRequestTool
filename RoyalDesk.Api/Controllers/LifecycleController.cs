@@ -18,6 +18,20 @@ public sealed class LifecycleController(ILifecycleService service) : ControllerB
     [HttpGet("departments")]
     public Task<IReadOnlyList<DepartmentDto>> Departments(CancellationToken ct) => service.GetDepartmentsAsync(ct);
 
+    [HttpGet("public-directory")]
+    public async Task<IReadOnlyList<PublicEmployeeDirectoryDto>> PublicDirectory(CancellationToken ct)
+        => (await service.GetEmployeesAsync(ct))
+            .Where(e => !e.EmploymentStatus.Equals("Inactive", StringComparison.OrdinalIgnoreCase))
+            .Select(e => new PublicEmployeeDirectoryDto
+            {
+                Name = $"{e.FirstName} {e.LastName}".Trim(),
+                Email = e.Email,
+                Branch = e.BranchName,
+                Department = e.DepartmentName
+            })
+            .OrderBy(e => e.Name)
+            .ToList();
+
     [HttpGet("employees")]
     public Task<IReadOnlyList<EmployeeDto>> Employees(CancellationToken ct) => service.GetEmployeesAsync(ct);
 
