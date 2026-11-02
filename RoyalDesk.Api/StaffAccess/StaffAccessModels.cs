@@ -19,6 +19,12 @@ public sealed class StaffProfileDto
     public List<string> Pages { get; set; } = [];
 }
 
+public sealed class StaffSelectorDto
+{
+    public int Id { get; set; }
+    public string DisplayName { get; set; } = string.Empty;
+}
+
 public sealed class StaffSessionDto
 {
     public int StaffAccessId { get; set; }
