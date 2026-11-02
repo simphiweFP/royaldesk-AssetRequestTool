@@ -12,6 +12,7 @@
       <button [class.active]="section==='dashboard'" (click)="open('dashboard')"><span>▦</span> Dashboard</button>
       <button [class.active]="section==='request'" (click)="open('request')"><span>＋</span> Request Equipment</button>
       <button [class.active]="section==='tickets'" (click)="open('tickets')"><span>▤</span> IT Tickets</button>
+      <button [class.active]="section==='store'" (click)="open('store')"><span>▦</span> Store Room</button>
       <button [class.active]="section==='assets'" (click)="open('assets')"><span>▣</span> Asset Register</button>
       <button [class.active]="section==='employees'" (click)="open('employees')"><span>●</span> Employees</button>
       <button [class.active]="section==='assignments'" (click)="open('assignments')"><span>⇄</span> Assignments & Returns</button>
@@ -72,6 +73,7 @@
 
       <section *ngIf="section==='request'" class="embedded request-embedded"><app-asset-request /></section>
       <section *ngIf="section==='tickets'" class="page-section"><app-help-desk-tickets /></section>
+      <section *ngIf="section==='store'" class="page-section"><app-store-room /></section>
 
       <section *ngIf="section==='assets'" class="page-section">
         <div class="grid two operational-grid">
