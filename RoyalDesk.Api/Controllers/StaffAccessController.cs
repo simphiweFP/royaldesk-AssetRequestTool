@@ -16,8 +16,10 @@ public sealed class StaffAccessController(StaffAccessService service) : Controll
         => service.BootstrapAsync(dto, ct);
 
     [HttpGet("profiles/public")]
-    public Task<IReadOnlyList<StaffProfileDto>> PublicProfiles(CancellationToken ct)
-        => service.GetProfilesAsync(true, ct);
+    public async Task<IReadOnlyList<StaffSelectorDto>> PublicProfiles(CancellationToken ct)
+        => (await service.GetProfilesAsync(true, ct))
+            .Select(x => new StaffSelectorDto { Id = x.Id, DisplayName = x.DisplayName })
+            .ToList();
 
     [HttpPost("unlock")]
     public async Task<ActionResult<StaffSessionDto>> Unlock(UnlockStaffDto dto, CancellationToken ct)
