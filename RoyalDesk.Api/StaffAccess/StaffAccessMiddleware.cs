@@ -28,7 +28,10 @@ public sealed class StaffAccessMiddleware(RequestDelegate next)
             context.Items["RoyalDeskStaffSession"] = session;
         }
 
-        var required = context.GetEndpoint()?.Metadata.GetOrderedMetadata<RequirePageAttribute>() ?? [];
+        var required = context.GetEndpoint()?.Metadata.GetOrderedMetadata<RequirePageAttribute>().Select(x => x.PageKey).ToList() ?? [];
+        var mapped = MapApiToPage(context.Request.Path, context.Request.Method);
+        if (mapped is not null) required.Add(mapped);
+
         if (required.Count > 0)
         {
             if (session is null)
@@ -38,7 +41,7 @@ public sealed class StaffAccessMiddleware(RequestDelegate next)
                 return;
             }
 
-            if (required.Any(r => !session.Pages.Contains(r.PageKey, StringComparer.OrdinalIgnoreCase)))
+            if (required.Distinct(StringComparer.OrdinalIgnoreCase).Any(page => !session.Pages.Contains(page, StringComparer.OrdinalIgnoreCase)))
             {
                 context.Response.StatusCode = StatusCodes.Status403Forbidden;
                 await context.Response.WriteAsJsonAsync(new { detail = "You do not have permission to access this RoyalDesk area." }, context.RequestAborted);
@@ -47,5 +50,23 @@ public sealed class StaffAccessMiddleware(RequestDelegate next)
         }
 
         await next(context);
+    }
+
+    private static string? MapApiToPage(PathString path, string method)
+    {
+        var p = path.Value?.ToLowerInvariant() ?? string.Empty;
+        if (p.StartsWith("/api/helpdesk")) return "tickets";
+        if (p.StartsWith("/api/store-room")) return "store";
+        if (p.StartsWith("/api/business-value")) return "business-value";
+        if (!p.StartsWith("/api/lifecycle")) return null;
+
+        if (p.Contains("/dashboard")) return "dashboard";
+        if (p.Contains("/assignments")) return "assignments";
+        if (p.Contains("/write-offs") || p.Contains("/imports/e-waste")) return "writeoffs";
+        if (p.Contains("/tasks/") && p.Contains("offboarding")) return "offboarding";
+        if (p.Contains("/tasks/") && p.Contains("onboarding")) return "onboarding";
+        if (p.Contains("/assets")) return "assets";
+        if (p.Contains("/employees")) return method.Equals("GET", StringComparison.OrdinalIgnoreCase) ? null : "employees";
+        return null;
     }
 }
