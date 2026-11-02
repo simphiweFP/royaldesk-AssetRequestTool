@@ -15,14 +15,14 @@
     <article class="ticket-card">
       <div class="ticket-card-heading">
         <div class="heading-symbol">▤</div>
-        <div>
-          <h2>IT Ticket Queue</h2>
-          <p>Assign requests, start investigations and keep ownership visible.</p>
-        </div>
+        <div><h2>IT Ticket Queue</h2><p>Problems, equipment requests and IT services stay in one operational queue, clearly separated by type.</p></div>
       </div>
 
       <div class="ticket-toolbar">
-        <input [(ngModel)]="search" placeholder="Search ticket, requester, branch, issue or technician…" />
+        <input [(ngModel)]="search" placeholder="Search ticket, requester, branch, category or technician…" />
+        <select [(ngModel)]="requestTypeFilter">
+          <option *ngFor="let type of requestTypes" [value]="type">{{ type==='All' ? 'All Request Types' : typeLabel(type) }}</option>
+        </select>
         <select [(ngModel)]="statusFilter" (ngModelChange)="load()">
           <option *ngFor="let status of statuses" [value]="status">{{ status }}</option>
         </select>
@@ -33,10 +33,11 @@
 
       <div class="ticket-table-wrap" *ngIf="!loading">
         <table>
-          <thead><tr><th>Ticket</th><th>Requester</th><th>Issue</th><th>Assigned Technician</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
+          <thead><tr><th>Ticket</th><th>Type</th><th>Requester</th><th>Request</th><th>Assigned Technician</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
           <tbody>
             <tr *ngFor="let ticket of filteredTickets" [class.selected]="selected?.id===ticket.id" (click)="select(ticket)">
               <td><strong>{{ ticket.ticketNumber }}</strong><small>{{ ticket.branch }} · {{ ticket.department }}</small></td>
+              <td><span class="status-pill">{{ typeLabel(ticket.requestType) }}</span></td>
               <td><strong>{{ ticket.requesterName }}</strong><small>{{ ticket.requesterEmail || 'No email supplied' }}</small></td>
               <td><strong>{{ ticket.itemType }}</strong><small>{{ ticket.reason }}</small></td>
               <td>{{ ticket.assignedToName || 'Unassigned' }}</td>
@@ -54,22 +55,21 @@
         </table>
 
         <div class="empty-state" *ngIf="filteredTickets.length===0">
-          <div class="empty-icon">▤</div>
-          <strong>No tickets in this view</strong>
-          <p>New IT requests will appear here as soon as they are submitted.</p>
+          <div class="empty-icon">▤</div><strong>No tickets in this view</strong><p>Adjust the request type or status filter, or wait for a new employee request.</p>
         </div>
       </div>
     </article>
 
     <div class="ticket-lower-grid" *ngIf="selected">
       <article class="ticket-card detail-card">
-        <div class="ticket-card-heading"><div class="heading-symbol">◎</div><div><h2>{{ selected.ticketNumber }}</h2><p>Current ownership and request details.</p></div></div>
+        <div class="ticket-card-heading"><div class="heading-symbol">◎</div><div><h2>{{ selected.ticketNumber }}</h2><p>{{ typeLabel(selected.requestType) }} · Current ownership and request details.</p></div></div>
         <div class="detail-grid">
+          <div><span>Request Type</span><strong>{{ typeLabel(selected.requestType) }}</strong></div>
           <div><span>Requester</span><strong>{{ selected.requesterName }}</strong></div>
           <div><span>Status</span><strong>{{ selected.status }}</strong></div>
           <div><span>Assigned Technician</span><strong>{{ selected.assignedToName || 'Unassigned' }}</strong></div>
           <div><span>Branch / Department</span><strong>{{ selected.branch }} · {{ selected.department }}</strong></div>
-          <div><span>Issue</span><strong>{{ selected.itemType }}</strong></div>
+          <div><span>{{ selected.requestType==='Equipment' ? 'Equipment' : selected.requestType==='Service' ? 'Service' : 'Problem Category' }}</span><strong>{{ selected.itemType }}</strong></div>
           <div><span>Requested</span><strong>{{ selected.requestedAtUtc | date:'medium' }}</strong></div>
         </div>
       </article>
@@ -88,7 +88,7 @@
 
     <div class="information-box">
       <div class="info-circle">i</div>
-      <div>Assigning a ticket records the IT employee responsible. If the issue cannot be resolved internally, the assigned technician can hand it over to Just ICT with the ticket context and troubleshooting already completed.<br />Remote access passwords are not stored in RoyalDesk.</div>
+      <div>Employees use a dedicated form for one task at a time. IT still receives every request in one controlled queue, with the request type clearly identified for reporting and workflow decisions.</div>
       <div class="tyre-decoration"></div>
     </div>
   </ng-container>
@@ -98,42 +98,20 @@
   <div class="modal-backdrop" *ngIf="showEscalation" (click)="closeEscalation()">
     <section class="escalation-modal" role="dialog" aria-modal="true" aria-labelledby="escalation-title" (click)="$event.stopPropagation()">
       <div class="modal-head">
-        <div>
-          <small>RoyalDesk · Third-Party Support</small>
-          <h2 id="escalation-title">Escalate to Just ICT</h2>
-          <p>{{ escalationTicket?.ticketNumber }} · {{ escalationTicket?.requesterName }}</p>
-        </div>
+        <div><small>RoyalDesk · Third-Party Support</small><h2 id="escalation-title">Escalate to Just ICT</h2><p>{{ escalationTicket?.ticketNumber }} · {{ escalationTicket?.requesterName }}</p></div>
         <button type="button" aria-label="Close" (click)="closeEscalation()">×</button>
       </div>
 
       <div class="escalation-grid">
-        <label>TeamViewer ID *
-          <input [(ngModel)]="escalationForm.teamViewerId" placeholder="Remote session ID" (ngModelChange)="refreshEscalationEmail()" />
-        </label>
-        <label>Issue Description *
-          <textarea [(ngModel)]="escalationForm.issueDescription"></textarea>
-        </label>
-        <label>Troubleshooting Completed *
-          <textarea [(ngModel)]="escalationForm.troubleshooting" placeholder="List what Royal Tyres IT already checked or tried" (ngModelChange)="refreshEscalationEmail()"></textarea>
-        </label>
-        <label>Additional Notes
-          <textarea [(ngModel)]="escalationForm.additionalNotes" placeholder="Optional handover notes" (ngModelChange)="refreshEscalationEmail()"></textarea>
-        </label>
-        <label class="email-editor">Email to support@justict.co.za *
-          <textarea [(ngModel)]="escalationForm.emailBody"></textarea>
-          <small>CC: itteam@royaltyres.co.za · You can edit this text before sending.</small>
-        </label>
+        <label>TeamViewer ID *<input [(ngModel)]="escalationForm.teamViewerId" placeholder="Remote session ID" (ngModelChange)="refreshEscalationEmail()" /></label>
+        <label>Issue Description *<textarea [(ngModel)]="escalationForm.issueDescription"></textarea></label>
+        <label>Troubleshooting Completed *<textarea [(ngModel)]="escalationForm.troubleshooting" placeholder="List what Royal Tyres IT already checked or tried" (ngModelChange)="refreshEscalationEmail()"></textarea></label>
+        <label>Additional Notes<textarea [(ngModel)]="escalationForm.additionalNotes" placeholder="Optional handover notes" (ngModelChange)="refreshEscalationEmail()"></textarea></label>
+        <label class="email-editor">Email to support@justict.co.za *<textarea [(ngModel)]="escalationForm.emailBody"></textarea><small>CC: itteam@royaltyres.co.za · You can edit this text before sending.</small></label>
       </div>
 
-      <div class="security-note">
-        <strong>Remote access security</strong>
-        <span>Only the TeamViewer ID is captured here. Do not store the TeamViewer password in RoyalDesk; provide it directly when the remote session starts.</span>
-      </div>
-
-      <div class="modal-actions">
-        <button type="button" class="secondary" (click)="closeEscalation()" [disabled]="escalating">Cancel</button>
-        <button type="button" class="primary-action" (click)="submitEscalation()" [disabled]="escalating">{{ escalating ? 'Sending…' : 'Send to Just ICT' }}</button>
-      </div>
+      <div class="security-note"><strong>Remote access security</strong><span>Only the TeamViewer ID is captured here. Do not store the TeamViewer password in RoyalDesk; provide it directly when the remote session starts.</span></div>
+      <div class="modal-actions"><button type="button" class="secondary" (click)="closeEscalation()" [disabled]="escalating">Cancel</button><button type="button" class="primary-action" (click)="submitEscalation()" [disabled]="escalating">{{ escalating ? 'Sending…' : 'Send to Just ICT' }}</button></div>
     </section>
   </div>
 </section>
