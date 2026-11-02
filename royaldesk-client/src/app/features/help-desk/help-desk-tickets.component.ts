@@ -18,11 +18,13 @@ export class HelpDeskTicketsComponent implements OnInit {
   private readonly justIct = inject(JustIctService);
 
   readonly statuses = ['All', 'New', 'Assigned', 'In Progress', 'Waiting for User', 'Waiting for Third Party', 'Escalated to Just ICT', 'Resolved', 'Closed'];
+  readonly requestTypes = ['All', 'Incident', 'Equipment', 'Service'];
   mode: 'team' | 'track' = 'team';
   tickets: HelpDeskTicket[] = [];
   history: TicketStatusHistory[] = [];
   selected?: HelpDeskTicket;
   statusFilter = 'All';
+  requestTypeFilter = 'All';
   search = '';
   loading = false;
   error = '';
@@ -35,15 +37,26 @@ export class HelpDeskTicketsComponent implements OnInit {
 
   get filteredTickets(): HelpDeskTicket[] {
     const q = this.search.trim().toLowerCase();
-    if (!q) return this.tickets;
-    return this.tickets.filter(t => [t.ticketNumber, t.requesterName, t.requesterEmail, t.branch, t.department, t.itemType, t.assignedToName, t.status]
-      .some(v => v?.toLowerCase().includes(q)));
+    return this.tickets.filter(t => {
+      const typeMatches = this.requestTypeFilter === 'All' || t.requestType === this.requestTypeFilter;
+      if (!typeMatches) return false;
+      if (!q) return true;
+      return [t.ticketNumber, t.requestType, t.requesterName, t.requesterEmail, t.branch, t.department, t.itemType, t.assignedToName, t.status]
+        .some(v => v?.toLowerCase().includes(q));
+    });
   }
 
   get newCount(): number { return this.tickets.filter(t => t.status === 'New').length; }
   get activeCount(): number { return this.tickets.filter(t => ['Assigned', 'In Progress'].includes(t.status)).length; }
   get waitingCount(): number { return this.tickets.filter(t => t.status.startsWith('Waiting') || t.status.startsWith('Escalated')).length; }
   get resolvedCount(): number { return this.tickets.filter(t => t.status === 'Resolved').length; }
+
+  typeLabel(type: string): string {
+    if (type === 'Incident') return 'Problem';
+    if (type === 'Service') return 'IT Service';
+    if (type === 'Equipment') return 'Equipment';
+    return type;
+  }
 
   load(): void {
     this.loading = true;
@@ -77,59 +90,29 @@ export class HelpDeskTicketsComponent implements OnInit {
   openEscalation(ticket: HelpDeskTicket): void {
     this.escalationTicket = ticket;
     this.escalationForm = {
-      teamViewerId: '',
-      issueDescription: ticket.reason,
-      troubleshooting: '',
-      additionalNotes: '',
+      teamViewerId: '', issueDescription: ticket.reason, troubleshooting: '', additionalNotes: '',
       emailBody: this.buildEscalationEmail(ticket, '', '', '')
     };
     this.showEscalation = true;
   }
 
-  closeEscalation(): void {
-    if (this.escalating) return;
-    this.showEscalation = false;
-    this.escalationTicket = undefined;
-  }
+  closeEscalation(): void { if (!this.escalating) { this.showEscalation = false; this.escalationTicket = undefined; } }
 
   refreshEscalationEmail(): void {
     if (!this.escalationTicket) return;
-    this.escalationForm.emailBody = this.buildEscalationEmail(
-      this.escalationTicket,
-      this.escalationForm.teamViewerId,
-      this.escalationForm.troubleshooting,
-      this.escalationForm.additionalNotes
-    );
+    this.escalationForm.emailBody = this.buildEscalationEmail(this.escalationTicket, this.escalationForm.teamViewerId, this.escalationForm.troubleshooting, this.escalationForm.additionalNotes);
   }
 
   submitEscalation(): void {
-    const ticket = this.escalationTicket;
-    const form = this.escalationForm;
+    const ticket = this.escalationTicket; const form = this.escalationForm;
     if (!ticket) return;
     if (!form.teamViewerId.trim() || !form.issueDescription.trim() || !form.troubleshooting.trim() || !form.emailBody.trim()) {
-      this.error = 'TeamViewer ID, issue description, troubleshooting and email text are required for Just ICT escalation.';
-      return;
+      this.error = 'TeamViewer ID, issue description, troubleshooting and email text are required for Just ICT escalation.'; return;
     }
-
-    this.escalating = true;
-    this.error = '';
-    this.justIct.escalate(ticket.id, {
-      teamViewerId: form.teamViewerId.trim(),
-      issueDescription: form.issueDescription.trim(),
-      troubleshooting: form.troubleshooting.trim(),
-      additionalNotes: form.additionalNotes.trim() || undefined,
-      emailBody: form.emailBody.trim()
-    }).subscribe({
-      next: () => {
-        this.escalating = false;
-        this.showEscalation = false;
-        this.escalationTicket = undefined;
-        this.reloadSelected(ticket.id);
-      },
-      error: e => {
-        this.escalating = false;
-        this.error = e?.error?.detail || e?.error || 'Could not escalate ticket to Just ICT.';
-      }
+    this.escalating = true; this.error = '';
+    this.justIct.escalate(ticket.id, { teamViewerId: form.teamViewerId.trim(), issueDescription: form.issueDescription.trim(), troubleshooting: form.troubleshooting.trim(), additionalNotes: form.additionalNotes.trim() || undefined, emailBody: form.emailBody.trim() }).subscribe({
+      next: () => { this.escalating = false; this.showEscalation = false; this.escalationTicket = undefined; this.reloadSelected(ticket.id); },
+      error: e => { this.escalating = false; this.error = e?.error?.detail || e?.error || 'Could not escalate ticket to Just ICT.'; }
     });
   }
 
@@ -140,16 +123,10 @@ export class HelpDeskTicketsComponent implements OnInit {
   }
 
   private buildEscalationEmail(ticket: HelpDeskTicket, remoteId: string, troubleshooting: string, notes: string): string {
-    return `RoyalDesk IT Support Escalation\n\nTicket: ${ticket.ticketNumber}\nEmployee: ${ticket.requesterName}\nBranch: ${ticket.branch}\nDepartment: ${ticket.department}\nCategory: ${ticket.itemType}\n\nIssue:\n${ticket.reason}\n\nRoyal Tyres IT troubleshooting completed:\n${troubleshooting || '[Enter troubleshooting completed]'}\n\nTeamViewer ID:\n${remoteId || '[Enter TeamViewer ID]'}${notes ? `\n\nAdditional Notes:\n${notes}` : ''}\n\nPlease assist with the above issue.\n\nRoyal Tyres IT`;
+    return `RoyalDesk IT Support Escalation\n\nTicket: ${ticket.ticketNumber}\nType: ${this.typeLabel(ticket.requestType)}\nEmployee: ${ticket.requesterName}\nBranch: ${ticket.branch}\nDepartment: ${ticket.department}\nCategory: ${ticket.itemType}\n\nIssue:\n${ticket.reason}\n\nRoyal Tyres IT troubleshooting completed:\n${troubleshooting || '[Enter troubleshooting completed]'}\n\nTeamViewer ID:\n${remoteId || '[Enter TeamViewer ID]'}${notes ? `\n\nAdditional Notes:\n${notes}` : ''}\n\nPlease assist with the above issue.\n\nRoyal Tyres IT`;
   }
 
   private reloadSelected(id: number): void {
-    this.api.ticket(id).subscribe({
-      next: ticket => {
-        this.selected = ticket;
-        this.load();
-        this.api.history(id).subscribe({ next: history => this.history = history });
-      }
-    });
+    this.api.ticket(id).subscribe({ next: ticket => { this.selected = ticket; this.load(); this.api.history(id).subscribe({ next: history => this.history = history }); } });
   }
 }
