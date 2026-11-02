@@ -9,6 +9,7 @@ using RoyalDesk.Api.Logging;
 using RoyalDesk.Api.Migrations;
 using RoyalDesk.Api.Repositories;
 using RoyalDesk.Api.Services;
+using RoyalDesk.Api.StoreRoom;
 using RoyalDesk.Api.Validation;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -57,6 +58,7 @@ builder.Services.AddScoped<HelpDeskService>();
 builder.Services.AddScoped<JustIctEscalationRepository>();
 builder.Services.AddScoped<JustIctEscalationService>();
 builder.Services.AddScoped<PublicTrackingService>();
+builder.Services.AddScoped<StoreRoomService>();
 builder.Services.AddScoped<IEmailOutbox, EmailOutbox>();
 builder.Services.AddScoped<TicketNotificationService>();
 builder.Services.AddHostedService<EmailOutboxWorker>();
