@@ -14,7 +14,7 @@ public sealed class HelpDeskRepository(IDbConnectionFactory connectionFactory) :
     public async Task<IReadOnlyList<HelpDeskTicketDto>> GetTicketsAsync(string? status, CancellationToken ct = default)
     {
         const string sql = """
-            SELECT Id, TicketNumber, RequesterName, RequesterEmail, Branch, Department,
+            SELECT Id, TicketNumber, RequestType, RequesterName, RequesterEmail, Branch, Department,
                    ItemType, Quantity, Reason, Status, AssignedToId, AssignedToName,
                    AssignedAtUtc, StartedAtUtc, ResolvedAtUtc, RequestedAtUtc, LastUpdatedAtUtc
             FROM AssetRequests
@@ -32,7 +32,7 @@ public sealed class HelpDeskRepository(IDbConnectionFactory connectionFactory) :
     public async Task<HelpDeskTicketDto?> GetTicketAsync(int id, CancellationToken ct = default)
     {
         const string sql = """
-            SELECT Id, TicketNumber, RequesterName, RequesterEmail, Branch, Department,
+            SELECT Id, TicketNumber, RequestType, RequesterName, RequesterEmail, Branch, Department,
                    ItemType, Quantity, Reason, Status, AssignedToId, AssignedToName,
                    AssignedAtUtc, StartedAtUtc, ResolvedAtUtc, RequestedAtUtc, LastUpdatedAtUtc
             FROM AssetRequests WHERE Id = @Id;
