@@ -77,7 +77,8 @@ public sealed class HelpDeskRepository(IDbConnectionFactory connectionFactory) :
         const string sql = """
             SELECT Id, DisplayName, Email, Username, Role, IsActive
             FROM ITTeamMembers
-            WHERE lower(Username) = lower(@Username) AND IsActive = 1
+            WHERE (lower(Username) = lower(@Username) OR lower(DisplayName) = lower(@Username))
+              AND IsActive = 1
             LIMIT 1;
             """;
 
