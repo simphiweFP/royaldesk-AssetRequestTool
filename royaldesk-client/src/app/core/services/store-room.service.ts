@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { StoreItem, StoreMovement } from '../models/store-room.model';
@@ -7,14 +7,13 @@ import { StoreItem, StoreMovement } from '../models/store-room.model';
 export class StoreRoomService {
   private readonly http = inject(HttpClient);
   private readonly base = 'https://localhost:7080/api/store-room';
-  private readonly headers = new HttpHeaders({ Authorization: 'Basic ' + btoa('demo.user:RoyalDesk123!') });
 
   items(): Observable<StoreItem[]> {
-    return this.http.get<StoreItem[]>(`${this.base}/items`, { headers: this.headers });
+    return this.http.get<StoreItem[]>(`${this.base}/items`, { withCredentials: true });
   }
 
   movements(): Observable<StoreMovement[]> {
-    return this.http.get<StoreMovement[]>(`${this.base}/movements`, { headers: this.headers });
+    return this.http.get<StoreMovement[]>(`${this.base}/movements`, { withCredentials: true });
   }
 
   createItem(payload: {
@@ -26,7 +25,7 @@ export class StoreRoomService {
     minimumStock: number;
     isAssetTracked: boolean;
   }): Observable<StoreItem> {
-    return this.http.post<StoreItem>(`${this.base}/items`, payload, { headers: this.headers });
+    return this.http.post<StoreItem>(`${this.base}/items`, payload, { withCredentials: true });
   }
 
   move(itemId: number, payload: {
@@ -36,6 +35,6 @@ export class StoreRoomService {
     reference?: string | null;
     notes?: string | null;
   }): Observable<void> {
-    return this.http.post<void>(`${this.base}/items/${itemId}/movements`, payload, { headers: this.headers });
+    return this.http.post<void>(`${this.base}/items/${itemId}/movements`, payload, { withCredentials: true });
   }
 }
