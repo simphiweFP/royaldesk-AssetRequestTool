@@ -4,27 +4,28 @@
       <img src="assets/images/royal-tyres-logo-final.png" alt="Royal Tyres" class="sidebar-logo" />
       <div class="sidebar-app-name">
         <strong>RoyalDesk</strong>
-        <span>Employee & Asset Lifecycle</span>
+        <span>Staff Portal</span>
       </div>
     </div>
 
     <nav class="sidebar-nav" aria-label="RoyalDesk navigation">
-      <button [class.active]="section==='dashboard'" (click)="open('dashboard')"><span>▦</span> Dashboard</button>
-      <button [class.active]="section==='request'" (click)="open('request')"><span>＋</span> Request Equipment</button>
-      <button [class.active]="section==='tickets'" (click)="open('tickets')"><span>▤</span> IT Tickets</button>
-      <button [class.active]="section==='store'" (click)="open('store')"><span>▦</span> Store Room</button>
-      <button [class.active]="section==='assets'" (click)="open('assets')"><span>▣</span> Asset Register</button>
-      <button [class.active]="section==='employees'" (click)="open('employees')"><span>●</span> Employees</button>
-      <button [class.active]="section==='assignments'" (click)="open('assignments')"><span>⇄</span> Assignments & Returns</button>
-      <button [class.active]="section==='onboarding'" (click)="open('onboarding'); loadTasks('Onboarding')"><span>✓</span> Onboarding</button>
-      <button [class.active]="section==='offboarding'" (click)="open('offboarding'); loadTasks('Offboarding')"><span>↩</span> Offboarding</button>
-      <button [class.active]="section==='writeoffs'" (click)="open('writeoffs')"><span>♻</span> Write-Offs & E-Waste</button>
-      <button [class.active]="section==='reports'" (click)="open('reports')"><span>▥</span> Business Value</button>
+      <button *ngIf="can('dashboard')" [class.active]="section==='dashboard'" (click)="open('dashboard')"><span>▦</span> Dashboard</button>
+      <button *ngIf="can('tickets')" [class.active]="section==='tickets'" (click)="open('tickets')"><span>▤</span> IT Tickets</button>
+      <button *ngIf="can('store')" [class.active]="section==='store'" (click)="open('store')"><span>▦</span> Store Room</button>
+      <button *ngIf="can('assets')" [class.active]="section==='assets'" (click)="open('assets')"><span>▣</span> Asset Register</button>
+      <button *ngIf="can('employees')" [class.active]="section==='employees'" (click)="open('employees')"><span>●</span> Employees</button>
+      <button *ngIf="can('assignments')" [class.active]="section==='assignments'" (click)="open('assignments')"><span>⇄</span> Assignments & Returns</button>
+      <button *ngIf="can('onboarding')" [class.active]="section==='onboarding'" (click)="open('onboarding'); loadTasks('Onboarding')"><span>✓</span> Onboarding</button>
+      <button *ngIf="can('offboarding')" [class.active]="section==='offboarding'" (click)="open('offboarding'); loadTasks('Offboarding')"><span>↩</span> Offboarding</button>
+      <button *ngIf="can('writeoffs')" [class.active]="section==='writeoffs'" (click)="open('writeoffs')"><span>♻</span> Write-Offs & E-Waste</button>
+      <button *ngIf="can('business-value')" [class.active]="section==='reports'" (click)="open('reports')"><span>▥</span> Business Value</button>
+      <button *ngIf="can('access-management')" [class.active]="section==='access-management'" (click)="open('access-management')"><span>⚿</span> Access Management</button>
     </nav>
 
     <div class="sidebar-user">
-      <span class="avatar">DU</span>
-      <div><strong>demo.user</strong><small>Administrator demo</small></div>
+      <span class="avatar">IT</span>
+      <div><strong>{{ staffName }}</strong><small>RoyalDesk staff</small></div>
+      <button class="lock-button" type="button" (click)="lock()">Lock</button>
     </div>
   </aside>
 
@@ -33,12 +34,12 @@
       <div class="header-brand">
         <img src="assets/images/royal-tyres-logo-final.png" alt="Royal Tyres" class="header-logo" />
         <span class="brand-divider"></span>
-        <div><strong>RoyalDesk</strong><span>Employee & Asset Lifecycle</span></div>
+        <div><strong>RoyalDesk</strong><span>Staff Portal</span></div>
       </div>
-      <div class="header-user"><span class="avatar">DU</span><span>demo.user</span><span class="chevron">⌄</span></div>
+      <div class="header-user"><span class="avatar">IT</span><span>{{ staffName }}</span></div>
     </header>
 
-    <section class="page-heading" *ngIf="section!=='request'">
+    <section class="page-heading">
       <div class="shared-hero-copy">
         <h1><span class="royal">Royal</span><span class="desk">Desk</span></h1>
         <h2>{{ pageTitle }}</h2>
@@ -71,7 +72,6 @@
         </div>
       </section>
 
-      <section *ngIf="section==='request'" class="embedded request-embedded"><app-asset-request /></section>
       <section *ngIf="section==='tickets'" class="page-section"><app-help-desk-tickets /></section>
       <section *ngIf="section==='store'" class="page-section"><app-store-room /></section>
 
@@ -98,11 +98,7 @@
                 <div class="table-empty" *ngIf="filteredAssets.length===0"><span class="table-empty-icon">▣</span><strong>No assets registered yet</strong><p>Register an asset using the form on the left. It will appear here once saved.</p></div>
               </div>
             </article>
-            <div class="information-box lifecycle-information-box">
-              <div class="info-circle">i</div>
-              <div>RoyalDesk keeps requests, assets, employees and lifecycle actions in one controlled workflow.<br />Use the relevant section to complete and track each action.</div>
-              <div class="tyre-decoration"></div>
-            </div>
+            <div class="information-box lifecycle-information-box"><div class="info-circle">i</div><div>RoyalDesk keeps requests, assets, employees and lifecycle actions in one controlled workflow.</div><div class="tyre-decoration"></div></div>
           </div>
         </div>
       </section>
@@ -112,9 +108,9 @@
           <article class="card form-card balanced-card">
             <div class="card-heading"><div class="heading-symbol">●</div><div><h2>Add Employee</h2><p>Create the employee record used across RoyalDesk workflows.</p></div></div>
             <div class="form-grid">
-              <label>Employee #<input [(ngModel)]="employeeForm.employeeNumber" placeholder="Employee number"></label><label>First name<input [(ngModel)]="employeeForm.firstName"></label>
-              <label>Last name<input [(ngModel)]="employeeForm.lastName"></label><label>Email<input [(ngModel)]="employeeForm.email" type="email"></label>
-              <label>Username<input [(ngModel)]="employeeForm.username"></label><label>Job title<input [(ngModel)]="employeeForm.jobTitle"></label>
+              <label>First name<input [(ngModel)]="employeeForm.firstName"></label><label>Last name<input [(ngModel)]="employeeForm.lastName"></label>
+              <label>Email<input [(ngModel)]="employeeForm.email" type="email"></label><label>Username<input [(ngModel)]="employeeForm.username"></label>
+              <label>Job title<input [(ngModel)]="employeeForm.jobTitle"></label>
               <label>Branch<select [(ngModel)]="employeeForm.branchId"><option [ngValue]="undefined">Select branch</option><option *ngFor="let b of branches" [ngValue]="b.id">{{b.name}}</option></select></label><label>Department<select [(ngModel)]="employeeForm.departmentId"><option [ngValue]="undefined">Select department</option><option *ngFor="let d of departments" [ngValue]="d.id">{{d.name}}</option></select></label>
             </div>
             <button class="primary" (click)="createEmployee()">➤ &nbsp; Add Employee</button>
@@ -124,15 +120,10 @@
             <article class="card table-card balanced-card">
               <div class="card-heading"><div class="heading-symbol">▤</div><div><h2>Employees</h2><p>People currently registered in the lifecycle system.</p></div></div>
               <div class="table-wrap">
-                <table><thead><tr><th>Employee</th><th>Department</th><th>Branch</th><th>Status</th></tr></thead><tbody><tr *ngFor="let e of employees"><td><strong>{{e.firstName}} {{e.lastName}}</strong><small>{{e.employeeNumber}} · {{e.email}}</small></td><td>{{e.departmentName || '—'}}</td><td>{{e.branchName || '—'}}</td><td><span class="pill">{{e.employmentStatus}}</span></td></tr></tbody></table>
+                <table><thead><tr><th>Employee</th><th>Department</th><th>Branch</th><th>Status</th></tr></thead><tbody><tr *ngFor="let e of employees"><td><strong>{{e.firstName}} {{e.lastName}}</strong><small>{{e.email || 'No email'}}</small></td><td>{{e.departmentName || '—'}}</td><td>{{e.branchName || '—'}}</td><td><span class="pill">{{e.employmentStatus}}</span></td></tr></tbody></table>
                 <div class="table-empty" *ngIf="employees.length===0"><span class="table-empty-icon">●</span><strong>No employees registered yet</strong><p>Add an employee using the form on the left. Their record will appear here.</p></div>
               </div>
             </article>
-            <div class="information-box lifecycle-information-box">
-              <div class="info-circle">i</div>
-              <div>RoyalDesk keeps employee records and asset lifecycle actions in one controlled workflow.<br />Use this view to review and track registered employees.</div>
-              <div class="tyre-decoration"></div>
-            </div>
           </div>
         </div>
       </section>
@@ -150,11 +141,6 @@
             <div class="table-empty" *ngIf="assignments.length===0"><span class="table-empty-icon">⇄</span><strong>No assignment history yet</strong><p>Assign available equipment above. Assignment, acceptance and return history will be shown here.</p></div>
           </div>
         </article>
-        <div class="information-box lifecycle-information-box full-view-info">
-          <div class="info-circle">i</div>
-          <div>Assignment history records equipment acceptance, returns and accountability.<br />Use the table above to review each asset handover.</div>
-          <div class="tyre-decoration"></div>
-        </div>
       </section>
 
       <section *ngIf="section==='onboarding' || section==='offboarding'" class="page-section">
@@ -179,20 +165,16 @@
             <div class="table-empty" *ngIf="writeOffs.length===0"><span class="table-empty-icon">♻</span><strong>No write-off requests yet</strong><p>Submit a write-off request above. Approval and disposal progress will appear here.</p></div>
           </div>
         </article>
-        <div class="information-box lifecycle-information-box full-view-info">
-          <div class="info-circle">i</div>
-          <div>Write-off and e-waste actions stay visible through approval and disposal.<br />Use the register above to track each request.</div>
-          <div class="tyre-decoration"></div>
-        </div>
       </section>
 
       <section *ngIf="section==='reports'" class="page-section"><app-business-value /></section>
+      <section *ngIf="section==='access-management'" class="page-section"><app-access-management /></section>
     </ng-container>
 
     <footer class="shared-footer">
       <div class="shared-footer-inner">
         <img src="assets/images/royal-tyres-logo-footer-final.png" alt="Royal Tyres" />
-        <div class="shared-footer-middle"><strong>RoyalDesk &nbsp;|&nbsp; Employee & Asset Lifecycle</strong><span>Your trusted tyre workshop since 1939.</span></div>
+        <div class="shared-footer-middle"><strong>RoyalDesk &nbsp;|&nbsp; Staff Portal</strong><span>Your trusted tyre workshop since 1939.</span></div>
         <div class="shared-footer-right"><div>Privacy Policy &nbsp;|&nbsp; Cookie Notice &nbsp;|&nbsp; Contact Us</div><span>© 2026 Royal Tyres. All rights reserved.</span></div>
       </div>
     </footer>
