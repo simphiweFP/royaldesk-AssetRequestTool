@@ -1,0 +1,42 @@
+<section class="value-page">
+  <div class="value-loading" *ngIf="loading">Loading business value…</div>
+  <div class="value-error" *ngIf="error">{{ error }}</div>
+
+  <ng-container *ngIf="data && !loading">
+    <div class="value-metrics">
+      <article><span>Total Tickets</span><strong>{{data.totalTickets}}</strong><small>{{data.openTickets}} currently open</small></article>
+      <article><span>Resolved</span><strong>{{data.resolvedTickets}}</strong><small>{{data.escalatedTickets}} escalated externally</small></article>
+      <article><span>Avg Response</span><strong>{{minutes(data.averageResponseMinutes)}}</strong><small>Request to assignment</small></article>
+      <article><span>Avg Resolution</span><strong>{{minutes(data.averageResolutionMinutes)}}</strong><small>Request to resolved</small></article>
+      <article><span>Store Available</span><strong>{{data.totalStoreUnits - data.reservedStoreUnits}}</strong><small>{{data.lowStockItems}} low-stock item(s)</small></article>
+      <article><span>Reuse Opportunity</span><strong>{{data.estimatedReuseValue | currency:'ZAR':'symbol-narrow':'1.0-0'}}</strong><small>{{data.availableAssets}} assets available</small></article>
+    </div>
+
+    <div class="value-grid">
+      <article class="value-card">
+        <div class="value-heading"><div><h2>Ticket Demand</h2><p>Where IT support demand is coming from.</p></div></div>
+        <div class="breakdown-list"><div *ngFor="let item of data.ticketsByCategory"><span>{{item.name}}</span><strong>{{item.count}}</strong></div><div class="empty" *ngIf="data.ticketsByCategory.length===0">No ticket data yet.</div></div>
+      </article>
+
+      <article class="value-card">
+        <div class="value-heading"><div><h2>Ticket Status</h2><p>Current service desk position.</p></div></div>
+        <div class="breakdown-list"><div *ngFor="let item of data.ticketsByStatus"><span>{{item.name}}</span><strong>{{item.count}}</strong></div><div class="empty" *ngIf="data.ticketsByStatus.length===0">No status data yet.</div></div>
+      </article>
+
+      <article class="value-card wide">
+        <div class="value-heading"><div><h2>IT Team Workload</h2><p>Ownership and completed work by technician.</p></div></div>
+        <div class="table-wrap"><table><thead><tr><th>Technician</th><th>Assigned</th><th>Active</th><th>Resolved</th></tr></thead><tbody><tr *ngFor="let item of data.technicianWorkload"><td>{{item.technicianName}}</td><td>{{item.assigned}}</td><td>{{item.active}}</td><td>{{item.resolved}}</td></tr></tbody></table><div class="empty" *ngIf="data.technicianWorkload.length===0">No technician workload data yet.</div></div>
+      </article>
+
+      <article class="value-card">
+        <div class="value-heading"><div><h2>Store Activity</h2><p>How IT stock is being moved and used.</p></div></div>
+        <div class="breakdown-list"><div *ngFor="let item of data.storeMovementsByType"><span>{{item.name}}</span><strong>{{item.count}}</strong></div><div class="empty" *ngIf="data.storeMovementsByType.length===0">No store movements yet.</div></div>
+      </article>
+
+      <article class="value-card">
+        <div class="value-heading"><div><h2>Asset & Stock Value</h2><p>Operational value available before new purchasing.</p></div></div>
+        <div class="value-story"><div><span>Tracked assets</span><strong>{{data.totalAssets}}</strong></div><div><span>Available asset value</span><strong>{{data.availableAssetValue | currency:'ZAR':'symbol-narrow':'1.0-0'}}</strong></div><div><span>Store units issued</span><strong>{{data.storeUnitsIssued}}</strong></div><div><span>Reserved store units</span><strong>{{data.reservedStoreUnits}}</strong></div></div>
+      </article>
+    </div>
+  </ng-container>
+</section>
