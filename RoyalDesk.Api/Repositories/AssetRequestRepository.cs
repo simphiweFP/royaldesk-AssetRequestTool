@@ -10,9 +10,9 @@ public sealed class AssetRequestRepository(IDbConnectionFactory connectionFactor
     {
         const string insertSql = """
             INSERT INTO AssetRequests
-                (TicketNumber, RequesterName, RequesterEmail, TrackingPinHash, Branch, Department, ItemType, Quantity, Reason, Status, RequestedBy, RequestedAtUtc)
+                (TicketNumber, RequestType, RequesterName, RequesterEmail, TrackingPinHash, Branch, Department, ItemType, Quantity, Reason, Status, RequestedBy, RequestedAtUtc)
             VALUES
-                (NULL, @RequesterName, @RequesterEmail, @TrackingPinHash, @Branch, @Department, @ItemType, @Quantity, @Reason, @Status, @RequestedBy, @RequestedAtUtc);
+                (NULL, @RequestType, @RequesterName, @RequesterEmail, @TrackingPinHash, @Branch, @Department, @ItemType, @Quantity, @Reason, @Status, @RequestedBy, @RequestedAtUtc);
             SELECT last_insert_rowid();
             """;
 
@@ -42,7 +42,7 @@ public sealed class AssetRequestRepository(IDbConnectionFactory connectionFactor
             INSERT INTO TicketStatusHistory
                 (TicketId, FromStatus, ToStatus, ChangedBy, ChangedByName, Comment, PublicVisible, ChangedAtUtc)
             VALUES
-                (@TicketId, NULL, 'New', @ChangedBy, @ChangedByName, 'Ticket created', 1, @ChangedAtUtc);
+                (@TicketId, NULL, 'New', @ChangedBy, @ChangedByName, @Comment, 1, @ChangedAtUtc);
             """;
 
         await connection.ExecuteAsync(new CommandDefinition(
@@ -52,6 +52,7 @@ public sealed class AssetRequestRepository(IDbConnectionFactory connectionFactor
                 TicketId = id,
                 ChangedBy = request.RequestedBy,
                 ChangedByName = request.RequesterName,
+                Comment = $"{request.RequestType} request created",
                 ChangedAtUtc = request.RequestedAtUtc
             },
             transaction,
