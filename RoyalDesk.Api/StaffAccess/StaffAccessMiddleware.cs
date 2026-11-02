@@ -66,6 +66,7 @@ public sealed class StaffAccessMiddleware(RequestDelegate next)
         if (p.StartsWith("/api/business-value")) return "business-value";
         if (!p.StartsWith("/api/lifecycle")) return null;
 
+        if (p.Contains("/public-directory") || p.Contains("/branches") || p.Contains("/departments")) return null;
         if (p.Contains("/dashboard")) return "dashboard";
         if (p.Contains("/asset-requests/")) return "tickets";
         if (p.StartsWith("/api/lifecycle/tasks/")) return "onboarding|offboarding";
@@ -74,7 +75,9 @@ public sealed class StaffAccessMiddleware(RequestDelegate next)
         if (p.Contains("/tasks/") && p.Contains("offboarding")) return "offboarding";
         if (p.Contains("/tasks/") && p.Contains("onboarding")) return "onboarding";
         if (p.Contains("/assets")) return "assets";
-        if (p.Contains("/employees")) return method.Equals("GET", StringComparison.OrdinalIgnoreCase) ? null : "employees";
+        if (p.Contains("/employees")) return method.Equals("GET", StringComparison.OrdinalIgnoreCase)
+            ? "employees|assignments|onboarding|offboarding"
+            : "employees";
         return null;
     }
 }
