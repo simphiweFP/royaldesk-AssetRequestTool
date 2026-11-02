@@ -4,13 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { AssetRequestComponent } from '../asset-request/asset-request.component';
 import { HelpDeskTicketsComponent } from '../help-desk/help-desk-tickets.component';
+import { StoreRoomComponent } from '../store-room/store-room.component';
 import { Asset, Assignment, Branch, Dashboard, Department, Employee, LifecycleTask, WriteOff } from '../../core/models/lifecycle.model';
 import { LifecycleService } from '../../core/services/lifecycle.service';
 
 @Component({
   selector: 'app-lifecycle',
   standalone: true,
-  imports: [CommonModule, FormsModule, AssetRequestComponent, HelpDeskTicketsComponent],
+  imports: [CommonModule, FormsModule, AssetRequestComponent, HelpDeskTicketsComponent, StoreRoomComponent],
   templateUrl: './lifecycle.component.html',
   styleUrl: './lifecycle.component.scss'
 })
@@ -44,6 +45,7 @@ export class LifecycleComponent implements OnInit {
       dashboard: 'Operations Dashboard',
       request: 'Request Equipment',
       tickets: 'IT Service Desk',
+      store: 'Store Room',
       assets: 'Asset Register',
       employees: 'Employees',
       assignments: 'Assignments & Returns',
@@ -60,6 +62,7 @@ export class LifecycleComponent implements OnInit {
       dashboard: 'A clear view of company assets, people and lifecycle activity.',
       request: 'Request the IT equipment you need to keep Royal Tyres moving.',
       tickets: 'Own, investigate and resolve IT requests with clear accountability.',
+      store: 'Control IT stock, reservations and issues with ticket-linked traceability.',
       assets: 'Register, search and manage company equipment in one place.',
       employees: 'Maintain employee records used across the asset lifecycle.',
       assignments: 'Assign equipment, capture acceptance and manage returns.',
