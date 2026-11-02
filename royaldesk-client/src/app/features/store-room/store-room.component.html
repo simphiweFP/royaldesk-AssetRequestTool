@@ -1,0 +1,79 @@
+<section class="store-page">
+  <div class="store-metrics">
+    <article><span>Total Units</span><strong>{{ totalUnits }}</strong><small>Physical stock on hand</small></article>
+    <article><span>Available</span><strong>{{ availableUnits }}</strong><small>Ready to issue</small></article>
+    <article><span>Reserved</span><strong>{{ reservedUnits }}</strong><small>Linked to planned work</small></article>
+    <article><span>Low Stock</span><strong>{{ lowStockCount }}</strong><small>At or below minimum level</small></article>
+  </div>
+
+  <div class="store-grid">
+    <article class="store-card form-card">
+      <div class="card-heading"><div class="heading-symbol">▦</div><div><h2>Add Store Item</h2><p>Register consumables and IT stock held in the store room.</p></div></div>
+      <div class="form-grid">
+        <label>Item name<input [(ngModel)]="itemForm.name" placeholder="e.g. HDMI Cable"></label>
+        <label>Category<select [(ngModel)]="itemForm.category"><option>Peripheral</option><option>Cable</option><option>Accessory</option><option>Networking</option><option>Printer</option><option>Hardware</option><option>Other</option></select></label>
+        <label>SKU / Code<input [(ngModel)]="itemForm.sku" placeholder="Optional"></label>
+        <label>Location<input [(ngModel)]="itemForm.location" placeholder="IT Store"></label>
+        <label>Opening quantity<input type="number" min="0" [(ngModel)]="itemForm.openingQuantity"></label>
+        <label>Minimum stock<input type="number" min="0" [(ngModel)]="itemForm.minimumStock"></label>
+        <label class="check"><input type="checkbox" [(ngModel)]="itemForm.isAssetTracked"> Asset tracked item</label>
+      </div>
+      <button class="primary" (click)="createItem()">➤ &nbsp; Add Store Item</button>
+    </article>
+
+    <article class="store-card inventory-card">
+      <div class="card-heading"><div class="heading-symbol">▤</div><div><h2>Store Inventory</h2><p>Current quantities, reservations and low-stock visibility.</p></div></div>
+      <input class="search" [(ngModel)]="search" placeholder="Search item, category, code or location…">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Item</th><th>On Hand</th><th>Reserved</th><th>Available</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let item of filteredItems" (click)="selectItem(item)" [class.selected]="selectedItemId===item.id">
+              <td><strong>{{ item.name }}</strong><small>{{ item.category }} · {{ item.sku || 'No code' }} · {{ item.location || 'No location' }}</small></td>
+              <td>{{ item.quantityOnHand }}</td>
+              <td>{{ item.reservedQuantity }}</td>
+              <td>{{ item.availableQuantity }}</td>
+              <td><span class="pill" [class.low]="item.stockStatus==='Low Stock'">{{ item.stockStatus }}</span></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="empty-state" *ngIf="filteredItems.length===0"><span>▦</span><strong>No store items yet</strong><p>Add the first item using the form on the left.</p></div>
+      </div>
+    </article>
+  </div>
+
+  <div class="store-grid lower-grid">
+    <article class="store-card movement-card">
+      <div class="card-heading"><div class="heading-symbol">⇄</div><div><h2>Record Stock Movement</h2><p>Select an inventory row, then record stock in, reserve, issue, return or write-off.</p></div></div>
+      <div class="form-grid">
+        <label>Movement<select [(ngModel)]="movementForm.movementType"><option *ngFor="let type of movementTypes">{{ type }}</option></select></label>
+        <label>Quantity<input type="number" min="1" [(ngModel)]="movementForm.quantity"></label>
+        <label>Ticket ID <small>(Optional)</small><input type="number" min="1" [(ngModel)]="movementForm.ticketId" placeholder="Links movement to IT ticket"></label>
+        <label>Reference<input [(ngModel)]="movementForm.reference" placeholder="PO, delivery, employee or other reference"></label>
+        <label class="wide">Notes<textarea [(ngModel)]="movementForm.notes" placeholder="Movement notes"></textarea></label>
+      </div>
+      <button class="primary" [disabled]="!selectedItemId" (click)="applyMovement()">➤ &nbsp; Record Movement</button>
+      <p class="selection-note">{{ selectedItemId ? 'Selected inventory item is ready for movement.' : 'Select an item from Store Inventory first.' }}</p>
+    </article>
+
+    <article class="store-card history-card">
+      <div class="card-heading"><div class="heading-symbol">↻</div><div><h2>Recent Store Movements</h2><p>Audit history showing what moved, why and who recorded it.</p></div></div>
+      <div class="table-wrap history-wrap">
+        <table>
+          <thead><tr><th>Item</th><th>Movement</th><th>Qty</th><th>Ticket / Ref</th><th>By</th><th>Date</th></tr></thead>
+          <tbody><tr *ngFor="let movement of movements"><td>{{ movement.itemName }}</td><td>{{ movement.movementType }}</td><td>{{ movement.quantity }}</td><td>{{ movement.ticketNumber || movement.reference || '—' }}</td><td>{{ movement.performedBy }}</td><td>{{ movement.performedAtUtc | date:'dd MMM yyyy HH:mm' }}</td></tr></tbody>
+        </table>
+        <div class="empty-state" *ngIf="movements.length===0"><span>⇄</span><strong>No movements yet</strong><p>Stock activity will appear here once recorded.</p></div>
+      </div>
+    </article>
+  </div>
+
+  <div class="error" *ngIf="error">{{ error }}</div>
+  <div class="loading" *ngIf="loading">Loading Store Room…</div>
+
+  <div class="information-box">
+    <div class="info-circle">i</div>
+    <div>Use reservations to hold stock for an approved request before it is issued. Link movements to the related RoyalDesk ticket whenever possible so the full support journey stays traceable.</div>
+    <div class="tyre-decoration"></div>
+  </div>
+</section>
