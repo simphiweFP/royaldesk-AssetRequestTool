@@ -11,6 +11,14 @@ import { TicketTrackingComponent } from '../ticket-tracking/ticket-tracking.comp
   styleUrl: './employee-portal.component.scss'
 })
 export class EmployeePortalComponent {
-  mode: 'home' | 'request' | 'track' = 'home';
+  mode: 'home' | 'request' | 'track' = this.initialMode();
+
+  private initialMode(): 'home' | 'request' | 'track' {
+    const path = window.location.pathname.toLowerCase();
+    if (path.startsWith('/track')) return 'track';
+    if (path.startsWith('/request') || path.startsWith('/enquiry')) return 'request';
+    return 'home';
+  }
+
   openStaff(): void { window.location.href = '/portal'; }
 }
