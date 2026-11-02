@@ -2,14 +2,17 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Asset, Assignment, Branch, Dashboard, Department, Employee, LifecycleTask, WriteOff } from '../models/lifecycle.model';
+import { BusinessValueSummary } from '../models/business-value.model';
 
 @Injectable({ providedIn: 'root' })
 export class LifecycleService {
   private readonly http = inject(HttpClient);
   private readonly base = 'https://localhost:7080/api/lifecycle';
+  private readonly businessValueBase = 'https://localhost:7080/api/business-value';
   private readonly headers = new HttpHeaders({ Authorization: 'Basic ' + btoa('demo.user:RoyalDesk123!') });
 
   dashboard(): Observable<Dashboard> { return this.http.get<Dashboard>(`${this.base}/dashboard`, { headers: this.headers }); }
+  businessValue(): Observable<BusinessValueSummary> { return this.http.get<BusinessValueSummary>(this.businessValueBase, { headers: this.headers }); }
   branches(): Observable<Branch[]> { return this.http.get<Branch[]>(`${this.base}/branches`, { headers: this.headers }); }
   departments(): Observable<Department[]> { return this.http.get<Department[]>(`${this.base}/departments`, { headers: this.headers }); }
   employees(): Observable<Employee[]> { return this.http.get<Employee[]>(`${this.base}/employees`, { headers: this.headers }); }
