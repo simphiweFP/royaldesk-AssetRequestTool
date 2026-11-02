@@ -1,0 +1,31 @@
+<div class="employee-portal">
+  <header class="portal-header">
+    <img src="assets/images/royal-tyres-logo-final.png" alt="Royal Tyres" />
+    <button type="button" (click)="openStaff()">Staff Access</button>
+  </header>
+
+  <section class="portal-hero" *ngIf="mode==='home'">
+    <div>
+      <h1><span>Royal</span>Desk</h1>
+      <h2>How can our IT team help?</h2>
+      <p>Submit an IT issue, equipment request or enquiry, or track an existing request.</p>
+    </div>
+  </section>
+
+  <section class="portal-actions" *ngIf="mode==='home'">
+    <button type="button" (click)="mode='request'"><strong>Report an IT Issue</strong><span>Printer, SAP, network, email, PC and other support issues.</span></button>
+    <button type="button" (click)="mode='request'"><strong>Request Equipment</strong><span>Request IT equipment and provide the business reason.</span></button>
+    <button type="button" (click)="mode='request'"><strong>Make an IT Enquiry</strong><span>Send a general IT question or request for assistance.</span></button>
+    <button type="button" (click)="mode='track'"><strong>Track My Request</strong><span>Check progress, technician ownership and public updates.</span></button>
+  </section>
+
+  <section class="embedded" *ngIf="mode==='request'">
+    <button class="back" type="button" (click)="mode='home'">← Employee Portal</button>
+    <app-asset-request></app-asset-request>
+  </section>
+
+  <section class="embedded tracking" *ngIf="mode==='track'">
+    <button class="back" type="button" (click)="mode='home'">← Employee Portal</button>
+    <app-ticket-tracking></app-ticket-tracking>
+  </section>
+</div>
