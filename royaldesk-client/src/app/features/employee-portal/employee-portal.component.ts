@@ -18,14 +18,14 @@ export class EmployeePortalComponent {
   private initialMode(): 'home' | 'request' | 'track' {
     const path = window.location.pathname.toLowerCase();
     if (path.startsWith('/track')) return 'track';
-    if (path.startsWith('/problem') || path.startsWith('/request') || path.startsWith('/service')) return 'request';
+    if (path.startsWith('/problem') || path.startsWith('/request') || path.startsWith('/service') || path.startsWith('/enquiry')) return 'request';
     return 'home';
   }
 
   private initialRequestType(): RequestType {
     const path = window.location.pathname.toLowerCase();
     if (path.startsWith('/problem')) return 'Incident';
-    if (path.startsWith('/service')) return 'Service';
+    if (path.startsWith('/service') || path.startsWith('/enquiry')) return 'Service';
     return 'Equipment';
   }
 
