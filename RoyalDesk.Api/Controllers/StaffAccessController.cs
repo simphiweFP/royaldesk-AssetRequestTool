@@ -27,7 +27,8 @@ public sealed class StaffAccessController(StaffAccessService service) : Controll
         {
             HttpOnly = true,
             Secure = true,
-            SameSite = SameSiteMode.Strict,
+            SameSite = SameSiteMode.None,
+            Path = "/",
             Expires = result.Session.ExpiresAtUtc
         });
         return Ok(result.Session);
@@ -37,7 +38,12 @@ public sealed class StaffAccessController(StaffAccessService service) : Controll
     public async Task<IActionResult> Lock(CancellationToken ct)
     {
         await service.LockAsync(Request.Cookies[StaffAccessMiddleware.CookieName], ct);
-        Response.Cookies.Delete(StaffAccessMiddleware.CookieName);
+        Response.Cookies.Delete(StaffAccessMiddleware.CookieName, new CookieOptions
+        {
+            Secure = true,
+            SameSite = SameSiteMode.None,
+            Path = "/"
+        });
         return NoContent();
     }
 
@@ -56,7 +62,7 @@ public sealed class StaffAccessController(StaffAccessService service) : Controll
     [HttpPost("profiles")]
     [RequirePage("access-management")]
     public Task<StaffProfileDto> Create(CreateStaffAccessDto dto, CancellationToken ct)
-        => service.CreateAsync(dto, User.Identity?.Name ?? "unknown", ct);
+        => service.CreateAsync(dto, User.FindFirst("display_name")?.Value ?? User.Identity?.Name ?? "unknown", ct);
 
     [HttpPut("profiles/{id:int}")]
     [RequirePage("access-management")]
