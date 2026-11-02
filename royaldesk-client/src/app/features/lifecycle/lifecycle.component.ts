@@ -1,23 +1,25 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { forkJoin } from 'rxjs';
-import { AssetRequestComponent } from '../asset-request/asset-request.component';
+import { forkJoin, of } from 'rxjs';
 import { HelpDeskTicketsComponent } from '../help-desk/help-desk-tickets.component';
 import { StoreRoomComponent } from '../store-room/store-room.component';
 import { BusinessValueComponent } from '../business-value/business-value.component';
+import { AccessManagementComponent } from '../staff-access/access-management.component';
 import { Asset, Assignment, Branch, Dashboard, Department, Employee, LifecycleTask, WriteOff } from '../../core/models/lifecycle.model';
 import { LifecycleService } from '../../core/services/lifecycle.service';
+import { StaffAccessService } from '../../core/services/staff-access.service';
 
 @Component({
   selector: 'app-lifecycle',
   standalone: true,
-  imports: [CommonModule, FormsModule, AssetRequestComponent, HelpDeskTicketsComponent, StoreRoomComponent, BusinessValueComponent],
+  imports: [CommonModule, FormsModule, HelpDeskTicketsComponent, StoreRoomComponent, BusinessValueComponent, AccessManagementComponent],
   templateUrl: './lifecycle.component.html',
   styleUrl: './lifecycle.component.scss'
 })
 export class LifecycleComponent implements OnInit {
   private readonly api = inject(LifecycleService);
+  readonly access = inject(StaffAccessService);
 
   section = 'dashboard';
   loading = true;
@@ -39,21 +41,28 @@ export class LifecycleComponent implements OnInit {
   assignmentForm = { assetId: undefined as number | undefined, employeeId: undefined as number | undefined, condition: 'Good' };
   writeOffForm = { assetId: undefined as number | undefined, reason: 'Beyond economical repair', condition: 'Damaged', currentValue: undefined as number | undefined, notes: '' };
 
-  ngOnInit(): void { this.refresh(); }
+  ngOnInit(): void {
+    this.section = this.firstAllowedSection();
+    this.refresh();
+  }
+
+  can(page: string): boolean { return this.access.can(page); }
+  get staffName(): string { return this.access.session?.displayName || 'RoyalDesk Staff'; }
+
+  private firstAllowedSection(): string {
+    const order: Array<[string,string]> = [
+      ['dashboard','dashboard'],['tickets','tickets'],['store','store'],['assets','assets'],['assignments','assignments'],
+      ['employees','employees'],['onboarding','onboarding'],['offboarding','offboarding'],['writeoffs','writeoffs'],
+      ['business-value','reports'],['access-management','access-management']
+    ];
+    return order.find(([page]) => this.can(page))?.[1] || 'access-management';
+  }
 
   get pageTitle(): string {
     const titles: Record<string, string> = {
-      dashboard: 'Operations Dashboard',
-      request: 'Request Equipment',
-      tickets: 'IT Service Desk',
-      store: 'Store Room',
-      assets: 'Asset Register',
-      employees: 'Employees',
-      assignments: 'Assignments & Returns',
-      onboarding: 'Employee Onboarding',
-      offboarding: 'Employee Offboarding',
-      writeoffs: 'Write-Offs & E-Waste',
-      reports: 'Business Value'
+      dashboard: 'Operations Dashboard', tickets: 'IT Service Desk', store: 'Store Room', assets: 'Asset Register',
+      employees: 'Employees', assignments: 'Assignments & Returns', onboarding: 'Employee Onboarding', offboarding: 'Employee Offboarding',
+      writeoffs: 'Write-Offs & E-Waste', reports: 'Business Value', 'access-management': 'Access Management'
     };
     return titles[this.section] ?? 'RoyalDesk';
   }
@@ -61,7 +70,6 @@ export class LifecycleComponent implements OnInit {
   get pageSubtitle(): string {
     const subtitles: Record<string, string> = {
       dashboard: 'A clear view of company assets, people and lifecycle activity.',
-      request: 'Request the IT equipment you need to keep Royal Tyres moving.',
       tickets: 'Own, investigate and resolve IT requests with clear accountability.',
       store: 'Control IT stock, reservations and issues with ticket-linked traceability.',
       assets: 'Register, search and manage company equipment in one place.',
@@ -70,9 +78,10 @@ export class LifecycleComponent implements OnInit {
       onboarding: 'Track accounts, access, equipment and employee readiness.',
       offboarding: 'Recover company assets and close employee access responsibly.',
       writeoffs: 'Control approvals, disposal and the company e-waste register.',
-      reports: 'Measure IT demand, response, reuse, stock activity and operational value.'
+      reports: 'Measure IT demand, response, reuse, stock activity and operational value.',
+      'access-management': 'Create staff passwords and choose exactly which RoyalDesk pages each person can access.'
     };
-    return subtitles[this.section] ?? 'One company workflow from request to disposal.';
+    return subtitles[this.section] ?? 'RoyalDesk staff portal.';
   }
 
   get filteredAssets(): Asset[] {
@@ -86,18 +95,28 @@ export class LifecycleComponent implements OnInit {
   refresh(): void {
     this.loading = true;
     this.error = '';
+    const needsAssets = this.can('assets') || this.can('assignments') || this.can('writeoffs');
     forkJoin({
-      dashboard: this.api.dashboard(), branches: this.api.branches(), departments: this.api.departments(),
-      employees: this.api.employees(), assets: this.api.assets(), assignments: this.api.assignments(), writeOffs: this.api.writeOffs()
+      dashboard: this.can('dashboard') ? this.api.dashboard() : of(undefined),
+      branches: this.api.branches(),
+      departments: this.api.departments(),
+      employees: this.api.employees(),
+      assets: needsAssets ? this.api.assets() : of([] as Asset[]),
+      assignments: this.can('assignments') ? this.api.assignments() : of([] as Assignment[]),
+      writeOffs: this.can('writeoffs') ? this.api.writeOffs() : of([] as WriteOff[])
     }).subscribe({
       next: result => { Object.assign(this, result); this.loading = false; },
-      error: err => { this.error = err?.error?.detail || err?.error || 'Could not load RoyalDesk. Confirm the API is running.'; this.loading = false; }
+      error: err => { this.error = err?.error?.detail || err?.error || 'Could not load RoyalDesk.'; this.loading = false; }
     });
   }
 
-  open(section: string): void {
-    this.section = section;
-    this.error = '';
+  open(section: string): void { this.section = section; this.error = ''; }
+
+  lock(): void {
+    this.access.lock().subscribe({
+      next: () => window.location.href = '/portal',
+      error: () => { this.access.clearLocalSession(); window.location.href = '/portal'; }
+    });
   }
 
   createEmployee(): void {
