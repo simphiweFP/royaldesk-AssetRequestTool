@@ -1,13 +1,10 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using RoyalDesk.Api.Authentication;
 using RoyalDesk.Api.StoreRoom;
 
 namespace RoyalDesk.Api.Controllers;
 
 [ApiController]
 [Route("api/store-room")]
-[Authorize(AuthenticationSchemes = BasicAuthenticationHandler.SchemeName)]
 public sealed class StoreRoomController(StoreRoomService service) : ControllerBase
 {
     private string Actor => User.Identity?.Name ?? "unknown";
