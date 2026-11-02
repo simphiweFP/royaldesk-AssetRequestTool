@@ -17,10 +17,12 @@ public sealed class StaffAccessMiddleware(RequestDelegate next)
         var session = await accessService.ResolveSessionAsync(context.Request.Cookies[CookieName], context.RequestAborted);
         if (session is not null)
         {
+            var identityName = string.IsNullOrWhiteSpace(session.Username) ? session.DisplayName : session.Username;
             var claims = new List<Claim>
             {
                 new(ClaimTypes.NameIdentifier, session.StaffAccessId.ToString()),
-                new(ClaimTypes.Name, session.DisplayName)
+                new(ClaimTypes.Name, identityName),
+                new("display_name", session.DisplayName)
             };
             if (!string.IsNullOrWhiteSpace(session.Username)) claims.Add(new("username", session.Username));
             claims.AddRange(session.Pages.Select(p => new Claim("page", p)));
