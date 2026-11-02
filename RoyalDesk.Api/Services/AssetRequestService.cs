@@ -22,15 +22,17 @@ public sealed class AssetRequestService(
             : request.RequesterEmail.Trim();
         var trackingPin = requesterEmail is null ? TrackingPinSecurity.GeneratePin() : null;
 
+        var requestType = string.IsNullOrWhiteSpace(request.RequestType) ? "Equipment" : request.RequestType.Trim();
         var entity = new AssetRequest
         {
+            RequestType = requestType,
             RequesterName = request.RequesterName.Trim(),
             RequesterEmail = requesterEmail,
             TrackingPinHash = trackingPin is null ? null : TrackingPinSecurity.Hash(trackingPin),
             Branch = request.Branch.Trim(),
             Department = request.Department.Trim(),
             ItemType = request.ItemType.Trim(),
-            Quantity = request.Quantity,
+            Quantity = requestType.Equals("Equipment", StringComparison.OrdinalIgnoreCase) ? request.Quantity : 1,
             Reason = request.Reason.Trim(),
             Status = "New",
             RequestedBy = requestedBy,
@@ -43,6 +45,7 @@ public sealed class AssetRequestService(
         {
             Id = entity.Id,
             TicketNumber = entity.TicketNumber ?? $"RT-IT-{entity.Id:000000}",
+            RequestType = entity.RequestType,
             RequesterName = entity.RequesterName,
             RequesterEmail = entity.RequesterEmail,
             TrackingPin = trackingPin,
