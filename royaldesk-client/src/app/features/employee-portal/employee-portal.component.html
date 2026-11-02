@@ -7,21 +7,21 @@
   <section class="portal-hero" *ngIf="mode==='home'">
     <div>
       <h1><span>Royal</span>Desk</h1>
-      <h2>How can our IT team help?</h2>
-      <p>Submit an IT issue, equipment request or enquiry, or track an existing request.</p>
+      <h2>What do you need today?</h2>
+      <p>Choose one simple option. RoyalDesk will only show the information needed for that request.</p>
     </div>
   </section>
 
   <section class="portal-actions" *ngIf="mode==='home'">
-    <button type="button" (click)="mode='request'"><strong>Report an IT Issue</strong><span>Printer, SAP, network, email, PC and other support issues.</span></button>
-    <button type="button" (click)="mode='request'"><strong>Request Equipment</strong><span>Request IT equipment and provide the business reason.</span></button>
-    <button type="button" (click)="mode='request'"><strong>Make an IT Enquiry</strong><span>Send a general IT question or request for assistance.</span></button>
+    <button type="button" (click)="openRequest('Incident')"><strong>Report a Problem</strong><span>Something is not working: SAP, printer, network, email, PC or another IT issue.</span></button>
+    <button type="button" (click)="openRequest('Equipment')"><strong>Request Equipment</strong><span>Laptop, monitor, keyboard, headset, printer or other IT equipment.</span></button>
+    <button type="button" (click)="openRequest('Service')"><strong>Request IT Service</strong><span>Access, software, stock code creation, shared folders, advice or another IT service.</span></button>
     <button type="button" (click)="mode='track'"><strong>Track My Request</strong><span>Check progress, technician ownership and public updates.</span></button>
   </section>
 
   <section class="embedded" *ngIf="mode==='request'">
     <button class="back" type="button" (click)="mode='home'">← Employee Portal</button>
-    <app-asset-request></app-asset-request>
+    <app-asset-request [requestType]="requestType"></app-asset-request>
   </section>
 
   <section class="embedded tracking" *ngIf="mode==='track'">
