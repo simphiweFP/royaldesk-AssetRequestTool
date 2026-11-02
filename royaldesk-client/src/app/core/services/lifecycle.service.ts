@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Asset, Assignment, Branch, Dashboard, Department, Employee, LifecycleTask, WriteOff } from '../models/lifecycle.model';
+import { Asset, Assignment, Branch, Dashboard, Department, Employee, LifecycleTask, PublicEmployeeDirectory, WriteOff } from '../models/lifecycle.model';
 import { BusinessValueSummary } from '../models/business-value.model';
 
 @Injectable({ providedIn: 'root' })
@@ -15,6 +15,7 @@ export class LifecycleService {
   businessValue(): Observable<BusinessValueSummary> { return this.http.get<BusinessValueSummary>(this.businessValueBase, this.options); }
   branches(): Observable<Branch[]> { return this.http.get<Branch[]>(`${this.base}/branches`, this.options); }
   departments(): Observable<Department[]> { return this.http.get<Department[]>(`${this.base}/departments`, this.options); }
+  publicDirectory(): Observable<PublicEmployeeDirectory[]> { return this.http.get<PublicEmployeeDirectory[]>(`${this.base}/public-directory`); }
   employees(): Observable<Employee[]> { return this.http.get<Employee[]>(`${this.base}/employees`, this.options); }
   assets(): Observable<Asset[]> { return this.http.get<Asset[]>(`${this.base}/assets`, this.options); }
   assignments(employeeId?: number): Observable<Assignment[]> { return this.http.get<Assignment[]>(`${this.base}/assignments${employeeId ? `?employeeId=${employeeId}` : ''}`, this.options); }
