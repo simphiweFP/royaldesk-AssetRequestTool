@@ -1,5 +1,6 @@
 using FluentMigrator.Runner;
 using RoyalDesk.Api.Authentication;
+using RoyalDesk.Api.BusinessValue;
 using RoyalDesk.Api.Data;
 using RoyalDesk.Api.Email;
 using RoyalDesk.Api.Exceptions;
@@ -59,6 +60,7 @@ builder.Services.AddScoped<JustIctEscalationRepository>();
 builder.Services.AddScoped<JustIctEscalationService>();
 builder.Services.AddScoped<PublicTrackingService>();
 builder.Services.AddScoped<StoreRoomService>();
+builder.Services.AddScoped<BusinessValueService>();
 builder.Services.AddScoped<IEmailOutbox, EmailOutbox>();
 builder.Services.AddScoped<TicketNotificationService>();
 builder.Services.AddHostedService<EmailOutboxWorker>();
