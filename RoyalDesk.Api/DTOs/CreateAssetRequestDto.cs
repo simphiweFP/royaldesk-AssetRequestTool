@@ -2,11 +2,12 @@ namespace RoyalDesk.Api.DTOs;
 
 public sealed class CreateAssetRequestDto
 {
+    public string RequestType { get; set; } = "Equipment";
     public string RequesterName { get; set; } = string.Empty;
     public string? RequesterEmail { get; set; }
     public string Branch { get; set; } = string.Empty;
     public string Department { get; set; } = string.Empty;
     public string ItemType { get; set; } = string.Empty;
-    public int Quantity { get; set; }
+    public int Quantity { get; set; } = 1;
     public string Reason { get; set; } = string.Empty;
 }
