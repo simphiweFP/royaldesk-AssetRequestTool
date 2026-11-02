@@ -4,6 +4,7 @@ public sealed class AssetRequestResponseDto
 {
     public int Id { get; init; }
     public string TicketNumber { get; init; } = string.Empty;
+    public string RequestType { get; init; } = "Equipment";
     public string RequesterName { get; init; } = string.Empty;
     public string? RequesterEmail { get; init; }
     public string? TrackingPin { get; init; }
