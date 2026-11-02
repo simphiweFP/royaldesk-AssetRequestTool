@@ -14,6 +14,7 @@ public sealed class HelpDeskTicketDto
 {
     public int Id { get; set; }
     public string TicketNumber { get; set; } = string.Empty;
+    public string RequestType { get; set; } = "Equipment";
     public string RequesterName { get; set; } = string.Empty;
     public string? RequesterEmail { get; set; }
     public string Branch { get; set; } = string.Empty;
