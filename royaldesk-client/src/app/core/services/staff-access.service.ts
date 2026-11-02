@@ -11,6 +11,11 @@ export interface StaffProfile {
   pages: string[];
 }
 
+export interface StaffSelector {
+  id: number;
+  displayName: string;
+}
+
 export interface StaffSession {
   staffAccessId: number;
   displayName: string;
@@ -37,8 +42,8 @@ export class StaffAccessService {
     return this.http.post<StaffProfile>(`${this.base}/bootstrap`, payload, { withCredentials: true });
   }
 
-  publicProfiles(): Observable<StaffProfile[]> {
-    return this.http.get<StaffProfile[]>(`${this.base}/profiles/public`, { withCredentials: true });
+  publicProfiles(): Observable<StaffSelector[]> {
+    return this.http.get<StaffSelector[]>(`${this.base}/profiles/public`, { withCredentials: true });
   }
 
   unlock(staffAccessId: number, password: string): Observable<StaffSession> {
