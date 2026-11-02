@@ -1,13 +1,10 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using RoyalDesk.Api.Authentication;
 using RoyalDesk.Api.HelpDesk;
 
 namespace RoyalDesk.Api.Controllers;
 
 [ApiController]
 [Route("api/helpdesk")]
-[Authorize(AuthenticationSchemes = BasicAuthenticationHandler.SchemeName)]
 public sealed class HelpDeskController(HelpDeskService service, JustIctEscalationService escalationService) : ControllerBase
 {
     private string Actor => User.Identity?.Name ?? "unknown";
