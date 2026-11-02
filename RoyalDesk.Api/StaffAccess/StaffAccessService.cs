@@ -1,3 +1,4 @@
+using System.Data.Common;
 using System.Security.Cryptography;
 using System.Text;
 using Dapper;
@@ -51,6 +52,7 @@ public sealed class StaffAccessService(IDbConnectionFactory connectionFactory, I
     public async Task<StaffProfileDto> CreateAsync(CreateStaffAccessDto dto, string actor, CancellationToken ct = default)
     {
         Validate(dto.DisplayName, dto.Password, dto.Pages);
+        var pages = NormalisePages(dto.Pages);
         var salt = RandomNumberGenerator.GetBytes(32);
         var hash = HashPassword(dto.Password, salt);
         await using var connection = connectionFactory.CreateConnection();
@@ -70,8 +72,11 @@ public sealed class StaffAccessService(IDbConnectionFactory connectionFactory, I
             CreatedBy = actor,
             Now = DateTime.UtcNow
         }, tx, cancellationToken: ct));
-        foreach (var page in NormalisePages(dto.Pages))
+
+        foreach (var page in pages)
             await connection.ExecuteAsync(new CommandDefinition("INSERT INTO StaffPageAccess (StaffAccessId, PageKey) VALUES (@Id,@Page)", new { Id = id, Page = page }, tx, cancellationToken: ct));
+
+        await EnsureItTeamMemberAsync(connection, tx, dto.DisplayName, dto.Username, pages, true, ct);
         await tx.CommitAsync(ct);
         return (await GetProfilesAsync(false, ct)).Single(x => x.Id == id);
     }
@@ -90,9 +95,12 @@ public sealed class StaffAccessService(IDbConnectionFactory connectionFactory, I
             WHERE Id=@Id;
             """, new { Id = id, DisplayName = dto.DisplayName.Trim(), Username = string.IsNullOrWhiteSpace(dto.Username) ? null : dto.Username.Trim(), dto.IsActive }, tx, cancellationToken: ct));
         if (changed == 0) throw new KeyNotFoundException("Staff access profile not found.");
+
         await connection.ExecuteAsync(new CommandDefinition("DELETE FROM StaffPageAccess WHERE StaffAccessId=@Id", new { Id = id }, tx, cancellationToken: ct));
         foreach (var page in pages)
             await connection.ExecuteAsync(new CommandDefinition("INSERT INTO StaffPageAccess (StaffAccessId, PageKey) VALUES (@Id,@Page)", new { Id = id, Page = page }, tx, cancellationToken: ct));
+
+        await EnsureItTeamMemberAsync(connection, tx, dto.DisplayName, dto.Username, pages, dto.IsActive, ct);
         await connection.ExecuteAsync(new CommandDefinition("DELETE FROM StaffAccessSessions WHERE StaffAccessId=@Id", new { Id = id }, tx, cancellationToken: ct));
         await tx.CommitAsync(ct);
     }
@@ -167,6 +175,36 @@ public sealed class StaffAccessService(IDbConnectionFactory connectionFactory, I
         await using var connection = connectionFactory.CreateConnection();
         await connection.OpenAsync(ct);
         await connection.ExecuteAsync(new CommandDefinition("DELETE FROM StaffAccessSessions WHERE TokenHash=@Hash", new { Hash = Sha256(rawToken) }, cancellationToken: ct));
+    }
+
+    private static async Task EnsureItTeamMemberAsync(DbConnection connection, DbTransaction tx, string displayName, string? username, IReadOnlyCollection<string> pages, bool accessActive, CancellationToken ct)
+    {
+        var effectiveUsername = string.IsNullOrWhiteSpace(username) ? displayName.Trim() : username.Trim();
+        var existingId = await connection.QuerySingleOrDefaultAsync<int?>(new CommandDefinition("""
+            SELECT Id FROM ITTeamMembers
+            WHERE lower(Username)=lower(@Username) OR lower(DisplayName)=lower(@DisplayName)
+            LIMIT 1;
+            """, new { Username = effectiveUsername, DisplayName = displayName.Trim() }, tx, cancellationToken: ct));
+
+        if (!accessActive)
+        {
+            if (existingId.HasValue)
+                await connection.ExecuteAsync(new CommandDefinition("UPDATE ITTeamMembers SET IsActive=0 WHERE Id=@Id", new { Id = existingId.Value }, tx, cancellationToken: ct));
+            return;
+        }
+
+        if (!pages.Contains("tickets", StringComparer.OrdinalIgnoreCase)) return;
+
+        if (existingId.HasValue)
+        {
+            await connection.ExecuteAsync(new CommandDefinition("UPDATE ITTeamMembers SET DisplayName=@DisplayName, IsActive=1 WHERE Id=@Id", new { Id = existingId.Value, DisplayName = displayName.Trim() }, tx, cancellationToken: ct));
+            return;
+        }
+
+        await connection.ExecuteAsync(new CommandDefinition("""
+            INSERT INTO ITTeamMembers (DisplayName, Email, Username, Role, IsActive, CreatedAtUtc)
+            VALUES (@DisplayName, NULL, @Username, 'IT Technician', 1, @Now);
+            """, new { DisplayName = displayName.Trim(), Username = effectiveUsername, Now = DateTime.UtcNow }, tx, cancellationToken: ct));
     }
 
     private static void Validate(string displayName, string password, IEnumerable<string> pages)
