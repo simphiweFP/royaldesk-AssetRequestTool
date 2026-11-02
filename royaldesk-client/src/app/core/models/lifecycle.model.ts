@@ -14,6 +14,13 @@ export interface Dashboard {
 export interface Branch { id: number; code: string; name: string; }
 export interface Department { id: number; name: string; }
 
+export interface PublicEmployeeDirectory {
+  name: string;
+  email?: string;
+  branch?: string;
+  department?: string;
+}
+
 export interface Employee {
   id: number; employeeNumber: string; firstName: string; lastName: string;
   email?: string; username?: string; jobTitle?: string; branchId?: number;
