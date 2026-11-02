@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { finalize } from 'rxjs';
@@ -6,7 +6,7 @@ import { finalize } from 'rxjs';
 import { AssetRequestService } from '../../core/services/asset-request.service';
 import { LifecycleService } from '../../core/services/lifecycle.service';
 import { PublicEmployeeDirectory } from '../../core/models/lifecycle.model';
-import { AssetRequestResponse, CreateAssetRequest } from '../../core/models/asset-request.model';
+import { AssetRequestResponse, CreateAssetRequest, RequestType } from '../../core/models/asset-request.model';
 
 @Component({
   selector: 'app-asset-request',
@@ -20,19 +20,21 @@ export class AssetRequestComponent {
   private readonly lifecycleService = inject(LifecycleService);
   private readonly formBuilder = inject(FormBuilder);
 
+  @Input() requestType: RequestType = 'Equipment';
+
   readonly currentUser = { name: 'Employee Portal', username: 'employee', initials: 'IT' };
   employees: PublicEmployeeDirectory[] = [];
 
   readonly branches = ['Durban Passenger','Durban Commercial','Phoenix','Alberton','Blackheath'];
   readonly departments = ['Administration','IT','Sales','Finance','Operations','Human Resources','Workshop'];
-  readonly itemTypes = [
-    'Equipment Request','Hardware','Printer / Scanner','Network / Internet / Wi-Fi','Email / Outlook','SAP','CisTech','VPN',
-    'User Account / Password / Access','Shared Folder','Software Installation','Telephone / VoIP','PC Performance',
-    'Monitor / Peripheral','Boardroom / TV / Casting','Website','General IT Enquiry','Other Infrastructure'
-  ];
-  readonly reasonOptions = ['IT Issue / Incident','New Starter','Replacement','Upgrade','Damaged Equipment','Additional Equipment','Access Required','General Enquiry','Other'];
+  readonly equipmentTypes = ['Laptop','Monitor','Keyboard','Mouse','Headset','Printer','Barcode Scanner','POS Peripheral'];
+  readonly incidentCategories = ['SAP','CisTech','Email','Hardware','Network','Printer','Software','Telephone','Windows','Other'];
+  readonly serviceCategories = ['Access / Permissions','Software Installation','Stock Code Creation','Shared Folder','User Account','Custom Software','IT Advice','Other'];
+  readonly equipmentReasons = ['New Starter','Replacement','Upgrade','Damaged Equipment','Additional Equipment'];
 
-  readonly form = this.formBuilder.nonNullable.group({ requesterName:[''], requesterEmail:[''], branch:[''], department:[''], itemType:[''], quantity:[1], reason:[''], additionalNotes:[''] });
+  readonly form = this.formBuilder.nonNullable.group({
+    requesterName:[''], requesterEmail:[''], branch:[''], department:[''], itemType:[''], quantity:[1], reason:[''], additionalNotes:['']
+  });
 
   submitting = false;
   submittedRequest: AssetRequestResponse | null = null;
@@ -44,6 +46,31 @@ export class AssetRequestComponent {
     this.lifecycleService.publicDirectory().subscribe({ next: employees => this.employees = employees, error: () => this.employees = [] });
   }
 
+  get pageTitle(): string {
+    if (this.requestType === 'Incident') return 'Report an IT Problem';
+    if (this.requestType === 'Service') return 'Request IT Service';
+    return 'Request IT Equipment';
+  }
+
+  get pageDescription(): string {
+    if (this.requestType === 'Incident') return 'Tell IT what is not working and give enough detail for us to start helping.';
+    if (this.requestType === 'Service') return 'Request access, software, stock code creation, IT advice or another IT service.';
+    return 'Request the IT equipment you need to keep Royal Tyres moving.';
+  }
+
+  get categoryLabel(): string {
+    if (this.requestType === 'Incident') return 'Problem Category';
+    if (this.requestType === 'Service') return 'Service Type';
+    return 'Equipment';
+  }
+
+  get categoryOptions(): string[] {
+    if (this.requestType === 'Incident') return this.incidentCategories;
+    if (this.requestType === 'Service') return this.serviceCategories;
+    return this.equipmentTypes;
+  }
+
+  get isEquipment(): boolean { return this.requestType === 'Equipment'; }
   get requestPreview() { return this.form.getRawValue(); }
   get employeeNames(): string[] { return this.employees.map(e => e.name); }
 
@@ -66,8 +93,23 @@ export class AssetRequestComponent {
 
   submit(): void {
     this.errorMessage=''; this.fieldErrors={}; this.submitting=true;
-    const value=this.form.getRawValue(); const notes=value.additionalNotes.trim();
-    const request:CreateAssetRequest={ requesterName:value.requesterName.trim(), requesterEmail:value.requesterEmail.trim()||undefined, branch:value.branch, department:value.department, itemType:value.itemType, quantity:value.quantity, reason:notes?`${value.reason} - ${notes}`:value.reason };
+    const value=this.form.getRawValue();
+    const notes=value.additionalNotes.trim();
+    const reason = this.isEquipment
+      ? (notes ? `${value.reason} - ${notes}` : value.reason)
+      : [value.reason.trim(), notes].filter(Boolean).join(' - ');
+
+    const request:CreateAssetRequest={
+      requestType:this.requestType,
+      requesterName:value.requesterName.trim(),
+      requesterEmail:value.requesterEmail.trim()||undefined,
+      branch:value.branch,
+      department:value.department,
+      itemType:value.itemType,
+      quantity:this.isEquipment ? value.quantity : 1,
+      reason
+    };
+
     this.service.create(request).pipe(finalize(()=>this.submitting=false)).subscribe({
       next:response=>this.submittedRequest=response,
       error:(error:HttpErrorResponse)=>{ if(error.status===400){this.setValidationErrors(error);return;} this.errorMessage='The request could not be submitted. Confirm that the API is running and try again.'; }
