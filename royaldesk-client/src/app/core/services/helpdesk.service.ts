@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HelpDeskTicket, ITTeamMember, PublicTicketDetail, PublicTicketSummary, TicketStatusHistory } from '../models/helpdesk.model';
@@ -8,35 +8,34 @@ export class HelpDeskService {
   private readonly http = inject(HttpClient);
   private readonly base = 'https://localhost:7080/api/helpdesk';
   private readonly publicBase = 'https://localhost:7080/api/public/tickets';
-  private readonly headers = new HttpHeaders({ Authorization: 'Basic ' + btoa('demo.user:RoyalDesk123!') });
 
   tickets(status?: string): Observable<HelpDeskTicket[]> {
     const suffix = status && status !== 'All' ? `?status=${encodeURIComponent(status)}` : '';
-    return this.http.get<HelpDeskTicket[]>(`${this.base}/tickets${suffix}`, { headers: this.headers });
+    return this.http.get<HelpDeskTicket[]>(`${this.base}/tickets${suffix}`, { withCredentials: true });
   }
 
   ticket(id: number): Observable<HelpDeskTicket> {
-    return this.http.get<HelpDeskTicket>(`${this.base}/tickets/${id}`, { headers: this.headers });
+    return this.http.get<HelpDeskTicket>(`${this.base}/tickets/${id}`, { withCredentials: true });
   }
 
   history(id: number): Observable<TicketStatusHistory[]> {
-    return this.http.get<TicketStatusHistory[]>(`${this.base}/tickets/${id}/history`, { headers: this.headers });
+    return this.http.get<TicketStatusHistory[]>(`${this.base}/tickets/${id}/history`, { withCredentials: true });
   }
 
   team(): Observable<ITTeamMember[]> {
-    return this.http.get<ITTeamMember[]>(`${this.base}/team`, { headers: this.headers });
+    return this.http.get<ITTeamMember[]>(`${this.base}/team`, { withCredentials: true });
   }
 
   assignToMe(id: number): Observable<void> {
-    return this.http.post<void>(`${this.base}/tickets/${id}/assign-to-me`, {}, { headers: this.headers });
+    return this.http.post<void>(`${this.base}/tickets/${id}/assign-to-me`, {}, { withCredentials: true });
   }
 
   start(id: number): Observable<void> {
-    return this.http.post<void>(`${this.base}/tickets/${id}/start`, {}, { headers: this.headers });
+    return this.http.post<void>(`${this.base}/tickets/${id}/start`, {}, { withCredentials: true });
   }
 
   updateStatus(id: number, status: string, comment?: string, publicVisible = true): Observable<void> {
-    return this.http.patch<void>(`${this.base}/tickets/${id}/status`, { status, comment, publicVisible }, { headers: this.headers });
+    return this.http.patch<void>(`${this.base}/tickets/${id}/status`, { status, comment, publicVisible }, { withCredentials: true });
   }
 
   searchPublic(name: string, department: string): Observable<PublicTicketSummary[]> {
