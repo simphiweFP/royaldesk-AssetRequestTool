@@ -1,13 +1,10 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using RoyalDesk.Api.Authentication;
 using RoyalDesk.Api.Lifecycle;
 
 namespace RoyalDesk.Api.Controllers;
 
 [ApiController]
 [Route("api/lifecycle")]
-[Authorize(AuthenticationSchemes = BasicAuthenticationHandler.SchemeName)]
 public sealed class LifecycleController(ILifecycleService service) : ControllerBase
 {
     private string Actor => User.Identity?.Name ?? "unknown";
@@ -27,8 +24,8 @@ public sealed class LifecycleController(ILifecycleService service) : ControllerB
     [HttpPost("employees")]
     public async Task<ActionResult<EmployeeDto>> CreateEmployee(CreateEmployeeDto dto, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(dto.EmployeeNumber) || string.IsNullOrWhiteSpace(dto.FirstName) || string.IsNullOrWhiteSpace(dto.LastName))
-            return BadRequest("Employee number, first name and last name are required.");
+        if (string.IsNullOrWhiteSpace(dto.FirstName) || string.IsNullOrWhiteSpace(dto.LastName))
+            return BadRequest("First name and last name are required.");
         return Ok(await service.CreateEmployeeAsync(dto, ct));
     }
 
