@@ -1,4 +1,7 @@
+export type RequestType = 'Incident' | 'Equipment' | 'Service';
+
 export interface CreateAssetRequest {
+  requestType: RequestType;
   requesterName: string;
   requesterEmail?: string;
   branch: string;
