@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, OnInit, Output, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { StaffAccessService, StaffProfile } from '../../core/services/staff-access.service';
+import { StaffAccessService, StaffSelector } from '../../core/services/staff-access.service';
 
 @Component({
   selector: 'app-staff-access-gate',
@@ -14,7 +14,7 @@ export class StaffAccessGateComponent implements OnInit {
   private readonly access = inject(StaffAccessService);
   @Output() unlocked = new EventEmitter<void>();
 
-  profiles: StaffProfile[] = [];
+  profiles: StaffSelector[] = [];
   bootstrapRequired = false;
   loading = true;
   error = '';
