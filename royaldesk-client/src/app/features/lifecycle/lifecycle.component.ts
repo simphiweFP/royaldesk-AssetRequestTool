@@ -5,13 +5,14 @@ import { forkJoin } from 'rxjs';
 import { AssetRequestComponent } from '../asset-request/asset-request.component';
 import { HelpDeskTicketsComponent } from '../help-desk/help-desk-tickets.component';
 import { StoreRoomComponent } from '../store-room/store-room.component';
+import { BusinessValueComponent } from '../business-value/business-value.component';
 import { Asset, Assignment, Branch, Dashboard, Department, Employee, LifecycleTask, WriteOff } from '../../core/models/lifecycle.model';
 import { LifecycleService } from '../../core/services/lifecycle.service';
 
 @Component({
   selector: 'app-lifecycle',
   standalone: true,
-  imports: [CommonModule, FormsModule, AssetRequestComponent, HelpDeskTicketsComponent, StoreRoomComponent],
+  imports: [CommonModule, FormsModule, AssetRequestComponent, HelpDeskTicketsComponent, StoreRoomComponent, BusinessValueComponent],
   templateUrl: './lifecycle.component.html',
   styleUrl: './lifecycle.component.scss'
 })
@@ -69,7 +70,7 @@ export class LifecycleComponent implements OnInit {
       onboarding: 'Track accounts, access, equipment and employee readiness.',
       offboarding: 'Recover company assets and close employee access responsibly.',
       writeoffs: 'Control approvals, disposal and the company e-waste register.',
-      reports: 'See the operational value created through reuse and accountability.'
+      reports: 'Measure IT demand, response, reuse, stock activity and operational value.'
     };
     return subtitles[this.section] ?? 'One company workflow from request to disposal.';
   }
