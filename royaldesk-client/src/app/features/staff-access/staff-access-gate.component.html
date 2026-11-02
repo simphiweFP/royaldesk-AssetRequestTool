@@ -1,0 +1,41 @@
+<div class="access-page">
+  <div class="access-shell">
+    <img src="assets/images/royal-tyres-logo-final.png" alt="Royal Tyres" class="logo" />
+
+    <ng-container *ngIf="!bootstrapRequired; else setupBlock">
+      <h1>RoyalDesk Staff Access</h1>
+      <p>Enter the password created for your access profile. You will only see the RoyalDesk pages assigned to you.</p>
+
+      <div class="error" *ngIf="error">{{ error }}</div>
+      <div class="loading" *ngIf="loading">Loading staff access…</div>
+
+      <div class="form" *ngIf="!loading">
+        <label>Staff member
+          <select [(ngModel)]="staffAccessId">
+            <option *ngFor="let profile of profiles" [ngValue]="profile.id">{{ profile.displayName }}</option>
+          </select>
+        </label>
+        <label>Access password
+          <input type="password" [(ngModel)]="password" (keyup.enter)="unlock()" autocomplete="current-password" />
+        </label>
+        <button class="primary" type="button" (click)="unlock()">Unlock RoyalDesk</button>
+      </div>
+    </ng-container>
+
+    <ng-template #setupBlock>
+      <h1>Set Up RoyalDesk Administrator</h1>
+      <p>No staff access profile exists yet. Create the first administrator using the one-time bootstrap key configured on the API server.</p>
+      <div class="error" *ngIf="error">{{ error }}</div>
+      <div class="form">
+        <label>Administrator name<input [(ngModel)]="setup.displayName" /></label>
+        <label>Username (optional)<input [(ngModel)]="setup.username" /></label>
+        <label>Password<input type="password" [(ngModel)]="setup.password" /></label>
+        <label>Confirm password<input type="password" [(ngModel)]="setup.confirmPassword" /></label>
+        <label>Bootstrap key<input type="password" [(ngModel)]="setup.bootstrapKey" /></label>
+        <button class="primary" type="button" (click)="bootstrap()" [disabled]="loading">Create Administrator</button>
+      </div>
+    </ng-template>
+
+    <button class="employee-link" type="button" (click)="employeePortal()">← Back to Employee IT Portal</button>
+  </div>
+</div>
