@@ -41,7 +41,7 @@ public sealed class StaffAccessMiddleware(RequestDelegate next)
                 return;
             }
 
-            if (required.Distinct(StringComparer.OrdinalIgnoreCase).Any(page => !session.Pages.Contains(page, StringComparer.OrdinalIgnoreCase)))
+            if (required.Distinct(StringComparer.OrdinalIgnoreCase).Any(requirement => !HasPermission(session.Pages, requirement)))
             {
                 context.Response.StatusCode = StatusCodes.Status403Forbidden;
                 await context.Response.WriteAsJsonAsync(new { detail = "You do not have permission to access this RoyalDesk area." }, context.RequestAborted);
@@ -52,6 +52,10 @@ public sealed class StaffAccessMiddleware(RequestDelegate next)
         await next(context);
     }
 
+    private static bool HasPermission(IEnumerable<string> pages, string requirement)
+        => requirement.Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Any(page => pages.Contains(page, StringComparer.OrdinalIgnoreCase));
+
     private static string? MapApiToPage(PathString path, string method)
     {
         var p = path.Value?.ToLowerInvariant() ?? string.Empty;
@@ -61,6 +65,8 @@ public sealed class StaffAccessMiddleware(RequestDelegate next)
         if (!p.StartsWith("/api/lifecycle")) return null;
 
         if (p.Contains("/dashboard")) return "dashboard";
+        if (p.Contains("/asset-requests/")) return "tickets";
+        if (p.StartsWith("/api/lifecycle/tasks/")) return "onboarding|offboarding";
         if (p.Contains("/assignments")) return "assignments";
         if (p.Contains("/write-offs") || p.Contains("/imports/e-waste")) return "writeoffs";
         if (p.Contains("/tasks/") && p.Contains("offboarding")) return "offboarding";
