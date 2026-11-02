@@ -4,6 +4,7 @@ public sealed class AssetRequest
 {
     public int Id { get; set; }
     public string? TicketNumber { get; set; }
+    public string RequestType { get; set; } = "Equipment";
     public string RequesterName { get; set; } = string.Empty;
     public string? RequesterEmail { get; set; }
     public string? TrackingPinHash { get; set; }
