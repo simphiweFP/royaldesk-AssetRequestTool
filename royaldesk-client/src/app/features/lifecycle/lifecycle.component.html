@@ -186,7 +186,7 @@
         </div>
       </section>
 
-      <section *ngIf="section==='reports' && dashboard" class="page-section"><div class="metrics reports"><article><span>Tracked asset value</span><strong>{{dashboard.totalAssetValue | currency:'ZAR':'symbol-narrow':'1.0-0'}}</strong><small>Company equipment recorded</small></article><article class="value"><span>Reusable stock value</span><strong>{{dashboard.availableAssetValue | currency:'ZAR':'symbol-narrow':'1.0-0'}}</strong><small>Available before buying new</small></article><article><span>Utilisation</span><strong>{{dashboard.totalAssets ? (dashboard.assignedAssets / dashboard.totalAssets | percent:'1.0-0') : '0%'}}</strong><small>Assets currently assigned</small></article></div><article class="card value-story"><div class="card-heading"><div class="heading-symbol">▥</div><div><h2>Business Value</h2><p>RoyalDesk turns lifecycle activity into measurable operational value.</p></div></div><div class="flow business-flow"><span>Reuse existing stock</span><b>→</b><span>Avoid unnecessary purchase</span><b>→</b><span>Track value recovered</span></div></article></section>
+      <section *ngIf="section==='reports'" class="page-section"><app-business-value /></section>
     </ng-container>
 
     <footer class="shared-footer">
