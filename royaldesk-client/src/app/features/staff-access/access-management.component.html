@@ -1,0 +1,47 @@
+<section class="access-admin">
+  <div class="error" *ngIf="error">{{ error }}</div>
+
+  <div class="grid">
+    <article class="card">
+      <h2>Create Staff Access</h2>
+      <p>Create a password and choose exactly which RoyalDesk pages this person may open.</p>
+      <label>Name<input [(ngModel)]="createForm.displayName" /></label>
+      <label>Username (optional)<input [(ngModel)]="createForm.username" /></label>
+      <label>Password<input type="password" [(ngModel)]="createForm.password" /></label>
+      <div class="pages">
+        <label *ngFor="let page of pageOptions">
+          <input type="checkbox" [checked]="createForm.pages.includes(page[0])" (change)="toggle(createForm.pages,page[0],$any($event.target).checked)" />
+          {{ page[1] }}
+        </label>
+      </div>
+      <button class="primary" (click)="create()">Create Access</button>
+    </article>
+
+    <article class="card">
+      <h2>Existing Access</h2>
+      <p>Select a person to change pages, disable access or reset their password.</p>
+      <div class="profile-list">
+        <button *ngFor="let profile of profiles" (click)="select(profile)" [class.active]="selected?.id===profile.id">
+          <strong>{{ profile.displayName }}</strong>
+          <span>{{ profile.pages.length }} pages · {{ profile.isActive ? 'Active' : 'Disabled' }}</span>
+        </button>
+      </div>
+
+      <div class="edit" *ngIf="selected">
+        <label>Name<input [(ngModel)]="editForm.displayName" /></label>
+        <label>Username<input [(ngModel)]="editForm.username" /></label>
+        <label class="active-toggle"><input type="checkbox" [(ngModel)]="editForm.isActive" /> Access active</label>
+        <div class="pages">
+          <label *ngFor="let page of pageOptions">
+            <input type="checkbox" [checked]="editForm.pages.includes(page[0])" (change)="toggle(editForm.pages,page[0],$any($event.target).checked)" />
+            {{ page[1] }}
+          </label>
+        </div>
+        <div class="actions">
+          <button class="primary" (click)="save()">Save Access</button>
+          <button class="secondary" (click)="resetPassword()">Reset Password</button>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>
