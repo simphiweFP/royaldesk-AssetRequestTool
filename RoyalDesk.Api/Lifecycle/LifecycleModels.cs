@@ -31,6 +31,14 @@ public sealed class EmployeeDto
     public DateTime? EndDate { get; set; }
 }
 
+public sealed class PublicEmployeeDirectoryDto
+{
+    public string Name { get; set; } = string.Empty;
+    public string? Email { get; set; }
+    public string? Branch { get; set; }
+    public string? Department { get; set; }
+}
+
 public sealed record CreateEmployeeDto(
     string EmployeeNumber, string FirstName, string LastName, string? Email,
     string? Username, string? JobTitle, int? BranchId, int? DepartmentId,
