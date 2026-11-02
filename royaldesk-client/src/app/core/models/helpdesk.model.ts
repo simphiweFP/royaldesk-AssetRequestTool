@@ -1,6 +1,7 @@
 export interface HelpDeskTicket {
   id: number;
   ticketNumber: string;
+  requestType: 'Incident' | 'Equipment' | 'Service';
   requesterName: string;
   requesterEmail?: string;
   branch: string;
