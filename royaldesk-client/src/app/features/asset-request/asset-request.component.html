@@ -74,13 +74,14 @@
             }
             <div class="attachment-list">
               @for (file of attachments; track file; let i = $index) {
-                <div class="attachment-row"><span>{{ file.name }} ({{ (file.size / 1024 / 1024).toFixed(2) }} MB)</span><button type="button" (click)="removeAttachment(i)" [attr.aria-label]="'Remove ' + file.name">Remove</button></div>
+                <div class="attachment-row">@if (previewFor(file); as preview) { <img class="evidence-preview" [src]="preview" [alt]="'Preview of ' + file.name" /> }<span>{{ file.name }} ({{ (file.size / 1024 / 1024).toFixed(2) }} MB)</span><button type="button" (click)="removeAttachment(i)" [attr.aria-label]="'Remove ' + file.name">Remove</button></div>
               }
             </div>
             @if (attachmentError) { <div class="field-error" role="alert">{{ attachmentError }}</div> }
           </div>
         }
         @if (errorMessage) { <div class="api-error"><strong>Request could not be submitted</strong><span>{{ errorMessage }}</span></div> }
+        @if (submitting && uploadPercent > 0) { <div class="upload-progress" role="progressbar" [attr.aria-valuenow]="uploadPercent" aria-valuemin="0" aria-valuemax="100"><div [style.width.%]="uploadPercent"></div></div><p class="upload-caption">Uploading request: {{ uploadPercent }}%</p> }
         @if (!submittedRequest) { <button class="submit" type="submit" [disabled]="submitting">@if (submitting) { Submitting... } @else { <span class="send-icon">➤</span> Submit {{ requestType === 'Incident' ? 'Problem' : requestType === 'Service' ? 'IT Service Request' : 'Equipment Request' }} }</button> }
       </form>
     </section>
