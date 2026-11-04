@@ -42,6 +42,11 @@ export class StaffAccessService {
     return this.http.post<StaffProfile>(`${this.base}/bootstrap`, payload, { withCredentials: true });
   }
 
+  login(username: string, password: string): Observable<StaffSession> {
+    return this.http.post<StaffSession>(`${this.base}/login`, { username, password }, { withCredentials: true })
+      .pipe(tap(session => this.sessionSubject.next(session)));
+  }
+
   publicProfiles(): Observable<StaffSelector[]> {
     return this.http.get<StaffSelector[]>(`${this.base}/profiles/public`, { withCredentials: true });
   }
