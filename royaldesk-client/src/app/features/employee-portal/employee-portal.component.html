@@ -41,8 +41,7 @@
   </section>
 
   <section class="embedded" *ngIf="mode==='request'">
-    <button class="back" type="button" (click)="mode='home'">← Employee Portal</button>
-    <app-asset-request [requestType]="requestType"></app-asset-request>
+    <app-asset-request [requestType]="requestType" (backToPortal)="mode='home'"></app-asset-request>
   </section>
 
   <section class="embedded tracking" *ngIf="mode==='track'">
