@@ -15,31 +15,10 @@ public sealed class StaffAccessController(StaffAccessService service) : Controll
     public Task<StaffProfileDto> Bootstrap(BootstrapStaffDto dto, CancellationToken ct)
         => service.BootstrapAsync(dto, ct);
 
-    [HttpGet("profiles/public")]
-    public async Task<IReadOnlyList<StaffSelectorDto>> PublicProfiles(CancellationToken ct)
-        => (await service.GetProfilesAsync(true, ct))
-            .Select(x => new StaffSelectorDto { Id = x.Id, DisplayName = x.DisplayName })
-            .ToList();
-
     [HttpPost("login")]
     public async Task<ActionResult<StaffSessionDto>> Login(UsernameLoginDto dto, CancellationToken ct)
     {
         var result = await service.LoginAsync(dto.Username, dto.Password, ct);
-        Response.Cookies.Append(StaffAccessMiddleware.CookieName, result.RawToken, new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.None,
-            Path = "/",
-            Expires = result.Session.ExpiresAtUtc
-        });
-        return Ok(result.Session);
-    }
-
-    [HttpPost("unlock")]
-    public async Task<ActionResult<StaffSessionDto>> Unlock(UnlockStaffDto dto, CancellationToken ct)
-    {
-        var result = await service.UnlockAsync(dto, ct);
         Response.Cookies.Append(StaffAccessMiddleware.CookieName, result.RawToken, new CookieOptions
         {
             HttpOnly = true,
