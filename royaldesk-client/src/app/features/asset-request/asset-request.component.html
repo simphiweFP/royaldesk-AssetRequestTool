@@ -1,32 +1,4 @@
 <div class="page">
-  <header class="topbar">
-    <div class="topbar-inner">
-      <div class="brand-area">
-        <img class="royal-logo" src="assets/images/royal-tyres-logo-final.png" alt="Royal Tyres" />
-        <div class="brand-separator"></div>
-        <div class="app-title"><strong>RoyalDesk</strong><span>{{ pageTitle }}</span></div>
-      </div>
-      <div class="current-user"><div class="user-icon">{{ currentUser.initials }}</div><span>{{ currentUser.name }}</span></div>
-    </div>
-  </header>
-
-  <section class="hero">
-    <img class="hero-background" src="assets/images/royal_tyres_workshop_in_focus.png" alt="Royal Tyres workshop" />
-    <div class="hero-overlay"></div>
-    <div class="hero-inner">
-      <div class="hero-copy">
-        <h1><span class="royal">Royal</span><span class="desk">Desk</span></h1>
-        <h2>{{ pageTitle }}</h2>
-        <p>{{ pageDescription }}</p>
-        <div class="benefits">
-          <div class="benefit"><div class="benefit-icon">⚙</div><span>Simple<br />Request</span></div>
-          <div class="benefit divider"><div class="benefit-icon">👥</div><span>Clear IT<br />Ownership</span></div>
-          <div class="benefit divider"><div class="benefit-icon bars">▮▮▮</div><span>Track<br />Progress</span></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <main class="content">
     <section class="card request-card">
       <div class="card-heading">
@@ -90,6 +62,24 @@
           <textarea formControlName="additionalNotes" placeholder="Add any extra detail that may help IT..."></textarea>
         </div>
 
+        @if (showsAttachments) {
+          <div class="field evidence-field">
+            <label>{{ isStockCode ? 'Stock Creation Supporting Document' : 'Supporting Evidence' }} @if (isStockCode) { <span>*</span> } @else { <small>(Optional)</small> }</label>
+            <p class="evidence-help">{{ isStockCode ? 'Upload the document IT needs to create the stock code (PDF, Word or Excel).' : 'Attach a file or photo, or take a live picture of the issue.' }}</p>
+            <input type="file" [accept]="isStockCode ? '.pdf,.doc,.docx,.xls,.xlsx' : '.pdf,.doc,.docx,.xls,.xlsx,image/jpeg,image/png,image/webp'" multiple (change)="onFilesSelected($event)" aria-label="Attach supporting files" />
+            @if (requestType === 'Incident') {
+              <label class="camera-action">Take a photo
+                <input type="file" accept="image/*" capture="environment" (change)="onFilesSelected($event)" aria-label="Take a photo of the problem" />
+              </label>
+            }
+            <div class="attachment-list">
+              @for (file of attachments; track file; let i = $index) {
+                <div class="attachment-row"><span>{{ file.name }} ({{ (file.size / 1024 / 1024).toFixed(2) }} MB)</span><button type="button" (click)="removeAttachment(i)" [attr.aria-label]="'Remove ' + file.name">Remove</button></div>
+              }
+            </div>
+            @if (attachmentError) { <div class="field-error" role="alert">{{ attachmentError }}</div> }
+          </div>
+        }
         @if (errorMessage) { <div class="api-error"><strong>Request could not be submitted</strong><span>{{ errorMessage }}</span></div> }
         @if (!submittedRequest) { <button class="submit" type="submit" [disabled]="submitting">@if (submitting) { Submitting... } @else { <span class="send-icon">➤</span> Submit {{ requestType === 'Incident' ? 'Problem' : requestType === 'Service' ? 'IT Service Request' : 'Equipment Request' }} }</button> }
       </form>
@@ -106,6 +96,7 @@
             <div class="summary-row"><span class="summary-name">Department</span><strong>{{ requestPreview.department || 'Not selected' }}</strong></div>
             <div class="summary-row"><span class="summary-name">{{ categoryLabel }}</span><strong>{{ requestPreview.itemType || 'Not selected' }}</strong></div>
             @if (isEquipment) { <div class="summary-row"><span class="summary-name">Quantity</span><strong>{{ requestPreview.quantity }}</strong></div> }
+            @if (showsAttachments) { <div class="summary-row"><span class="summary-name">Attachments</span><strong>{{ attachments.length }} selected</strong></div> }
             <div class="summary-row no-border"><span class="summary-name">Details</span><strong>{{ requestPreview.reason || 'Not entered' }}</strong></div>
           </div>
         </div>
@@ -118,5 +109,4 @@
     </section>
   </main>
 
-  <footer><div class="footer-inner"><img src="assets/images/royal-tyres-logo-footer-final.png" alt="Royal Tyres" class="footer-logo" /><div class="footer-middle"><strong>RoyalDesk &nbsp;|&nbsp; {{ pageTitle }}</strong><span>Your trusted tyre workshop since 1939.</span></div><div class="footer-right"><span>© 2026 Royal Tyres. All rights reserved.</span></div></div></footer>
 </div>
