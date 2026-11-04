@@ -86,3 +86,29 @@ button, input { font: inherit; }
   .access-shell { padding: 20px 16px; }
   .portal-hero h2 { font-size: 22px; }
 }
+
+
+/* Same original corporate footer as the employee and staff workspaces. */
+.access-page { display: flex; flex-direction: column; }
+.access-content { flex: 1 0 auto; padding-bottom: 12px; }
+.royaldesk-footer {
+  margin-top: auto; min-height: 105px;
+  background: linear-gradient(90deg, #174899, #0e3c8a, #052a70);
+  color: white;
+}
+.royaldesk-footer-inner {
+  width: min(1220px, calc(100% - 64px)); min-height: 105px; margin: 0 auto;
+  display: grid; grid-template-columns: 290px 1fr 350px; gap: 16px; align-items: center;
+}
+.royaldesk-footer img { width: 220px; height: 67px; object-fit: contain; object-position: left center; }
+.royaldesk-footer-middle { display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 12px; }
+.royaldesk-footer-middle span, .royaldesk-footer-right { font-size: 10px; opacity: .85; }
+.royaldesk-footer-right { text-align: right; }
+@media (max-width: 760px) {
+  .royaldesk-footer-inner {
+    width: calc(100% - 32px); padding: 18px 0;
+    grid-template-columns: 1fr; justify-items: center; text-align: center;
+  }
+  .royaldesk-footer img { object-position: center; }
+  .royaldesk-footer-right { text-align: center; }
+}
