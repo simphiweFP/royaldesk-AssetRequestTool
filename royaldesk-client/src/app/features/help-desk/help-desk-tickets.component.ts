@@ -22,6 +22,7 @@ export class HelpDeskTicketsComponent implements OnInit {
   mode: 'team' | 'track' = 'team';
   tickets: HelpDeskTicket[] = [];
   history: TicketStatusHistory[] = [];
+  attachments: { id: number; fileName: string; contentType: string; sizeBytes: number }[] = [];
   selected?: HelpDeskTicket;
   statusFilter = 'All';
   requestTypeFilter = 'All';
@@ -70,7 +71,25 @@ export class HelpDeskTicketsComponent implements OnInit {
   select(ticket: HelpDeskTicket): void {
     this.selected = ticket;
     this.history = [];
+    this.attachments = [];
+    this.api.attachments(ticket.id).subscribe({ next: files => this.attachments = files, error: () => { this.attachments = []; this.error = 'Could not load ticket attachments.'; } });
     this.api.history(ticket.id).subscribe({ next: history => this.history = history, error: () => this.history = [] });
+  }
+
+  downloadAttachment(ticketId: number, file: { id: number; fileName: string }): void {
+    this.api.downloadAttachment(ticketId, file.id).subscribe({
+      next: blob => {
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = file.fileName;
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      },
+      error: () => this.error = 'Could not download this attachment.'
+    });
   }
 
   assignToMe(ticket: HelpDeskTicket): void {
