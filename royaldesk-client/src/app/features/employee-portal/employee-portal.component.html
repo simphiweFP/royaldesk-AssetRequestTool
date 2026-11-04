@@ -8,16 +8,16 @@
     <div>
       <h1><span>Royal</span>Desk</h1>
       <h2>Your IT support starts here.</h2>
-      <p>Report an issue, request equipment, access IT services or track progress — all in one place.</p>
-      <p>Choose what you need below to get started.</p>
+      <p>Having an IT problem or need something from IT? RoyalDesk makes it easy to report an issue, request equipment or services, and follow progress without having to chase for updates.</p>
+      <p class="hero-guidance">Choose what you need below. We’ll guide you through the request.</p>
     </div>
   </section>
 
   <section class="portal-actions" *ngIf="mode==='home'">
-    <button type="button" (click)="openRequest('Incident')"><strong>Report a Problem</strong><span>Something is not working: SAP, printer, network, email, PC or another IT issue.</span></button>
-    <button type="button" (click)="openRequest('Equipment')"><strong>Request Equipment</strong><span>Laptop, monitor, keyboard, headset, printer or other IT equipment.</span></button>
-    <button type="button" (click)="openRequest('Service')"><strong>Request IT Service</strong><span>Access, software, stock code creation, shared folders, advice or another IT service.</span></button>
-    <button type="button" (click)="mode='track'"><strong>Track My Request</strong><span>Check progress, technician ownership and public updates.</span></button>
+    <button type="button" (click)="openRequest('Incident')"><strong>Report a Problem</strong><span>Something is not working: SAP, printer, network, email, PC or another IT issue.</span><small>Tell us what’s wrong and attach a photo if needed.</small></button>
+    <button type="button" (click)="openRequest('Equipment')"><strong>Request Equipment</strong><span>Laptop, monitor, keyboard, headset, printer or other IT equipment.</span><small>Request the equipment you need for work.</small></button>
+    <button type="button" (click)="openRequest('Service')"><strong>Request IT Service</strong><span>Access, software, stock code creation, shared folders, advice or another IT service.</span><small>Select a service and provide the required details.</small></button>
+    <button type="button" (click)="mode='track'"><strong>Track My Request</strong><span>Check progress, technician ownership and public updates.</span><small>See who is handling your request and the latest progress.</small></button>
   </section>
 
   <section class="embedded" *ngIf="mode==='request'">
@@ -29,4 +29,16 @@
     <button class="back" type="button" (click)="mode='home'">← Employee Portal</button>
     <app-ticket-tracking></app-ticket-tracking>
   </section>
+  <footer class="royaldesk-footer">
+    <div class="royaldesk-footer-inner">
+      <img src="assets/images/royal-tyres-logo-footer-final.png" alt="Royal Tyres" />
+      <div class="royaldesk-footer-middle">
+        <strong>RoyalDesk &nbsp;|&nbsp; Employee IT Portal</strong>
+        <span>Your trusted tyre workshop since 1939.</span>
+      </div>
+      <div class="royaldesk-footer-right">
+        <span>© 2026 Royal Tyres. All rights reserved.</span>
+      </div>
+    </div>
+  </footer>
 </div>
