@@ -13,11 +13,31 @@
     </div>
   </section>
 
-  <section class="portal-actions" *ngIf="mode==='home'">
-    <button type="button" (click)="openRequest('Incident')"><strong>Report a Problem</strong><span>Something is not working: SAP, printer, network, email, PC or another IT issue.</span><small>Tell us what’s wrong and attach a photo if needed.</small></button>
-    <button type="button" (click)="openRequest('Equipment')"><strong>Request Equipment</strong><span>Laptop, monitor, keyboard, headset, printer or other IT equipment.</span><small>Request the equipment you need for work.</small></button>
-    <button type="button" (click)="openRequest('Service')"><strong>Request IT Service</strong><span>Access, software, stock code creation, shared folders, advice or another IT service.</span><small>Select a service and provide the required details.</small></button>
-    <button type="button" (click)="mode='track'"><strong>Track My Request</strong><span>Check progress, technician ownership and public updates.</span><small>See who is handling your request and the latest progress.</small></button>
+  <section class="portal-actions" *ngIf="mode==='home'" aria-label="Choose a RoyalDesk service">
+    <button class="option-card" type="button" (click)="openRequest('Incident')">
+      <svg class="option-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4l-6.2 6.2a2 2 0 0 0 2.8 2.8l6.2-6.2a4 4 0 0 0 5.4-5.4l-2.4 2.4-2.8-.8-.8-2.8z"/></svg>
+      <strong>Report a Problem</strong>
+      <span>Something is not working: SAP, printer, network, email, PC or another IT issue.</span>
+      <small>Tell us what’s wrong and attach a photo if needed.</small>
+    </button>
+    <button class="option-card" type="button" (click)="openRequest('Equipment')">
+      <svg class="option-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>
+      <strong>Request Equipment</strong>
+      <span>Laptop, monitor, keyboard, headset, printer or other IT equipment.</span>
+      <small>Request the equipment you need for work.</small>
+    </button>
+    <button class="option-card" type="button" (click)="openRequest('Service')">
+      <svg class="option-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v3m0 12v3M3 12h3m12 0h3M5.6 5.6l2.1 2.1m8.6 8.6 2.1 2.1m0-12.8-2.1 2.1m-8.6 8.6-2.1 2.1"/><circle cx="12" cy="12" r="4"/></svg>
+      <strong>Request IT Service</strong>
+      <span>Access, software, stock code creation, shared folders, advice or another IT service.</span>
+      <small>Select a service and provide the required details.</small>
+    </button>
+    <button class="option-card" type="button" (click)="mode='track'">
+      <svg class="option-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4.5h6M9 10h6M9 14h6M9 18h4"/></svg>
+      <strong>Track My Request</strong>
+      <span>Check progress, technician ownership and public updates.</span>
+      <small>See who is handling your request and the latest progress.</small>
+    </button>
   </section>
 
   <section class="embedded" *ngIf="mode==='request'">
