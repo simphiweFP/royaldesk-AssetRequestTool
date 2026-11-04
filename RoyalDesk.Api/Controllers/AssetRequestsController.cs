@@ -46,6 +46,10 @@ public sealed class AssetRequestsController(
         if (errors.Count > 0)
             return ValidationProblem(new ValidationProblemDetails(errors));
 
+        if (request.RequestType.Equals("Service", StringComparison.OrdinalIgnoreCase)
+            && request.ItemType.Equals("Stock Code Creation", StringComparison.OrdinalIgnoreCase))
+            return BadRequest(new { detail = "Stock code creation requires a supporting document. Use the evidence upload form." });
+
         var requestedBy = string.IsNullOrWhiteSpace(request.RequesterName) ? "RoyalDesk employee" : request.RequesterName.Trim();
         var result = await service.CreateAsync(request, requestedBy, cancellationToken);
         return StatusCode(StatusCodes.Status201Created, result);
