@@ -72,6 +72,14 @@
           <div><span>{{ selected.requestType==='Equipment' ? 'Equipment' : selected.requestType==='Service' ? 'Service' : 'Problem Category' }}</span><strong>{{ selected.itemType }}</strong></div>
           <div><span>Requested</span><strong>{{ selected.requestedAtUtc | date:'medium' }}</strong></div>
         </div>
+        <div class="ticket-attachments">
+          <h3>Supporting Attachments</h3>
+          <p *ngIf="attachments.length===0">No supporting documents or evidence attached.</p>
+          <div class="ticket-attachment-row" *ngFor="let file of attachments">
+            <span>{{ file.fileName }} ({{ (file.sizeBytes / 1024 / 1024).toFixed(2) }} MB)</span>
+            <button type="button" (click)="downloadAttachment(selected.id, file)">Download</button>
+          </div>
+        </div>
       </article>
 
       <article class="ticket-card history-card">
