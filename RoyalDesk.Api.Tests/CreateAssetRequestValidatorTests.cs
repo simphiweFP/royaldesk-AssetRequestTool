@@ -10,6 +10,7 @@ public sealed class CreateAssetRequestValidatorTests
     {
         var request = new CreateAssetRequestDto
         {
+            RequesterName = "Test Employee",
             Branch = "Durban Commercial",
             Department = "Workshop",
             ItemType = "Barcode Scanner",
@@ -25,6 +26,7 @@ public sealed class CreateAssetRequestValidatorTests
     {
         var request = new CreateAssetRequestDto
         {
+            RequesterName = "Test Employee",
             Branch = "Phoenix",
             Department = "IT",
             ItemType = "Laptop",
@@ -35,7 +37,7 @@ public sealed class CreateAssetRequestValidatorTests
         var errors = new CreateAssetRequestValidator().Validate(request);
 
         Assert.Equal(
-            "Please select a reason for the request.",
+            "Please select a reason for the equipment request.",
             Assert.Single(errors[nameof(request.Reason)]));
     }
 
@@ -44,6 +46,7 @@ public sealed class CreateAssetRequestValidatorTests
     {
         var request = new CreateAssetRequestDto
         {
+            RequesterName = "Test Employee",
             Branch = "Phoenix",
             Department = "IT",
             ItemType = "Laptop",
@@ -54,7 +57,7 @@ public sealed class CreateAssetRequestValidatorTests
         var errors = new CreateAssetRequestValidator().Validate(request);
 
         Assert.Equal(
-            "Please select a valid reason for the request.",
+            "Please select a valid equipment request reason.",
             Assert.Single(errors[nameof(request.Reason)]));
     }
 }
