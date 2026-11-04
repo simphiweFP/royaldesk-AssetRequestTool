@@ -54,6 +54,7 @@ builder.Services.Configure<SmtpOptions>(options =>
 builder.Services.AddSingleton<IDbConnectionFactory>(new SqliteConnectionFactory(connectionString));
 builder.Services.AddScoped<IAssetRequestRepository, AssetRequestRepository>();
 builder.Services.AddScoped<IAssetRequestService, AssetRequestService>();
+builder.Services.AddScoped<RequestAttachmentService>();
 builder.Services.AddScoped<ILifecycleRepository, LifecycleRepository>();
 builder.Services.AddScoped<ILifecycleService, LifecycleService>();
 builder.Services.AddScoped<IHelpDeskRepository, HelpDeskRepository>();
