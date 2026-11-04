@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using RoyalDesk.Api.HelpDesk;
+using RoyalDesk.Api.Services;
+using RoyalDesk.Api.StaffAccess;
 
 namespace RoyalDesk.Api.Controllers;
 
 [ApiController]
 [Route("api/helpdesk")]
-public sealed class HelpDeskController(HelpDeskService service, JustIctEscalationService escalationService) : ControllerBase
+public sealed class HelpDeskController(HelpDeskService service, JustIctEscalationService escalationService, RequestAttachmentService attachments) : ControllerBase
 {
     private string Actor => User.Identity?.Name ?? "unknown";
 
@@ -18,6 +20,21 @@ public sealed class HelpDeskController(HelpDeskService service, JustIctEscalatio
     {
         var ticket = await service.GetTicketAsync(id, ct);
         return ticket is null ? NotFound() : Ok(ticket);
+    }
+
+    [HttpGet("tickets/{id:int}/attachments")]
+    [RequirePage("tickets")]
+    public Task<IReadOnlyList<AttachmentInfo>> Attachments(int id, CancellationToken ct)
+        => attachments.ListAsync(id, ct);
+
+    [HttpGet("tickets/{id:int}/attachments/{attachmentId:int}")]
+    [RequirePage("tickets")]
+    public async Task<IActionResult> DownloadAttachment(int id, int attachmentId, CancellationToken ct)
+    {
+        var attachment = await attachments.ReadAsync(id, attachmentId, ct);
+        if (attachment is null) return NotFound();
+        Response.Headers["X-Content-Type-Options"] = "nosniff";
+        return File(attachment.Content, "application/octet-stream", attachment.FileName);
     }
 
     [HttpGet("tickets/{id:int}/history")]
