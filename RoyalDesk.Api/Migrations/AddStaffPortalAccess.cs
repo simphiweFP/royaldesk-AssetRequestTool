@@ -2,7 +2,7 @@ using FluentMigrator;
 
 namespace RoyalDesk.Api.Migrations;
 
-[Migration(202611020001)]
+[Migration(202611020003)]
 public sealed class AddStaffPortalAccess : Migration
 {
     public override void Up()
