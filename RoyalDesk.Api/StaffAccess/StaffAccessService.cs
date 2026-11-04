@@ -123,6 +123,21 @@ public sealed class StaffAccessService(IDbConnectionFactory connectionFactory, I
         await tx.CommitAsync(ct);
     }
 
+    public async Task<(StaffSessionDto Session, string RawToken)> LoginAsync(string username, string password, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+            throw new UnauthorizedAccessException("Incorrect username or password.");
+        await using var connection = connectionFactory.CreateConnection();
+        await connection.OpenAsync(ct);
+        var id = await connection.QuerySingleOrDefaultAsync<int?>(new CommandDefinition("""
+            SELECT Id FROM StaffPortalAccess
+            WHERE lower(coalesce(nullif(trim(Username), ''), trim(DisplayName))) = lower(@Username)
+              AND IsActive = 1 LIMIT 1;
+            """, new { Username = username.Trim() }, cancellationToken: ct));
+        if (!id.HasValue) throw new UnauthorizedAccessException("Incorrect username or password.");
+        return await UnlockAsync(new UnlockStaffDto { StaffAccessId = id.Value, Password = password }, ct);
+    }
+
     public async Task<(StaffSessionDto Session, string RawToken)> UnlockAsync(UnlockStaffDto dto, CancellationToken ct = default)
     {
         await using var connection = connectionFactory.CreateConnection();
