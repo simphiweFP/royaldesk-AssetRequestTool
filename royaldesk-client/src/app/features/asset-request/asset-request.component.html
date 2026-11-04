@@ -106,7 +106,7 @@
     <section class="right-column">
       @if (!submittedRequest) {
         <div class="card summary-card">
-          <div class="card-heading summary-heading"><div class="heading-symbol">▤</div><div><h3>Your Request</h3><p>Only the information relevant to this request is shown here.</p></div></div>
+          <div class="card-heading summary-heading"><div class="heading-symbol">▤</div><div class="summary-heading-copy"><h3>Your Request</h3><p>Only the information relevant to this request is shown here.</p></div><button class="summary-back-button" type="button" (click)="backToPortal.emit()">← Employee Portal</button></div>
           <div class="summary-list">
             <div class="summary-row"><span class="summary-name">Type</span><strong>{{ requestType }}</strong></div>
             <div class="summary-row"><span class="summary-name">Employee</span><strong>{{ requestPreview.requesterName || 'Not entered' }}</strong></div>
@@ -120,6 +120,7 @@
         </div>
         <div class="information-box"><div class="info-circle">i</div><div>Once submitted, RoyalDesk sends this to the IT team as a tracked ticket.<br />You can follow progress using Track My Request.</div><div class="tyre-decoration"></div></div>
       } @else {
+        <button class="summary-back-button success-back-button" type="button" (click)="backToPortal.emit()">← Employee Portal</button>
         <div class="success-card"><div class="success-icon">✓</div><div class="success-copy"><h3>Request Submitted Successfully!</h3><p>Your {{ submittedRequest.requestType }} request has been created.</p></div><div class="request-number"><span>Ticket</span><strong>{{ submittedRequest.ticketNumber }}</strong></div></div>
         @if (submittedRequest.trackingPin) { <div class="information-box"><div class="info-circle">#</div><div><strong>Tracking PIN: {{ submittedRequest.trackingPin }}</strong><br />Keep this PIN with your ticket number to view the full request later.</div><div class="tyre-decoration"></div></div> }
         <button class="outline-button another-request" type="button" (click)="submitAnotherRequest()">+ Submit Another {{ requestType === 'Incident' ? 'Problem' : 'Request' }}</button>
