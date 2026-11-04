@@ -18,6 +18,14 @@ export class HelpDeskService {
     return this.http.get<HelpDeskTicket>(`${this.base}/tickets/${id}`, { withCredentials: true });
   }
 
+  attachments(id: number): Observable<{ id: number; fileName: string; contentType: string; sizeBytes: number }[]> {
+    return this.http.get<{ id: number; fileName: string; contentType: string; sizeBytes: number }[]>(`${this.base}/tickets/${id}/attachments`, { withCredentials: true });
+  }
+
+  downloadAttachment(ticketId: number, attachmentId: number): Observable<Blob> {
+    return this.http.get(`${this.base}/tickets/${ticketId}/attachments/${attachmentId}`, { withCredentials: true, responseType: 'blob' });
+  }
+
   history(id: number): Observable<TicketStatusHistory[]> {
     return this.http.get<TicketStatusHistory[]>(`${this.base}/tickets/${id}/history`, { withCredentials: true });
   }
