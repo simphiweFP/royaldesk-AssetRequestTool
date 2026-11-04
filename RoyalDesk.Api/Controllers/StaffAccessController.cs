@@ -21,6 +21,21 @@ public sealed class StaffAccessController(StaffAccessService service) : Controll
             .Select(x => new StaffSelectorDto { Id = x.Id, DisplayName = x.DisplayName })
             .ToList();
 
+    [HttpPost("login")]
+    public async Task<ActionResult<StaffSessionDto>> Login(UsernameLoginDto dto, CancellationToken ct)
+    {
+        var result = await service.LoginAsync(dto.Username, dto.Password, ct);
+        Response.Cookies.Append(StaffAccessMiddleware.CookieName, result.RawToken, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.None,
+            Path = "/",
+            Expires = result.Session.ExpiresAtUtc
+        });
+        return Ok(result.Session);
+    }
+
     [HttpPost("unlock")]
     public async Task<ActionResult<StaffSessionDto>> Unlock(UnlockStaffDto dto, CancellationToken ct)
     {
@@ -81,4 +96,11 @@ public sealed class StaffAccessController(StaffAccessService service) : Controll
         await service.ResetPasswordAsync(id, dto.Password, ct);
         return NoContent();
     }
+}
+
+
+public sealed class UsernameLoginDto
+{
+    public string Username { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
 }
