@@ -107,3 +107,9 @@ tbody tr.selected { background:#f7f9fd; }
   .email-editor { grid-column:1; }
   .modal-backdrop { padding:14px; }
 }
+
+.ticket-attachments { padding: 16px 18px; border-top: 1px solid #dce2ea; }
+.ticket-attachments h3 { color: #0f347d; font-size: 15px; margin: 0 0 10px; }
+.ticket-attachments p { color: #69758b; font-size: 12px; }
+.ticket-attachment-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid #eef1f5; font-size: 12px; overflow-wrap: anywhere; }
+.ticket-attachment-row button { border: 1px solid #143f91; background: white; color: #143f91; border-radius: 6px; padding: 8px 12px; cursor: pointer; }
