@@ -1114,3 +1114,28 @@ footer {
 .upload-progress { height: 7px; background: #e8edf6; border-radius: 8px; overflow: hidden; margin: 12px 0 4px; }
 .upload-progress > div { background: #143f91; height: 100%; transition: width .15s; }
 .upload-caption { margin: 0 0 10px; color: #69758b; font-size: 12px; }
+
+
+/* Bring back the pre-restyling RoyalDesk workshop canvas without duplicating the portal header/footer. */
+.page .hero {
+  width: 100vw;
+  max-width: none;
+  margin-left: calc(50% - 50vw);
+  height: 325px;
+  margin-bottom: 22px;
+}
+.page .hero-inner { width: min(1220px, calc(100% - 64px)); }
+.page .content {
+  width: min(1220px, 100%);
+  grid-template-columns: minmax(0, 520px) minmax(0, 1fr);
+  padding: 0 0 30px;
+}
+@media (max-width: 900px) {
+  .page .content { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 650px) {
+  .page .hero { height: auto; min-height: 315px; }
+  .page .hero-inner { width: calc(100% - 40px); padding: 28px 0; }
+  .page .hero-copy { width: min(455px, 100%); }
+  .page .benefit { width: 33.333%; }
+}
