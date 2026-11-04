@@ -41,6 +41,37 @@ export class AssetRequestComponent {
   errorMessage = '';
   fieldErrors: Record<string,string> = {};
   showContactModal = false;
+  attachments: File[] = [];
+  attachmentError = '';
+  readonly maxAttachments = 5;
+  readonly maxAttachmentBytes = 8 * 1024 * 1024;
+  get isStockCode(): boolean { return this.requestType === 'Service' && this.form.controls.itemType.value === 'Stock Code Creation'; }
+  get showsAttachments(): boolean { return this.requestType === 'Incident' || this.isStockCode; }
+
+  onFilesSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const selected = Array.from(input.files ?? []);
+    input.value = '';
+    this.attachmentError = '';
+    const allowed = this.isStockCode
+      ? ['.pdf', '.doc', '.docx', '.xls', '.xlsx']
+      : ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.jpg', '.jpeg', '.png', '.webp'];
+    for (const file of selected) {
+      const ext = file.name.slice(file.name.lastIndexOf('.')).toLowerCase();
+      if (!allowed.includes(ext) || file.size === 0 || file.size > this.maxAttachmentBytes) {
+        this.attachmentError = 'Select an allowed file smaller than 8 MB.';
+        return;
+      }
+      if (this.attachments.length >= this.maxAttachments ||
+          this.attachments.reduce((sum, entry) => sum + entry.size, 0) + file.size > 25 * 1024 * 1024) {
+        this.attachmentError = 'Maximum 5 files and 25 MB per request.';
+        return;
+      }
+      this.attachments.push(file);
+    }
+  }
+  removeAttachment(index: number): void { this.attachments.splice(index, 1); this.attachmentError = ''; }
+
 
   constructor() {
     this.lifecycleService.publicDirectory().subscribe({ next: employees => this.employees = employees, error: () => this.employees = [] });
@@ -92,7 +123,13 @@ export class AssetRequestComponent {
   closeContactModal(): void { this.showContactModal=false; }
 
   submit(): void {
-    this.errorMessage=''; this.fieldErrors={}; this.submitting=true;
+    this.errorMessage=''; this.fieldErrors={};
+    if (this.isStockCode && !this.attachments.length) {
+      this.attachmentError = 'Upload the stock code creation document before submitting.';
+      return;
+    }
+    if (this.attachmentError) return;
+    this.submitting=true;
     const value=this.form.getRawValue();
     const notes=value.additionalNotes.trim();
     const reason = this.isEquipment
@@ -110,14 +147,14 @@ export class AssetRequestComponent {
       reason
     };
 
-    this.service.create(request).pipe(finalize(()=>this.submitting=false)).subscribe({
-      next:response=>this.submittedRequest=response,
-      error:(error:HttpErrorResponse)=>{ if(error.status===400){this.setValidationErrors(error);return;} this.errorMessage='The request could not be submitted. Confirm that the API is running and try again.'; }
+    this.service.createWithEvidence(request, this.showsAttachments ? this.attachments : []).pipe(finalize(()=>this.submitting=false)).subscribe({
+      next:response=>{this.submittedRequest=response;this.attachments=[];},
+      error:(error:HttpErrorResponse)=>{ if(error.status===400){this.setValidationErrors(error);return;} this.errorMessage=error.error?.detail || 'The request could not be submitted. Confirm that the API is running and try again.'; }
     });
   }
 
   submitAnotherRequest(): void {
-    this.submittedRequest=null; this.errorMessage=''; this.fieldErrors={};
+    this.submittedRequest=null; this.errorMessage=''; this.fieldErrors={}; this.attachments=[]; this.attachmentError='';
     this.form.reset({requesterName:'',requesterEmail:'',branch:'',department:'',itemType:'',quantity:1,reason:'',additionalNotes:''});
   }
 
