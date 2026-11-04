@@ -43,6 +43,8 @@ export class AssetRequestComponent {
   showContactModal = false;
   attachments: File[] = [];
   attachmentError = '';
+  uploadPercent = 0;
+  readonly imagePreviews = new Map<File, string>();
   readonly maxAttachments = 5;
   readonly maxAttachmentBytes = 8 * 1024 * 1024;
   get isStockCode(): boolean { return this.requestType === 'Service' && this.form.controls.itemType.value === 'Stock Code Creation'; }
@@ -68,9 +70,22 @@ export class AssetRequestComponent {
         return;
       }
       this.attachments.push(file);
+      if (file.type.startsWith('image/')) this.imagePreviews.set(file, URL.createObjectURL(file));
     }
   }
-  removeAttachment(index: number): void { this.attachments.splice(index, 1); this.attachmentError = ''; }
+  previewFor(file: File): string | undefined { return this.imagePreviews.get(file); }
+  private clearImagePreviews(): void {
+    this.imagePreviews.forEach(url => URL.revokeObjectURL(url));
+    this.imagePreviews.clear();
+  }
+  removeAttachment(index: number): void {
+    const file = this.attachments[index];
+    const url = this.imagePreviews.get(file);
+    if (url) URL.revokeObjectURL(url);
+    this.imagePreviews.delete(file);
+    this.attachments.splice(index, 1);
+    this.attachmentError = '';
+  }
 
 
   constructor() {
@@ -129,7 +144,7 @@ export class AssetRequestComponent {
       return;
     }
     if (this.attachmentError) return;
-    this.submitting=true;
+    this.submitting=true; this.uploadPercent=0;
     const value=this.form.getRawValue();
     const notes=value.additionalNotes.trim();
     const reason = this.isEquipment
@@ -147,14 +162,14 @@ export class AssetRequestComponent {
       reason
     };
 
-    this.service.createWithEvidence(request, this.showsAttachments ? this.attachments : []).pipe(finalize(()=>this.submitting=false)).subscribe({
-      next:response=>{this.submittedRequest=response;this.attachments=[];},
+    this.service.createWithEvidence(request, this.showsAttachments ? this.attachments : [], percent => this.uploadPercent=percent).pipe(finalize(()=>this.submitting=false)).subscribe({
+      next:response=>{this.submittedRequest=response;this.clearImagePreviews();this.attachments=[];},
       error:(error:HttpErrorResponse)=>{ if(error.status===400){this.setValidationErrors(error);return;} this.errorMessage=error.error?.detail || 'The request could not be submitted. Confirm that the API is running and try again.'; }
     });
   }
 
   submitAnotherRequest(): void {
-    this.submittedRequest=null; this.errorMessage=''; this.fieldErrors={}; this.attachments=[]; this.attachmentError='';
+    this.submittedRequest=null; this.errorMessage=''; this.fieldErrors={}; this.clearImagePreviews(); this.attachments=[]; this.attachmentError=''; this.uploadPercent=0;
     this.form.reset({requesterName:'',requesterEmail:'',branch:'',department:'',itemType:'',quantity:1,reason:'',additionalNotes:''});
   }
 
