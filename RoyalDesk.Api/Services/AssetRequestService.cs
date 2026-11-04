@@ -10,7 +10,7 @@ namespace RoyalDesk.Api.Services;
 public sealed class AssetRequestService(
     IAssetRequestRepository repository,
     IAssetRequestAuditLogger auditLogger,
-    TicketNotificationService notifications) : IAssetRequestService
+    TicketNotificationService? notifications = null) : IAssetRequestService
 {
     public async Task<AssetRequestResponseDto> CreateAsync(
         CreateAssetRequestDto request,
@@ -60,7 +60,7 @@ public sealed class AssetRequestService(
         };
 
         await auditLogger.LogCreatedAsync(response, cancellationToken);
-        await notifications.TicketCreatedAsync(
+        if (notifications is not null) await notifications.TicketCreatedAsync(
             entity.Id,
             response.TicketNumber,
             entity.RequesterName,
