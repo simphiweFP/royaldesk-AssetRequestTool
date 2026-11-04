@@ -2,39 +2,35 @@
   <div class="access-shell">
     <img src="assets/images/royal-tyres-logo-final.png" alt="Royal Tyres" class="logo" />
 
-    <ng-container *ngIf="!bootstrapRequired; else setupBlock">
+    <ng-container *ngIf="!setupMode">
       <h1>RoyalDesk Staff Access</h1>
-      <p>Enter the password created for your access profile. You will only see the RoyalDesk pages assigned to you.</p>
-
-      <div class="error" *ngIf="error">{{ error }}</div>
-      <div class="loading" *ngIf="loading">Loading staff access…</div>
-
-      <div class="form" *ngIf="!loading">
-        <label>Staff member
-          <select [(ngModel)]="staffAccessId">
-            <option *ngFor="let profile of profiles" [ngValue]="profile.id">{{ profile.displayName }}</option>
-          </select>
+      <p>Sign in with your employee username and password to access your assigned RoyalDesk pages.</p>
+      <div class="error" role="alert" *ngIf="error">{{ error }}</div>
+      <form class="form" (ngSubmit)="unlock()">
+        <label>Employee username
+          <input name="username" type="text" [(ngModel)]="username" autocomplete="username" required />
         </label>
-        <label>Access password
-          <input type="password" [(ngModel)]="password" (keyup.enter)="unlock()" autocomplete="current-password" />
+        <label>Password
+          <input name="password" type="password" [(ngModel)]="password" autocomplete="current-password" required />
         </label>
-        <button class="primary" type="button" (click)="unlock()">Unlock RoyalDesk</button>
-      </div>
+        <button class="primary" type="submit" [disabled]="loading || !username.trim() || !password">{{ loading ? 'Signing in…' : 'Sign In' }}</button>
+      </form>
     </ng-container>
 
-    <ng-template #setupBlock>
+    <ng-container *ngIf="setupMode">
       <h1>Set Up RoyalDesk Administrator</h1>
-      <p>No staff access profile exists yet. Create the first administrator using the one-time bootstrap key configured on the API server.</p>
-      <div class="error" *ngIf="error">{{ error }}</div>
-      <div class="form">
-        <label>Administrator name<input [(ngModel)]="setup.displayName" /></label>
-        <label>Username (optional)<input [(ngModel)]="setup.username" /></label>
-        <label>Password<input type="password" [(ngModel)]="setup.password" /></label>
-        <label>Confirm password<input type="password" [(ngModel)]="setup.confirmPassword" /></label>
-        <label>Bootstrap key<input type="password" [(ngModel)]="setup.bootstrapKey" /></label>
-        <button class="primary" type="button" (click)="bootstrap()" [disabled]="loading">Create Administrator</button>
-      </div>
-    </ng-template>
+      <p>Restricted initial setup. Create the first administrator using the one-time bootstrap key configured on the API server.</p>
+      <div class="error" role="alert" *ngIf="error">{{ error }}</div>
+      <div class="loading" *ngIf="loading">Checking administrator setup…</div>
+      <form class="form" *ngIf="bootstrapRequired && !loading" (ngSubmit)="bootstrap()">
+        <label>Administrator name<input name="displayName" [(ngModel)]="setup.displayName" required /></label>
+        <label>Username (optional)<input name="setupUsername" [(ngModel)]="setup.username" autocomplete="username" /></label>
+        <label>Password<input name="setupPassword" type="password" [(ngModel)]="setup.password" autocomplete="new-password" required /></label>
+        <label>Confirm password<input name="confirmPassword" type="password" [(ngModel)]="setup.confirmPassword" autocomplete="new-password" required /></label>
+        <label>Bootstrap key<input name="bootstrapKey" type="password" [(ngModel)]="setup.bootstrapKey" autocomplete="off" required /></label>
+        <button class="primary" type="submit" [disabled]="loading">Create Administrator</button>
+      </form>
+    </ng-container>
 
     <button class="employee-link" type="button" (click)="employeePortal()">← Back to Employee IT Portal</button>
   </div>
