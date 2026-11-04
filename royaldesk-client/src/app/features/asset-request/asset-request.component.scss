@@ -1139,3 +1139,28 @@ footer {
   .page .hero-copy { width: min(455px, 100%); }
   .page .benefit { width: 33.333%; }
 }
+
+
+/* Keep return navigation inside the Your Request card instead of above the workshop banner. */
+.summary-heading { align-items: flex-start; gap: 12px; }
+.summary-heading-copy { flex: 1; min-width: 0; }
+.summary-back-button {
+  flex: 0 0 auto;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid #b7c5d9;
+  border-radius: 6px;
+  background: #fff;
+  color: #143f91;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.summary-back-button:hover { background: #f3f6fb; }
+.summary-back-button:focus-visible { outline: 3px solid rgba(20, 63, 145, .22); outline-offset: 2px; }
+.success-back-button { align-self: flex-end; }
+@media (max-width: 650px) {
+  .summary-heading { flex-wrap: wrap; }
+  .summary-back-button { margin-left: auto; }
+}
