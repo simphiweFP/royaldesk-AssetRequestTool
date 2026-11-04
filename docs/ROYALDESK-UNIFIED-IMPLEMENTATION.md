@@ -14,10 +14,10 @@ Preserve the RoyalDesk application, its existing employee request flows, asset l
 - [x] Keep the original "Set Up RoyalDesk Administrator" title and form.
 - [x] Preserve server-side `ROYALDESK_BOOTSTRAP_KEY` verification and one-time setup check; never bundle the configured value into Angular.
 - [x] Improve staff login/setup visuals using existing RoyalDesk styling.
-- [ ] Automated backend/frontend build, login/logout and first-admin tests.
+- [x] Automated frontend/backend build and existing test suite plus new upload validation tests through CI. Manual login/logout and first-admin journey checks remain release gates.
 - [ ] Review username uniqueness and prevent ambiguity before enabling additional account creation.
 - [ ] Review rate limits, bootstrap race conditions, audit logs and error handling before production deployment.
-- [ ] Review whether the legacy `/unlock` and `profiles/public` endpoints remain needed and retire them if unused.
+- [x] Retire legacy public profile-selection and unlock endpoints; keep username/password login.
 
 **Important:** the dedicated URL is not access control; the bootstrap key must be provisioned to authorised IT administrators out of band. A deployment should never reveal its value in client JavaScript or API responses. Initial setup should be disabled after first-use and ideally restricted by network or operator workflow.
 
@@ -34,7 +34,7 @@ Preserve the RoyalDesk application, its existing employee request flows, asset l
 - [x] Audit current ticket APIs, storage and form model for existing attachment support.
 - [x] Require a supporting document on the stock-code-creation service subtype (PDF/Excel/Word, as accepted by business rules).
 - [x] Allow optional incident evidence: existing files, photos, and live device-camera capture.
-- [x] Show selected filenames, counts, removal controls and validation. Photo previews and upload progress remain enhancements.
+- [x] Show selected filenames, image previews, file removal, validation and upload progress.
 - [x] Link documents to the right ticket and provide permission-checked retrieval for IT.
 - [x] Enforce allowed file types, signature/package checks, size/count limits, SQLite-backed storage and access control on the API.
 - [ ] Prevent orphan files on failed requests; add tests for unauthorised download.
