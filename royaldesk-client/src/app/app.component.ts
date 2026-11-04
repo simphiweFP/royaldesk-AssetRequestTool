@@ -12,8 +12,8 @@ import { StaffAccessService } from './core/services/staff-access.service';
   template: `
     <app-employee-portal *ngIf="!isStaffPortal"></app-employee-portal>
     <div class="session-check" *ngIf="isStaffPortal && checkingSession">Checking RoyalDesk access…</div>
-    <app-staff-access-gate *ngIf="isStaffPortal && !checkingSession && !unlocked" (unlocked)="onUnlocked()"></app-staff-access-gate>
-    <app-lifecycle *ngIf="isStaffPortal && !checkingSession && unlocked"></app-lifecycle>
+    <app-staff-access-gate *ngIf="isStaffPortal && !checkingSession && (isSetupPage || !unlocked)" (unlocked)="onUnlocked()"></app-staff-access-gate>
+    <app-lifecycle *ngIf="isStaffPortal && !isSetupPage && !checkingSession && unlocked"></app-lifecycle>
   `,
   styles: [`
     :host { display:block; min-height:100vh; }
@@ -23,11 +23,12 @@ import { StaffAccessService } from './core/services/staff-access.service';
 export class AppComponent implements OnInit {
   private readonly access = inject(StaffAccessService);
   readonly isStaffPortal = window.location.pathname.toLowerCase().startsWith('/portal');
+  readonly isSetupPage = window.location.pathname.toLowerCase().replace(/\/$/, '') === '/portal/setup';
   checkingSession = this.isStaffPortal;
   unlocked = false;
 
   ngOnInit(): void {
-    if (!this.isStaffPortal) return;
+    if (!this.isStaffPortal || this.isSetupPage) { this.checkingSession = false; return; }
     this.access.restore().subscribe({
       next: () => { this.unlocked = true; this.checkingSession = false; },
       error: () => { this.access.clearLocalSession(); this.unlocked = false; this.checkingSession = false; }
