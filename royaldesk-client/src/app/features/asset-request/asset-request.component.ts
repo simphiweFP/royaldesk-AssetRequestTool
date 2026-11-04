@@ -1,4 +1,4 @@
-import { Component, Input, inject } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { finalize } from 'rxjs';
@@ -21,6 +21,7 @@ export class AssetRequestComponent {
   private readonly formBuilder = inject(FormBuilder);
 
   @Input() requestType: RequestType = 'Equipment';
+  @Output() backToPortal = new EventEmitter<void>();
 
   readonly currentUser = { name: 'Employee Portal', username: 'employee', initials: 'IT' };
   employees: PublicEmployeeDirectory[] = [];
