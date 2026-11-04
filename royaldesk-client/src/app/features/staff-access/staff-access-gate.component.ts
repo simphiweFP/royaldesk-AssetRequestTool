@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, OnInit, Output, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { StaffAccessService, StaffSelector } from '../../core/services/staff-access.service';
+import { StaffAccessService } from '../../core/services/staff-access.service';
 
 @Component({
   selector: 'app-staff-access-gate',
@@ -14,43 +14,38 @@ export class StaffAccessGateComponent implements OnInit {
   private readonly access = inject(StaffAccessService);
   @Output() unlocked = new EventEmitter<void>();
 
-  profiles: StaffSelector[] = [];
+  readonly setupMode = window.location.pathname.toLowerCase().replace(/\/$/, '') === '/portal/setup';
+  username = '';
   bootstrapRequired = false;
   loading = true;
   error = '';
-  staffAccessId?: number;
   password = '';
   setup = { displayName: '', username: '', password: '', confirmPassword: '', bootstrapKey: '' };
 
   ngOnInit(): void {
+    if (!this.setupMode) { this.loading = false; return; }
     this.access.bootstrapRequired().subscribe({
       next: result => {
         this.bootstrapRequired = result.required;
-        if (result.required) this.loading = false;
-        else this.loadProfiles();
+        if (!result.required) this.error = 'Administrator setup is already complete. Use Staff Access to sign in.';
+        this.loading = false;
       },
       error: () => { this.error = 'Could not connect to RoyalDesk access service.'; this.loading = false; }
     });
   }
 
-  private loadProfiles(): void {
-    this.access.publicProfiles().subscribe({
-      next: profiles => { this.profiles = profiles; this.staffAccessId = profiles[0]?.id; this.loading = false; },
-      error: () => { this.error = 'Could not load staff access profiles.'; this.loading = false; }
-    });
-  }
-
   unlock(): void {
-    if (!this.staffAccessId || !this.password) return;
+    if (!this.username.trim() || !this.password || this.loading) return;
     this.error = '';
     this.loading = true;
-    this.access.unlock(this.staffAccessId, this.password).subscribe({
+    this.access.login(this.username.trim(), this.password).subscribe({
       next: () => { this.password = ''; this.loading = false; this.unlocked.emit(); },
-      error: e => { this.error = e?.error?.detail || 'Incorrect password or access is unavailable.'; this.loading = false; }
+      error: () => { this.error = 'Incorrect username or password, or access is unavailable.'; this.loading = false; }
     });
   }
 
   bootstrap(): void {
+    if (!this.setupMode || !this.bootstrapRequired || this.loading) return;
     if (!this.setup.displayName || !this.setup.password || !this.setup.bootstrapKey) return;
     if (this.setup.password !== this.setup.confirmPassword) { this.error = 'Passwords do not match.'; return; }
     this.loading = true;
@@ -64,9 +59,9 @@ export class StaffAccessGateComponent implements OnInit {
       next: () => {
         this.bootstrapRequired = false;
         this.setup = { displayName: '', username: '', password: '', confirmPassword: '', bootstrapKey: '' };
-        this.loadProfiles();
+        window.location.href = '/portal';
       },
-      error: e => { this.error = e?.error?.detail || e?.error || 'Could not create the first RoyalDesk administrator.'; this.loading = false; }
+      error: e => { this.error = e?.error?.detail || 'Could not create the first RoyalDesk administrator.'; this.loading = false; }
     });
   }
 
