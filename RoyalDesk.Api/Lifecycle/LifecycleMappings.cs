@@ -55,7 +55,10 @@ internal static class LifecycleMappings
         FullyDepreciated = row.FullyDepreciated != 0,
         Notes = row.Notes,
         AssignedEmployeeId = ToNullableInt(row.AssignedEmployeeId),
-        AssignedEmployeeName = row.AssignedEmployeeName
+        AssignedEmployeeName = row.AssignedEmployeeName,
+        StoreItemId = ToNullableInt(row.StoreItemId),
+        StoreItemName = row.StoreItemName,
+        PhysicallyInStore = row.PhysicallyInStore != 0
     };
 
     public static AssignmentDto ToDto(this AssignmentRecord row) => new()
