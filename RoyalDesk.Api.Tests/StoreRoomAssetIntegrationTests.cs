@@ -62,6 +62,18 @@ public sealed class StoreRoomAssetIntegrationTests
 
             await Assert.ThrowsAsync<InvalidOperationException>(()=>store.ApplyMovementAsync(item.Id,
                 new StoreMovementRequest{MovementType="Issue",Quantity=1},"IT"));
+
+            var writeOff=await lifecycle.CreateWriteOffAsync(
+                new CreateWriteOffCommand(assetId,"Damaged","Damaged",null,"Repair not economical"),"IT",CancellationToken.None);
+            await lifecycle.ApproveWriteOffAsync((int)writeOff.Id,
+                new ApproveWriteOffCommand(true,"Approved"),"IT",CancellationToken.None);
+            await lifecycle.DisposeWriteOffAsync((int)writeOff.Id,
+                new DisposeWriteOffCommand("Recycling",null,DateTime.UtcNow,null,"Disposed"),"IT",CancellationToken.None);
+            var disposed=Assert.Single(await store.GetAssetInventoryAsync());
+            Assert.Equal("Disposed",disposed.Status);
+            Assert.False(disposed.PhysicallyInStore);
+            Assert.Equal(0,Assert.Single(await store.GetItemsAsync()).QuantityOnHand);
+            Assert.Contains(await store.GetMovementsAsync(),m=>m.MovementType=="Write-Off" && m.StoreItemId==item.Id);
         }
         finally { if(File.Exists(file)) File.Delete(file); }
     }
