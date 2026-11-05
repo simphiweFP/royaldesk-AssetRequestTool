@@ -9,6 +9,7 @@ public sealed class StoreItemDto
     public string? Location { get; set; }
     public int QuantityOnHand { get; set; }
     public int ReservedQuantity { get; set; }
+    public int QuarantinedQuantity { get; set; }
     public int MinimumStock { get; set; }
     public bool IsAssetTracked { get; set; }
     public bool IsActive { get; set; }
