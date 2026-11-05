@@ -1,5 +1,6 @@
 using Dapper;
 using RoyalDesk.Api.Data;
+using RoyalDesk.Api.StoreRoom;
 
 namespace RoyalDesk.Api.Lifecycle;
 
@@ -190,6 +191,8 @@ internal sealed class LifecycleRepository(IDbConnectionFactory connectionFactory
             SELECT last_insert_rowid();
             """, new { command.AssetId, command.EmployeeId, command.Condition, actor, now = DateTime.UtcNow }, tx, cancellationToken: ct));
 
+        await LinkedAssetInventory.IssueAsync(db, tx, command.AssetId, actor, ct);
+
         await db.ExecuteAsync(new CommandDefinition(
             "UPDATE Assets SET Status='Assigned', Condition=@Condition, UpdatedAtUtc=@now WHERE Id=@AssetId",
             new { command.AssetId, command.Condition, now = DateTime.UtcNow }, tx, cancellationToken: ct));
@@ -231,6 +234,8 @@ internal sealed class LifecycleRepository(IDbConnectionFactory connectionFactory
         await db.ExecuteAsync(new CommandDefinition(
             "UPDATE AssetAssignments SET ReturnedAtUtc=@now,ReturnedTo=@actor,ReturnReason=@Reason,ConditionAtReturn=@Condition,Status='Returned' WHERE Id=@id",
             new { id = assignmentId, actor, command.Reason, command.Condition, now = DateTime.UtcNow }, tx, cancellationToken: ct));
+
+        await LinkedAssetInventory.ReturnAsync(db, tx, assetId.Value, nextStatus != "Available", actor, ct);
 
         await db.ExecuteAsync(new CommandDefinition(
             "UPDATE Assets SET Status=@nextStatus,Condition=@Condition,Notes=COALESCE(@Notes,Notes),UpdatedAtUtc=@now WHERE Id=@assetId",
@@ -373,6 +378,8 @@ internal sealed class LifecycleRepository(IDbConnectionFactory connectionFactory
         await db.OpenAsync(ct);
         await using var tx = await db.BeginTransactionAsync(ct);
 
+        await LinkedAssetInventory.QuarantineAsync(db, tx, command.AssetId, actor, ct);
+
         var id = await db.ExecuteScalarAsync<long>(new CommandDefinition("""
             INSERT INTO WriteOffs(AssetId,Reason,Condition,CurrentValue,RequestedBy,RequestedAtUtc,ApprovalStatus,Notes)
             VALUES(@AssetId,@Reason,@Condition,@CurrentValue,@actor,@now,'Pending',@Notes);
@@ -418,7 +425,7 @@ internal sealed class LifecycleRepository(IDbConnectionFactory connectionFactory
 
         await db.ExecuteAsync(new CommandDefinition(
             "UPDATE Assets SET Status=@assetStatus,UpdatedAtUtc=@now WHERE Id=@assetId",
-            new { assetId, assetStatus = command.Approved ? "Approved for Write-Off" : "Available", now = DateTime.UtcNow }, tx, cancellationToken: ct));
+            new { assetId, assetStatus = command.Approved ? "Approved for Write-Off" : "In Repair", now = DateTime.UtcNow }, tx, cancellationToken: ct));
 
         await tx.CommitAsync(ct);
     }
@@ -434,6 +441,8 @@ internal sealed class LifecycleRepository(IDbConnectionFactory connectionFactory
             new { id }, tx, cancellationToken: ct));
 
         if (assetId is null) throw new InvalidOperationException("Only approved write-offs can be disposed.");
+
+        await LinkedAssetInventory.DisposeAsync(db, tx, assetId.Value, actor, ct);
 
         await db.ExecuteAsync(new CommandDefinition("""
             UPDATE WriteOffs
