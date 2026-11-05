@@ -87,6 +87,18 @@ public sealed class OperationsController(IDbConnectionFactory connectionFactory)
         var previous = await db.QuerySingleOrDefaultAsync<(string Status, string Condition)>(new CommandDefinition(
             "SELECT Status,Condition FROM Assets WHERE Id=@assetId", new { assetId }, tx, cancellationToken: ct));
         if (string.IsNullOrEmpty(previous.Status)) return NotFound();
+        if (previous.Status.Equals("Disposed", StringComparison.OrdinalIgnoreCase))
+            return Conflict("Disposed assets cannot be returned to service.");
+        if (dto.Status.Equals("Available", StringComparison.OrdinalIgnoreCase))
+        {
+            var activeWriteOff = await db.ExecuteScalarAsync<int>(new CommandDefinition("""
+                SELECT COUNT(*) FROM WriteOffs
+                WHERE AssetId=@assetId AND ApprovalStatus IN ('Pending','Approved')
+                  AND DisposalDate IS NULL
+                """,new { assetId },tx,cancellationToken:ct));
+            if(activeWriteOff>0)
+                return Conflict("Resolve or reject the active write-off before returning the asset to available stock.");
+        }
         var nextCondition = dto.Condition ?? previous.Condition;
         if (dto.Status.Equals("Available", StringComparison.OrdinalIgnoreCase) &&
             (nextCondition.Equals("Damaged", StringComparison.OrdinalIgnoreCase) ||
