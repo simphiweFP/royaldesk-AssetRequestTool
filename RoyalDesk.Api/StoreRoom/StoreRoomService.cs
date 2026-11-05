@@ -7,7 +7,7 @@ public sealed class StoreRoomService(IDbConnectionFactory connectionFactory)
 {
     private static readonly HashSet<string> AllowedMovements = new(StringComparer.OrdinalIgnoreCase)
     {
-        "Stock In", "Reserve", "Release Reservation", "Issue", "Return", "Adjustment", "Stock Correction -", "Write-Off"
+        "Stock In", "Reserve", "Release Reservation", "Issue", "Return", "Adjustment", "Stock Correction -", "Write-Off", "Dispose Quarantined"
     };
 
     public async Task<IReadOnlyList<StoreItemDto>> GetItemsAsync(CancellationToken ct = default)
@@ -15,7 +15,7 @@ public sealed class StoreRoomService(IDbConnectionFactory connectionFactory)
         await using var connection = connectionFactory.CreateConnection();
         await connection.OpenAsync(ct);
         var rows = await connection.QueryAsync<StoreItemDto>(new CommandDefinition("""
-            SELECT Id, Name, Category, Sku, Location, QuantityOnHand, ReservedQuantity,
+            SELECT Id, Name, Category, Sku, Location, QuantityOnHand, ReservedQuantity, QuarantinedQuantity,
                    MinimumStock, IsAssetTracked, IsActive
             FROM StoreItems
             WHERE IsActive = 1
@@ -65,7 +65,7 @@ public sealed class StoreRoomService(IDbConnectionFactory connectionFactory)
         await db.OpenAsync(ct);
         await using var tx = await db.BeginTransactionAsync(ct);
         var storeItem = await db.QuerySingleOrDefaultAsync<StoreItemDto>(new CommandDefinition("""
-            SELECT Id,Name,Category,Sku,Location,QuantityOnHand,ReservedQuantity,MinimumStock,IsAssetTracked,IsActive
+            SELECT Id,Name,Category,Sku,Location,QuantityOnHand,ReservedQuantity,QuarantinedQuantity,MinimumStock,IsAssetTracked,IsActive
             FROM StoreItems WHERE Id=@storeItemId AND IsActive=1
             """,new {storeItemId},tx,cancellationToken:ct));
         if(storeItem is null || !storeItem.IsAssetTracked)
@@ -158,6 +158,7 @@ public sealed class StoreRoomService(IDbConnectionFactory connectionFactory)
 
         var onHand = item.QuantityOnHand;
         var reserved = item.ReservedQuantity;
+        var quarantined = item.QuarantinedQuantity;
         var qty = request.Quantity;
 
         switch (request.MovementType)
@@ -184,6 +185,13 @@ public sealed class StoreRoomService(IDbConnectionFactory connectionFactory)
             case "Adjustment":
                 onHand += qty;
                 break;
+            case "Dispose Quarantined":
+                if (item.IsAssetTracked)
+                    throw new InvalidOperationException("Quarantined tagged assets must be disposed through Write-Offs & E-Waste.");
+                if (quarantined < qty)
+                    throw new InvalidOperationException("Cannot dispose more units than physically quarantined.");
+                quarantined -= qty;
+                break;
             case "Stock Correction -":
                 if (onHand - reserved < qty)
                     throw new InvalidOperationException("Stock correction cannot reduce reserved or unavailable units.");
@@ -203,9 +211,9 @@ public sealed class StoreRoomService(IDbConnectionFactory connectionFactory)
         var now = DateTime.UtcNow;
         await connection.ExecuteAsync(new CommandDefinition("""
             UPDATE StoreItems
-            SET QuantityOnHand = @OnHand, ReservedQuantity = @Reserved, UpdatedAtUtc = @Now
+            SET QuantityOnHand = @OnHand, ReservedQuantity = @Reserved, QuarantinedQuantity = @Quarantined, UpdatedAtUtc = @Now
             WHERE Id = @Id;
-            """, new { Id = itemId, OnHand = onHand, Reserved = reserved, Now = now }, tx, cancellationToken: ct));
+            """, new { Id = itemId, OnHand = onHand, Reserved = reserved, Quarantined = quarantined, Now = now }, tx, cancellationToken: ct));
 
         await connection.ExecuteAsync(new CommandDefinition("""
             INSERT INTO StoreMovements
