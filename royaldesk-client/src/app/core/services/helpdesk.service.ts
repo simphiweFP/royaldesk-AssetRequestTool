@@ -102,8 +102,8 @@ export class HelpDeskService {
     return this.http.post<EquipmentDelivery>(`${this.base}/tickets/${ticketId}/delivery/fail`, { notes }, { withCredentials: true });
   }
 
-  returnDelivery(ticketId: number, notes: string): Observable<EquipmentDelivery> {
-    return this.http.post<EquipmentDelivery>(`${this.base}/tickets/${ticketId}/delivery/return`, { notes }, { withCredentials: true });
+  returnDelivery(ticketId: number, notes: string, damaged: boolean): Observable<EquipmentDelivery> {
+    return this.http.post<EquipmentDelivery>(`${this.base}/tickets/${ticketId}/delivery/return`, { notes, damaged }, { withCredentials: true });
   }
 
   searchPublic(name: string, department: string): Observable<PublicTicketSummary[]> {
