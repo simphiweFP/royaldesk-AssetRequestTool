@@ -17,6 +17,17 @@ public sealed class StoreRoomController(StoreRoomService service) : ControllerBa
     public Task<IReadOnlyList<StoreMovementDto>> Movements(CancellationToken ct)
         => service.GetMovementsAsync(ct);
 
+    [HttpGet("asset-inventory")]
+    public Task<IReadOnlyList<StoreLinkedAssetDto>> AssetInventory(CancellationToken ct)
+        => service.GetAssetInventoryAsync(ct);
+
+    [HttpPost("items/{id:int}/link-asset")]
+    public async Task<IActionResult> LinkAsset(int id, LinkStoreAssetDto dto, CancellationToken ct)
+    {
+        await service.LinkAssetAsync(id, dto, Actor, ct);
+        return NoContent();
+    }
+
     [HttpPost("items")]
     public async Task<ActionResult<StoreItemDto>> CreateItem(CreateStoreItemDto dto, CancellationToken ct)
         => Ok(await service.CreateItemAsync(dto, Actor, ct));
