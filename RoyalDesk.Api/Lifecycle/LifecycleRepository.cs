@@ -186,8 +186,18 @@ internal sealed class LifecycleRepository(IDbConnectionFactory connectionFactory
             new { id = command.AssetId }, tx, cancellationToken: ct));
 
         if (status is null) throw new InvalidOperationException("Asset not found.");
-        if (!string.Equals(status, "Available", StringComparison.OrdinalIgnoreCase))
-            throw new InvalidOperationException("Only available assets can be assigned.");
+        var delivered = string.Equals(status, "Delivered", StringComparison.OrdinalIgnoreCase);
+        if (delivered)
+        {
+            var receiptConfirmed = await db.ExecuteScalarAsync<int>(new CommandDefinition("""
+                SELECT COUNT(*) FROM EquipmentDeliveries
+                WHERE AssetId=@assetId AND Status='Done' AND ReceivedQuantity=Quantity
+                """, new { assetId=command.AssetId }, tx, cancellationToken:ct));
+            if (receiptConfirmed != 1)
+                throw new InvalidOperationException("Equipment must have a confirmed branch receipt before employee assignment.");
+        }
+        else if (!string.Equals(status, "Available", StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException("Only available or branch-received assets can be assigned.");
 
         var id = await db.ExecuteScalarAsync<long>(new CommandDefinition("""
             INSERT INTO AssetAssignments(AssetId,EmployeeId,AssignedAtUtc,AssignedBy,ConditionAtAssignment,Status)
@@ -195,7 +205,9 @@ internal sealed class LifecycleRepository(IDbConnectionFactory connectionFactory
             SELECT last_insert_rowid();
             """, new { command.AssetId, command.EmployeeId, command.Condition, actor, now = DateTime.UtcNow }, tx, cancellationToken: ct));
 
-        await LinkedAssetInventory.IssueAsync(db, tx, command.AssetId, actor, ct);
+        // Branch-delivered assets were already issued from Store Room at driver pickup.
+        if (!delivered)
+            await LinkedAssetInventory.IssueAsync(db, tx, command.AssetId, actor, ct);
 
         await db.ExecuteAsync(new CommandDefinition(
             "UPDATE Assets SET Status='Assigned', Condition=@Condition, UpdatedAtUtc=@now WHERE Id=@AssetId",
