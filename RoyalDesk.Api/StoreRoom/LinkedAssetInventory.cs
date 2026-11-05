@@ -46,7 +46,7 @@ internal static class LinkedAssetInventory
         if (!link.PhysicallyInStore || link.QuantityOnHand-link.ReservedQuantity < 1)
             throw new InvalidOperationException("Linked asset is not available in Store Room. Reconcile the stock before assigning it.");
         await db.ExecuteAsync(new CommandDefinition("""
-            UPDATE StoreItems SET QuantityOnHand=QuantityOnHand-1,QuarantinedQuantity=QuarantinedQuantity+1,UpdatedAtUtc=@now WHERE Id=@id
+            UPDATE StoreItems SET QuantityOnHand=QuantityOnHand-1,UpdatedAtUtc=@now WHERE Id=@id
             """,new {id=link.StoreItemId,now=DateTime.UtcNow},tx,cancellationToken:ct));
         await db.ExecuteAsync(new CommandDefinition("""
             UPDATE StoreAssetLinks SET PhysicallyInStore=0 WHERE AssetId=@assetId
@@ -84,7 +84,7 @@ internal static class LinkedAssetInventory
             if (link.QuantityOnHand-link.ReservedQuantity < 1)
                 throw new InvalidOperationException("Insufficient available Store Room stock to quarantine the asset.");
             await db.ExecuteAsync(new CommandDefinition("""
-                UPDATE StoreItems SET QuantityOnHand=QuantityOnHand-1,UpdatedAtUtc=@now WHERE Id=@id
+                UPDATE StoreItems SET QuantityOnHand=QuantityOnHand-1,QuarantinedQuantity=QuarantinedQuantity+1,UpdatedAtUtc=@now WHERE Id=@id
                 """,new {id=link.StoreItemId,now=DateTime.UtcNow},tx,cancellationToken:ct));
             await MovementAsync(db,tx,assetId,link.StoreItemId,"Quarantine","Moved from usable stock pending assessment/write-off",actor,ct);
         }
