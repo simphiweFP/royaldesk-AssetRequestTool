@@ -113,6 +113,23 @@ public sealed class HelpDeskController(HelpDeskService service, JustIctEscalatio
     public Task<EquipmentDeliveryDto> MarkDeliveryArrived(int id,CancellationToken ct)
         => deliveries.ArrivedAsync(id,Actor,ct);
 
+    [HttpPost("tickets/{id:int}/delivery/proof")]
+    [Consumes("multipart/form-data")]
+    [RequestSizeLimit(9 * 1024 * 1024)]
+    public async Task<IActionResult> UploadDeliveryProof(int id, [FromForm] IFormFile file,CancellationToken ct)
+    {
+        var delivery=await deliveries.GetAsync(id,ct);
+        if(delivery is null)return NotFound();
+        if(delivery.Status is "Waiting for Driver Pickup" or "Awaiting Local Handover")
+            return Conflict("Upload the delivery proof after dispatch or during receipt confirmation.");
+        if(file is null)return BadRequest("Attach a PDF or delivery photo.");
+        var current=await attachments.ListAsync(id,ct);
+        if(current.Count>=5)return BadRequest("This ticket already contains five attachments.");
+        var validated=await attachments.ValidateAsync(new List<IFormFile>{file},false,true,ct);
+        await attachments.SaveAsync(id,validated,ct);
+        return NoContent();
+    }
+
     [HttpPost("tickets/{id:int}/delivery/confirm")]
     public Task<EquipmentDeliveryDto> ConfirmDelivery(int id,ConfirmEquipmentReceiptDto dto,CancellationToken ct)
         => deliveries.ConfirmAsync(id,dto,Actor,ct);
