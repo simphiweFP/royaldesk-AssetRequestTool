@@ -94,6 +94,114 @@
       </article>
     </div>
 
+    <article class="ticket-card delivery-card" *ngIf="selected?.requestType==='Equipment'">
+      <div class="ticket-card-heading">
+        <div class="heading-symbol">▣</div>
+        <div><h2>Equipment Delivery &amp; Branch Receipt</h2>
+          <p>Follow equipment from Store Room reservation to verified handover. A request is not done until receipt is confirmed.</p>
+        </div>
+      </div>
+      <div class="ticket-error" *ngIf="deliveryError">{{ deliveryError }}</div>
+      <ng-container *ngIf="selected as ticket">
+        <div *ngIf="!delivery && ['Assigned','In Progress'].includes(ticket.status)" class="delivery-form">
+          <p class="delivery-note">Destination: <strong>{{ ticket.branch }}</strong> · {{ ticket.quantity }} unit(s). Store Room stock is reserved when you prepare.</p>
+          <div class="delivery-fields">
+            <label>Store Room item *
+              <select [(ngModel)]="deliveryForm.storeItemId" (ngModelChange)="onDeliveryStockChanged()">
+                <option [ngValue]="0">Choose available stock</option>
+                <option *ngFor="let item of deliveryStock" [ngValue]="item.id">
+                  {{ item.name }} · {{ item.availableQuantity }} available{{ item.isAssetTracked ? ' · asset tracked' : '' }}
+                </option>
+              </select>
+            </label>
+            <label *ngIf="selectedDeliveryStock?.isAssetTracked">Exact asset tag *
+              <select [(ngModel)]="deliveryForm.assetId">
+                <option [ngValue]="0">Select available asset tag</option>
+                <option *ngFor="let asset of eligibleDeliveryAssets" [ngValue]="asset.id">{{ asset.assetTag }} · {{ asset.serialNumber || 'No serial number' }}</option>
+              </select>
+            </label>
+            <label>Receiving employee *
+              <input [(ngModel)]="deliveryForm.recipientName" placeholder="Employee or authorised branch recipient">
+            </label>
+            <label class="delivery-check"><input type="checkbox" [(ngModel)]="deliveryForm.deliveryRequired">
+              Delivery required (suggested for branches outside Phoenix)
+            </label>
+            <label *ngIf="!deliveryForm.deliveryRequired && ticket.branch.toLowerCase()!=='phoenix'">
+              Reason for local handover *
+              <input [(ngModel)]="deliveryForm.localHandoverReason" placeholder="Why will this branch collect locally?">
+            </label>
+          </div>
+          <p class="delivery-note">Asset-tracked requests currently require one individually tagged asset per delivery. Other stock supports the ticket quantity.</p>
+          <button class="delivery-primary" type="button" [disabled]="deliveryBusy || !deliveryForm.storeItemId"
+             (click)="prepareDelivery()">Reserve Stock &amp; Prepare</button>
+        </div>
+
+        <p *ngIf="!delivery && !['Assigned','In Progress'].includes(ticket.status)" class="delivery-note">
+          Assign this ticket to an IT technician and start processing before preparing equipment.
+        </p>
+
+        <ng-container *ngIf="delivery as d">
+          <div class="delivery-summary">
+            <div><span>Delivery status</span><strong>{{ d.status }}</strong></div>
+            <div><span>Destination</span><strong>{{ d.destinationBranch }}</strong></div>
+            <div><span>Recipient</span><strong>{{ d.recipientName }}</strong></div>
+            <div><span>Store item</span><strong>{{ d.storeItemName }} {{ d.assetTag ? '· ' + d.assetTag : '' }}</strong></div>
+            <div><span>Confirmed received</span><strong>{{ d.receivedQuantity }} / {{ d.quantity }}</strong></div>
+            <div><span>Driver / courier</span><strong>{{ d.driverName || 'Not picked up' }}</strong></div>
+          </div>
+          <div class="delivery-form" *ngIf="d.status==='Waiting for Driver Pickup'">
+            <h3>Driver collection</h3>
+            <div class="delivery-fields">
+              <label>Driver / courier name *<input [(ngModel)]="deliveryForm.driverName" placeholder="Driver name"></label>
+              <label>Waybill / collection reference<input [(ngModel)]="deliveryForm.trackingReference" placeholder="Optional tracking reference"></label>
+            </div>
+            <button type="button" class="delivery-primary" [disabled]="deliveryBusy" (click)="pickupDelivery()">Confirm Driver Pickup</button>
+          </div>
+          <div class="delivery-form" *ngIf="d.status==='In Transit'">
+            <p class="delivery-note">The driver has collected the equipment. Record arrival at the branch before receipt confirmation.</p>
+            <button type="button" class="delivery-primary" [disabled]="deliveryBusy" (click)="arriveDelivery()">Mark Arrived at Branch</button>
+          </div>
+          <div class="delivery-form" *ngIf="['Awaiting Local Handover','Awaiting Receipt Confirmation','Partially Received'].includes(d.status)">
+            <h3>{{ d.deliveryRequired ? 'Branch Receipt Confirmation' : 'Local Collection Confirmation' }}</h3>
+            <p class="delivery-note">Only confirm when the named recipient has acknowledged receipt. Record the recipient and proof/reference received by IT.</p>
+            <div class="delivery-fields">
+              <label>Quantity received *
+                <input type="number" min="1" [max]="remainingDeliveryQuantity" [(ngModel)]="deliveryForm.receivedQuantity">
+              </label>
+              <label>Confirmed received by *<input [(ngModel)]="deliveryForm.receivedBy" placeholder="Name of employee at branch"></label>
+              <label>Proof of delivery / confirmation reference *
+                <input [(ngModel)]="deliveryForm.receiptReference" placeholder="Signed POD, email reference or receipt number">
+              </label>
+              <label>Notes<input [(ngModel)]="deliveryForm.notes" placeholder="Optional delivery notes"></label>
+            </div>
+            <button type="button" class="delivery-primary" [disabled]="deliveryBusy" (click)="confirmDelivery()">
+              {{ remainingDeliveryQuantity===deliveryForm.receivedQuantity ? 'Confirm Receipt & Complete' : 'Record Partial Receipt' }}
+            </button>
+          </div>
+          <div class="delivery-form" *ngIf="['In Transit','Awaiting Receipt Confirmation','Partially Received','Delivery Failed'].includes(d.status)">
+            <h3>Delivery Exception</h3>
+            <label>Exception / return notes *
+              <textarea [(ngModel)]="deliveryForm.notes" placeholder="Describe the delivery failure or physical return"></textarea>
+            </label>
+            <div class="delivery-buttons">
+              <button *ngIf="d.status!=='Delivery Failed'" type="button" [disabled]="deliveryBusy" (click)="failDelivery()">Record Failed Delivery</button>
+              <button *ngIf="d.status==='Delivery Failed'" type="button" [disabled]="deliveryBusy" (click)="returnFailedDelivery()">Confirm Returned to Store Room</button>
+            </div>
+          </div>
+          <p *ngIf="d.status==='Done'" class="delivery-note">Receipt confirmed. The ticket has been completed and the stock issue recorded.</p>
+          <p *ngIf="d.status==='Returned to Sender'" class="delivery-note">Undelivered stock returned to Store Room. IT must review the request; it has not been completed.</p>
+          <div class="delivery-timeline" *ngIf="deliveryEvents.length">
+            <h3>Delivery Audit Trail</h3>
+            <div class="delivery-event" *ngFor="let event of deliveryEvents">
+              <strong>{{ event.toStatus }}</strong>
+              <span>{{ event.details || 'Status updated' }}</span>
+              <small>{{ event.performedBy }} · {{ event.performedAtUtc | date:'medium' }}</small>
+            </div>
+          </div>
+        </ng-container>
+      </ng-container>
+    </article>
+
     <div class="information-box">
       <div class="info-circle">i</div>
       <div>Employees use a dedicated form for one task at a time. IT still receives every request in one controlled queue, with the request type clearly identified for reporting and workflow decisions.</div>
