@@ -217,7 +217,10 @@
             </div>
           </div>
           <p *ngIf="d.status==='Done'" class="delivery-note">Receipt confirmed. The ticket has been completed and the stock issue recorded.</p>
-          <p *ngIf="d.status==='Returned to Sender'" class="delivery-note">Undelivered stock returned to Store Room. IT must review the request; it has not been completed.</p>
+          <div *ngIf="d.status==='Returned to Sender'" class="delivery-form">
+            <p class="delivery-note">Undelivered stock is back in the Store Room. This ticket is not complete; prepare another driver attempt for the remaining {{ remainingDeliveryQuantity }} item(s).</p>
+            <button type="button" class="delivery-primary" [disabled]="deliveryBusy" (click)="retryDelivery()">Reserve Remaining Stock &amp; Retry Delivery</button>
+          </div>
           <div class="delivery-timeline" *ngIf="deliveryEvents.length">
             <h3>Delivery Audit Trail</h3>
             <div class="delivery-event" *ngFor="let event of deliveryEvents">
