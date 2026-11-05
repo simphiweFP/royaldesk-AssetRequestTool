@@ -115,6 +115,28 @@ public sealed class EquipmentDeliveryIntegrationTests
     }
 
     [Fact]
+    public async Task Cancellation_BeforeDriverPickup_ReleasesReservationWithoutIssuingStock()
+    {
+        var data=await SetupAsync(4,quantity:2);
+        try
+        {
+            await data.Deliveries.PrepareAsync(data.TicketId,
+                new PrepareEquipmentDeliveryDto(data.StoreItemId,null,true,"Branch Employee",null),"IT");
+            Assert.Equal(2,Assert.Single(await data.Store.GetItemsAsync()).ReservedQuantity);
+            var cancelled=await data.Deliveries.CancelAsync(data.TicketId,
+                new DeliveryExceptionDto("Request withdrawn"),"IT");
+            Assert.Equal("Cancelled",cancelled.Status);
+            var item=Assert.Single(await data.Store.GetItemsAsync());
+            Assert.Equal(4,item.QuantityOnHand);
+            Assert.Equal(0,item.ReservedQuantity);
+            Assert.Equal("Cancelled",(await new HelpDeskRepository(data.Factory).GetTicketAsync(data.TicketId))!.Status);
+            await Assert.ThrowsAsync<InvalidOperationException>(()=>data.Deliveries.PickupAsync(data.TicketId,
+                new PickupEquipmentDeliveryDto("Driver",null),"IT"));
+        }
+        finally { if(File.Exists(data.Path))File.Delete(data.Path); }
+    }
+
+    [Fact]
     public async Task DamagedReturn_IsQuarantinedAndCannotIncreaseAvailableStock()
     {
         var data=await SetupAsync(4,quantity:2);
