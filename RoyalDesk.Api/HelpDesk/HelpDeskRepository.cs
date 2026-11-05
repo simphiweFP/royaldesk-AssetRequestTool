@@ -172,6 +172,14 @@ public sealed class HelpDeskRepository(IDbConnectionFactory connectionFactory) :
             "SELECT Status FROM AssetRequests WHERE Id = @Id", new { Id = ticketId }, transaction, cancellationToken: ct));
         if (current is null) throw new KeyNotFoundException("Ticket not found.");
 
+        var deliveryStatus = await connection.ExecuteScalarAsync<string?>(new CommandDefinition(
+            "SELECT Status FROM EquipmentDeliveries WHERE TicketId=@ticketId",
+            new { ticketId }, transaction, cancellationToken: ct));
+        if (deliveryStatus is not null && deliveryStatus != "Done")
+            throw new InvalidOperationException("This equipment request has an active delivery. Update pickup and receipt through Delivery Tracking; it cannot be resolved or closed early.");
+        if (deliveryStatus == "Done" && dto.Status != "Closed")
+            throw new InvalidOperationException("Received equipment can only be closed, not put back into an unfinished support status.");
+
         var now = DateTime.UtcNow;
         await connection.ExecuteAsync(new CommandDefinition("""
             UPDATE AssetRequests
