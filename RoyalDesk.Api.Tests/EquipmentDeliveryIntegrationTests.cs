@@ -99,6 +99,17 @@ public sealed class EquipmentDeliveryIntegrationTests
             Assert.Equal("Returned to Sender",returned.Status);
             Assert.Equal(4,Assert.Single(await data.Store.GetItemsAsync()).QuantityOnHand);
             Assert.Equal("Returned to Sender",(await new HelpDeskRepository(data.Factory).GetTicketAsync(data.TicketId))!.Status);
+            var retried=await data.Deliveries.RetryAsync(data.TicketId,"IT");
+            Assert.Equal("Waiting for Driver Pickup",retried.Status);
+            Assert.Equal(2,Assert.Single(await data.Store.GetItemsAsync()).ReservedQuantity);
+            await data.Deliveries.PickupAsync(data.TicketId,new PickupEquipmentDeliveryDto("Driver 2","WB-2"),"IT");
+            await data.Deliveries.ArrivedAsync(data.TicketId,"IT");
+            var received=await data.Deliveries.ConfirmAsync(data.TicketId,
+                new ConfirmEquipmentReceiptDto(2,"Alberton Receiver","POD-2",null),"IT");
+            Assert.Equal("Done",received.Status);
+            Assert.Equal(2,Assert.Single(await data.Store.GetItemsAsync()).QuantityOnHand);
+            Assert.Equal(0,Assert.Single(await data.Store.GetItemsAsync()).ReservedQuantity);
+            Assert.Contains(await data.Deliveries.HistoryAsync(data.TicketId),h=>h.ToStatus=="Returned to Sender");
         }
         finally { if(File.Exists(data.Path))File.Delete(data.Path); }
     }
