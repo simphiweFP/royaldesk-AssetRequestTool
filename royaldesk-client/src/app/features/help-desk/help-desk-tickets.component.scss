@@ -113,3 +113,32 @@ tbody tr.selected { background:#f7f9fd; }
 .ticket-attachments p { color: #69758b; font-size: 12px; }
 .ticket-attachment-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid #eef1f5; font-size: 12px; overflow-wrap: anywhere; }
 .ticket-attachment-row button { border: 1px solid #143f91; background: white; color: #143f91; border-radius: 6px; padding: 8px 12px; cursor: pointer; }
+
+
+/* Embedded delivery controls: retain the existing RoyalDesk ticket card theme. */
+.delivery-card { margin-top: 18px; padding: 20px; }
+.delivery-card h3 { margin: 0 0 12px; font-size: 16px; color: #0f347d; }
+.delivery-summary { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; margin: 14px 0; }
+.delivery-summary>div { min-width: 0; padding: 12px; background: #f5f8fd; border: 1px solid #e0e7f2; border-radius: 7px; }
+.delivery-summary span { display: block; color: #69758b; font-size: 12px; margin-bottom: 5px; }
+.delivery-summary strong { display: block; font-size: 13px; color: #17243f; overflow-wrap: anywhere; }
+.delivery-form { margin: 14px 0 4px; padding: 16px; border: 1px solid #dce2ea; border-radius: 8px; background: #fff; }
+.delivery-note { margin: 8px 0 14px; color: #53647b; line-height: 1.5; font-size: 13px; }
+.delivery-fields { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; margin: 12px 0; }
+.delivery-fields label, .delivery-form>label { display: flex; flex-direction: column; gap: 6px; color: #17243f; font-size: 12px; font-weight: 700; }
+.delivery-fields input, .delivery-fields select, .delivery-form textarea { box-sizing: border-box; width: 100%; min-height: 40px; padding: 9px 10px; border: 1px solid #cbd4df; border-radius: 6px; background: #fff; color: #17243f; font-size: 13px; }
+.delivery-form textarea { min-height: 70px; }
+.delivery-fields .delivery-check { grid-column: 1/-1; flex-direction: row; align-items: center; font-size: 13px; font-weight: 600; }
+.delivery-check input { width: 17px; height: 17px; min-height: 0; }
+.delivery-primary { margin-top: 12px; min-height: 40px; border: 0; border-radius: 6px; padding: 10px 18px; background: #143f91; color: white; font-weight: 700; font-size: 13px; cursor: pointer; }
+.delivery-primary:hover:not(:disabled) { background: #0f347d; }
+.delivery-primary:disabled, .delivery-buttons button:disabled { opacity: .55; cursor: not-allowed; }
+.delivery-buttons { display: flex; gap: 12px; margin-top: 12px; flex-wrap: wrap; }
+.delivery-buttons button { border: 1px solid #b7c5d9; background: #fff; border-radius: 6px; padding: 10px 14px; color: #143f91; font-size: 12px; font-weight: 700; cursor: pointer; }
+.delivery-timeline { border-top: 1px solid #e5eaf1; margin-top: 18px; padding-top: 16px; }
+.delivery-event { border-left: 2px solid #143f91; margin: 10px 0; padding: 0 0 8px 14px; display: flex; flex-direction: column; gap: 3px; }
+.delivery-event strong { font-size: 13px; color: #0f347d; }
+.delivery-event span { color: #53647b; font-size: 12px; }
+.delivery-event small { color: #69758b; font-size: 11px; }
+@media (max-width: 760px) { .delivery-fields { grid-template-columns: 1fr; } .delivery-summary { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media (max-width: 420px) { .delivery-summary { grid-template-columns: 1fr; } }
