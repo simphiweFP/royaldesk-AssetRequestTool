@@ -3,12 +3,13 @@ using RoyalDesk.Api.HelpDesk;
 using RoyalDesk.Api.Deliveries;
 using RoyalDesk.Api.Services;
 using RoyalDesk.Api.StaffAccess;
+using RoyalDesk.Api.StoreRoom;
 
 namespace RoyalDesk.Api.Controllers;
 
 [ApiController]
 [Route("api/helpdesk")]
-public sealed class HelpDeskController(HelpDeskService service, JustIctEscalationService escalationService, RequestAttachmentService attachments, EquipmentDeliveryService deliveries) : ControllerBase
+public sealed class HelpDeskController(HelpDeskService service, JustIctEscalationService escalationService, RequestAttachmentService attachments, EquipmentDeliveryService deliveries, StoreRoomService storeRoom) : ControllerBase
 {
     private string Actor => User.Identity?.Name ?? "unknown";
 
@@ -66,6 +67,20 @@ public sealed class HelpDeskController(HelpDeskService service, JustIctEscalatio
         await service.UpdateStatusAsync(id, dto, Actor, ct);
         return NoContent();
     }
+
+    // Read-only fulfilment choices for authorised IT ticket staff.
+    [HttpGet("delivery-stock")]
+    public Task<IReadOnlyList<StoreItemDto>> DeliveryStock(CancellationToken ct)
+        => storeRoom.GetItemsAsync(ct);
+
+    [HttpGet("delivery-assets/{storeItemId:int}")]
+    public async Task<IReadOnlyList<StoreLinkedAssetDto>> DeliveryAssets(int storeItemId,CancellationToken ct)
+        => (await storeRoom.GetAssetInventoryAsync(ct))
+            .Where(a=>a.StoreItemId==storeItemId && a.PhysicallyInStore &&
+                a.Status.Equals("Available",StringComparison.OrdinalIgnoreCase) &&
+                !a.Condition.Equals("Damaged",StringComparison.OrdinalIgnoreCase) &&
+                !a.Condition.Equals("Obsolete",StringComparison.OrdinalIgnoreCase))
+            .ToList();
 
     [HttpGet("tickets/{id:int}/delivery")]
     public async Task<IActionResult> Delivery(int id,CancellationToken ct)
