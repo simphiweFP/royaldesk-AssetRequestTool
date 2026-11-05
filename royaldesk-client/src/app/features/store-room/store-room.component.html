@@ -46,14 +46,14 @@
     <article class="store-card movement-card">
       <div class="card-heading"><div class="heading-symbol">⇄</div><div><h2>Record Stock Movement</h2><p>Select an inventory row, then record stock in, reserve, issue, return or write-off.</p></div></div>
       <div class="form-grid">
-        <label>Movement<select [(ngModel)]="movementForm.movementType"><option *ngFor="let type of movementTypes">{{ type }}</option></select></label>
+        <label>Movement<select [(ngModel)]="movementForm.movementType"><option *ngFor="let type of allowedMovementTypes">{{ type }}</option></select></label>
         <label>Quantity<input type="number" min="1" [(ngModel)]="movementForm.quantity"></label>
         <label>Ticket ID <small>(Optional)</small><input type="number" min="1" [(ngModel)]="movementForm.ticketId" placeholder="Links movement to IT ticket"></label>
         <label>Reference<input [(ngModel)]="movementForm.reference" placeholder="PO, delivery, employee or other reference"></label>
         <label class="wide">Notes<textarea [(ngModel)]="movementForm.notes" placeholder="Movement notes"></textarea></label>
       </div>
       <button class="primary" [disabled]="!selectedItemId" (click)="applyMovement()">➤ &nbsp; Record Movement</button>
-      <p class="selection-note">{{ selectedItemId ? 'Selected inventory item is ready for movement.' : 'Select an item from Store Inventory first.' }}</p>
+      <p class="selection-note">{{ selectedItem?.isAssetTracked ? 'Tagged equipment is issued, returned and disposed through Asset Assignments and Write-Offs to keep stock accurate.' : selectedItemId ? 'Selected inventory item is ready for movement.' : 'Select an item from Store Inventory first.' }}</p>
     </article>
 
     <article class="store-card history-card">
