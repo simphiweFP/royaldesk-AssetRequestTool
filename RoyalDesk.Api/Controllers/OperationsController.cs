@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using RoyalDesk.Api.Authentication;
 using RoyalDesk.Api.Data;
 using RoyalDesk.Api.Operations;
+using RoyalDesk.Api.StoreRoom;
 
 namespace RoyalDesk.Api.Controllers;
 
@@ -83,6 +84,19 @@ public sealed class OperationsController(IDbConnectionFactory connectionFactory)
         await using var db = connectionFactory.CreateConnection();
         await db.OpenAsync(ct);
         await using var tx = await db.BeginTransactionAsync(ct);
+        var previous = await db.QuerySingleOrDefaultAsync<(string Status, string Condition)>(new CommandDefinition(
+            "SELECT Status,Condition FROM Assets WHERE Id=@assetId", new { assetId }, tx, cancellationToken: ct));
+        if (string.IsNullOrEmpty(previous.Status)) return NotFound();
+        var nextCondition = dto.Condition ?? previous.Condition;
+        if (dto.Status.Equals("Available", StringComparison.OrdinalIgnoreCase) &&
+            (nextCondition.Equals("Damaged", StringComparison.OrdinalIgnoreCase) ||
+             nextCondition.Equals("Obsolete", StringComparison.OrdinalIgnoreCase)))
+            return BadRequest("A damaged or obsolete item must be inspected and its condition updated before release.");
+        if (dto.Status.Equals("Available", StringComparison.OrdinalIgnoreCase))
+            await LinkedAssetInventory.RestoreAsync(db, tx, assetId, Actor, ct);
+        else if (previous.Status.Equals("Available", StringComparison.OrdinalIgnoreCase))
+            await LinkedAssetInventory.QuarantineAsync(db, tx, assetId, Actor, ct);
+
         var affected = await db.ExecuteAsync(new CommandDefinition("UPDATE Assets SET Status=@Status,Condition=COALESCE(@Condition,Condition),Notes=COALESCE(@Notes,Notes),UpdatedAtUtc=@now WHERE Id=@assetId", new { assetId, dto.Status, dto.Condition, dto.Notes, now = DateTime.UtcNow }, tx, cancellationToken: ct));
         if (affected == 0) return NotFound();
         await db.ExecuteAsync(new CommandDefinition("INSERT INTO AssetHistory(AssetId,EventType,Description,PerformedBy,CreatedAtUtc) VALUES(@assetId,'StatusChanged',@description,@actor,@now)", new { assetId, description = $"Status changed to {dto.Status}", actor = Actor, now = DateTime.UtcNow }, tx, cancellationToken: ct));
