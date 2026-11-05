@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
-import { StoreItem, StoreMovement } from '../../core/models/store-room.model';
+import { StoreItem, StoreMovement, StoreLinkedAsset } from '../../core/models/store-room.model';
 import { StoreRoomService } from '../../core/services/store-room.service';
 
 @Component({
@@ -17,6 +17,9 @@ export class StoreRoomComponent implements OnInit {
 
   items: StoreItem[] = [];
   movements: StoreMovement[] = [];
+  assets: StoreLinkedAsset[] = [];
+  assetToLinkId?: number;
+  physicallyInStore = true;
   selectedItemId?: number;
   loading = false;
   error = '';
@@ -42,6 +45,13 @@ export class StoreRoomComponent implements OnInit {
     return this.items.filter(i => [i.name, i.category, i.sku, i.location, i.stockStatus].some(v => v?.toLowerCase().includes(q)));
   }
 
+  get damagedAssets(): StoreLinkedAsset[] {
+    return this.assets.filter(a =>
+      a.condition.toLowerCase() === 'damaged' ||
+      ['in repair', 'pending write-off', 'approved for write-off'].includes(a.status.toLowerCase()));
+  }
+  get unlinkedAssets(): StoreLinkedAsset[] { return this.assets.filter(a => !a.storeItemId && a.status !== 'Disposed'); }
+  get selectedItem(): StoreItem | undefined { return this.items.find(i => i.id === this.selectedItemId); }
   get totalUnits(): number { return this.items.reduce((sum, item) => sum + item.quantityOnHand, 0); }
   get availableUnits(): number { return this.items.reduce((sum, item) => sum + item.availableQuantity, 0); }
   get reservedUnits(): number { return this.items.reduce((sum, item) => sum + item.reservedQuantity, 0); }
@@ -50,8 +60,8 @@ export class StoreRoomComponent implements OnInit {
   load(): void {
     this.loading = true;
     this.error = '';
-    forkJoin({ items: this.api.items(), movements: this.api.movements() }).subscribe({
-      next: result => { this.items = result.items; this.movements = result.movements; this.loading = false; },
+    forkJoin({ items: this.api.items(), movements: this.api.movements(), assets: this.api.assetInventory() }).subscribe({
+      next: result => { this.items = result.items; this.movements = result.movements; this.assets = result.assets; this.loading = false; },
       error: e => { this.error = e?.error?.detail || e?.error || 'Could not load Store Room.'; this.loading = false; }
     });
   }
@@ -76,6 +86,17 @@ export class StoreRoomComponent implements OnInit {
 
   selectItem(item: StoreItem): void {
     this.selectedItemId = item.id;
+  }
+
+  linkAsset(): void {
+    if (!this.selectedItemId || !this.assetToLinkId) {
+      this.error = 'Select an asset-tracked store item and an unlinked asset.';
+      return;
+    }
+    this.api.linkAsset(this.selectedItemId, this.assetToLinkId, this.physicallyInStore).subscribe({
+      next: () => { this.assetToLinkId = undefined; this.load(); },
+      error: e => this.error = e?.error?.detail || e?.error || 'Could not link asset to Store Room.'
+    });
   }
 
   applyMovement(): void {
