@@ -137,6 +137,47 @@ public sealed class EquipmentDeliveryService(IDbConnectionFactory connections)
         return (await GetAsync(ticketId,ct))!;
     }
 
+    public async Task<EquipmentDeliveryDto> RetryAsync(int ticketId,string actor,CancellationToken ct=default)
+    {
+        await using var db=connections.CreateConnection();
+        await db.OpenAsync(ct);
+        await using var tx=await db.BeginTransactionAsync(ct);
+        var delivery=await RequireAsync(db,tx,ticketId,ct);
+        if(delivery.Status!="Returned to Sender" || !delivery.DeliveryRequired)
+            throw new InvalidOperationException("Only returned branch deliveries can be prepared for another attempt.");
+        var remaining=delivery.Quantity-delivery.ReceivedQuantity;
+        if(remaining<=0)throw new InvalidOperationException("All requested items have already been received.");
+        var now=DateTime.UtcNow;
+        var reserved=await db.ExecuteAsync(new CommandDefinition("""
+            UPDATE StoreItems SET ReservedQuantity=ReservedQuantity+@qty,UpdatedAtUtc=@now
+            WHERE Id=@id AND IsActive=1 AND QuantityOnHand-ReservedQuantity>=@qty
+            """,new{id=delivery.StoreItemId,qty=remaining,now},tx,cancellationToken:ct));
+        if(reserved!=1)throw new InvalidOperationException("Insufficient usable stock to retry this delivery.");
+        if(delivery.AssetId.HasValue)
+        {
+            var asset=await db.ExecuteScalarAsync<int>(new CommandDefinition("""
+                SELECT COUNT(*) FROM StoreAssetLinks l JOIN Assets a ON a.Id=l.AssetId
+                WHERE l.AssetId=@assetId AND l.StoreItemId=@itemId AND l.PhysicallyInStore=1
+                  AND a.Status='Available'
+                """,new{assetId=delivery.AssetId.Value,itemId=delivery.StoreItemId},tx,cancellationToken:ct));
+            if(asset!=1)throw new InvalidOperationException("Tagged asset has not returned to available IT custody.");
+        }
+        await db.ExecuteAsync(new CommandDefinition("""
+            INSERT INTO StoreMovements(StoreItemId,TicketId,AssetId,MovementType,Quantity,Reference,Notes,PerformedBy,PerformedAtUtc)
+            VALUES(@itemId,@ticketId,@assetId,'Reserve',@qty,@reference,'Reserved for branch delivery retry',@actor,@now)
+            """,new{itemId=delivery.StoreItemId,ticketId,assetId=delivery.AssetId,qty=remaining,
+                reference=delivery.TicketNumber,actor,now},tx,cancellationToken:ct));
+        await db.ExecuteAsync(new CommandDefinition("""
+            UPDATE EquipmentDeliveries SET Status='Waiting for Driver Pickup',
+                DriverName=NULL,TrackingReference=NULL,PickedUpAtUtc=NULL,
+                UpdatedAtUtc=@now WHERE Id=@id
+            """,new{id=delivery.Id,now},tx,cancellationToken:ct));
+        await StageAsync(db,tx,delivery.Id,ticketId,delivery.Status,"Waiting for Driver Pickup",actor,
+            $"Delivery retry prepared; {remaining} remaining unit(s) reserved.",now,ct);
+        await tx.CommitAsync(ct);
+        return (await GetAsync(ticketId,ct))!;
+    }
+
     public async Task<EquipmentDeliveryDto> PickupAsync(int ticketId,PickupEquipmentDeliveryDto request,string actor,CancellationToken ct=default)
     {
         if(string.IsNullOrWhiteSpace(request.DriverName))throw new ArgumentException("Driver or courier name is required.");
@@ -289,10 +330,12 @@ public sealed class EquipmentDeliveryService(IDbConnectionFactory connections)
     private static async Task IssueReservedAsync(DbConnection db,DbTransaction tx,EquipmentDeliveryDto delivery,string actor,CancellationToken ct)
     {
         var now=DateTime.UtcNow;
+        var quantity=delivery.Quantity-delivery.ReceivedQuantity;
+        if(quantity<=0)throw new InvalidOperationException("No outstanding items remain to issue.");
         var released=await db.ExecuteAsync(new CommandDefinition("""
             UPDATE StoreItems SET ReservedQuantity=ReservedQuantity-@qty,UpdatedAtUtc=@now
             WHERE Id=@itemId AND ReservedQuantity>=@qty
-            """,new{itemId=delivery.StoreItemId,qty=delivery.Quantity,now},tx,cancellationToken:ct));
+            """,new{itemId=delivery.StoreItemId,qty=quantity,now},tx,cancellationToken:ct));
         if(released!=1)throw new InvalidOperationException("Reservation missing; contact IT for reconciliation.");
         if(delivery.AssetId.HasValue)
         {
@@ -310,14 +353,14 @@ public sealed class EquipmentDeliveryService(IDbConnectionFactory connections)
             var removed=await db.ExecuteAsync(new CommandDefinition("""
                 UPDATE StoreItems SET QuantityOnHand=QuantityOnHand-@qty,UpdatedAtUtc=@now
                 WHERE Id=@itemId AND QuantityOnHand-ReservedQuantity>=@qty
-                """,new{itemId=delivery.StoreItemId,qty=delivery.Quantity,now},tx,cancellationToken:ct));
+                """,new{itemId=delivery.StoreItemId,qty=quantity,now},tx,cancellationToken:ct));
             if(removed!=1)throw new InvalidOperationException("Not enough usable stock to dispatch.");
         }
         if(!delivery.AssetId.HasValue)
             await db.ExecuteAsync(new CommandDefinition("""
                 INSERT INTO StoreMovements(StoreItemId,TicketId,MovementType,Quantity,Reference,Notes,PerformedBy,PerformedAtUtc)
                 VALUES(@itemId,@ticketId,'Issue',@qty,@reference,'Dispatched from IT Store',@actor,@now)
-                """,new{itemId=delivery.StoreItemId,ticketId=delivery.TicketId,qty=delivery.Quantity,
+                """,new{itemId=delivery.StoreItemId,ticketId=delivery.TicketId,qty=quantity,
                     reference=delivery.TicketNumber,actor,now},tx,cancellationToken:ct));
         else
             await db.ExecuteAsync(new CommandDefinition("""
