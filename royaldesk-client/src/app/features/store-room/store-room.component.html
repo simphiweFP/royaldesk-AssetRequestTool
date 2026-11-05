@@ -1,6 +1,6 @@
 <section class="store-page">
   <div class="store-metrics">
-    <article><span>Total Units</span><strong>{{ totalUnits }}</strong><small>Physical stock on hand</small></article>
+    <article><span>Total Units</span><strong>{{ totalUnits }}</strong><small>Usable stock physically in Store Room</small></article>
     <article><span>Available</span><strong>{{ availableUnits }}</strong><small>Ready to issue</small></article>
     <article><span>Reserved</span><strong>{{ reservedUnits }}</strong><small>Linked to planned work</small></article>
     <article><span>Low Stock</span><strong>{{ lowStockCount }}</strong><small>At or below minimum level</small></article>
@@ -64,6 +64,45 @@
           <tbody><tr *ngFor="let movement of movements"><td>{{ movement.itemName }}</td><td>{{ movement.movementType }}</td><td>{{ movement.quantity }}</td><td>{{ movement.ticketNumber || movement.reference || '—' }}</td><td>{{ movement.performedBy }}</td><td>{{ movement.performedAtUtc | date:'dd MMM yyyy HH:mm' }}</td></tr></tbody>
         </table>
         <div class="empty-state" *ngIf="movements.length===0"><span>⇄</span><strong>No movements yet</strong><p>Stock activity will appear here once recorded.</p></div>
+      </div>
+    </article>
+  </div>
+
+  <div class="store-grid lower-grid">
+    <article class="store-card inventory-card">
+      <div class="card-heading"><div class="heading-symbol">▣</div><div><h2>Link Asset Register to Store Room</h2><p>Connect an existing tagged asset to its physical stock item. This does not add stock again.</p></div></div>
+      <div class="form-grid">
+        <label>Selected Store Item
+          <input [value]="selectedItem?.name || 'Select an asset-tracked item in Store Inventory above'" readonly>
+        </label>
+        <label>Existing Unlinked Asset
+          <select [(ngModel)]="assetToLinkId">
+            <option [ngValue]="undefined">Select asset tag</option>
+            <option *ngFor="let asset of unlinkedAssets" [ngValue]="asset.id">{{ asset.assetTag }} · {{ asset.make || asset.category }} {{ asset.model || '' }} · {{ asset.status }}</option>
+          </select>
+        </label>
+        <label class="check"><input type="checkbox" [(ngModel)]="physicallyInStore"> Item physically verified in Store Room</label>
+      </div>
+      <button class="primary" [disabled]="!selectedItem?.isAssetTracked || !assetToLinkId" (click)="linkAsset()">➤ &nbsp; Link Existing Asset</button>
+      <p class="selection-note">Stock quantities must be reconciled before linking an available asset. Assigned assets stay with the employee until returned.</p>
+    </article>
+
+    <article class="store-card history-card">
+      <div class="card-heading"><div class="heading-symbol">▤</div><div><h2>Damaged &amp; Repair Items</h2><p>Live condition and custody from the Asset Register, including assets not yet linked to Store Room.</p></div></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Asset</th><th>Condition</th><th>Asset Status</th><th>Custody</th><th>Store Item</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let asset of damagedAssets">
+              <td><strong>{{ asset.assetTag }}</strong><small>{{ asset.serialNumber || 'No serial' }}</small></td>
+              <td>{{ asset.condition }}</td>
+              <td><span class="pill low">{{ asset.status }}</span></td>
+              <td>{{ asset.physicallyInStore ? 'IT Store / Quarantine' : (asset.assignedEmployee || 'Not confirmed in store') }}</td>
+              <td>{{ asset.storeItemName || 'Not linked yet' }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="empty-state" *ngIf="damagedAssets.length===0"><span>✓</span><strong>No damaged assets recorded</strong><p>Damaged returns and assets awaiting repair or write-off will appear here.</p></div>
       </div>
     </article>
   </div>
