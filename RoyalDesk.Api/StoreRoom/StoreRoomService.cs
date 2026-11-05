@@ -101,6 +101,20 @@ public sealed class StoreRoomService(IDbConnectionFactory connectionFactory)
             VALUES(@assetId,@storeItemId,@inStore,@now,@actor)
             """,new {assetId=dto.AssetId,storeItemId,inStore=dto.PhysicallyInStore,now=DateTime.UtcNow,actor},
             tx,cancellationToken:ct));
+        // Physical damaged items are recorded separately from usable stock.
+        if(dto.PhysicallyInStore && !usable &&
+            (asset.Condition.Equals("Damaged",StringComparison.OrdinalIgnoreCase) ||
+             asset.Condition.Equals("Obsolete",StringComparison.OrdinalIgnoreCase) ||
+             asset.Status is "In Repair" or "Pending Write-Off" or "Approved for Write-Off"))
+        {
+            await db.ExecuteAsync(new CommandDefinition("""
+                UPDATE StoreItems SET QuarantinedQuantity=QuarantinedQuantity+1,UpdatedAtUtc=@now WHERE Id=@storeItemId
+                """,new {storeItemId,now=DateTime.UtcNow},tx,cancellationToken:ct));
+            await db.ExecuteAsync(new CommandDefinition("""
+                INSERT INTO StoreMovements(StoreItemId,AssetId,MovementType,Quantity,Reference,Notes,PerformedBy,PerformedAtUtc)
+                VALUES(@storeItemId,@assetId,'Quarantine',1,@ref,'Existing damaged asset reconciled to physical store',@actor,@now)
+                """,new {storeItemId,assetId=dto.AssetId,@ref=asset.AssetTag,actor,now=DateTime.UtcNow},tx,cancellationToken:ct));
+        }
         await tx.CommitAsync(ct);
     }
 
