@@ -37,6 +37,11 @@ export class StoreRoomComponent implements OnInit {
 
   readonly movementTypes = ['Stock In', 'Reserve', 'Release Reservation', 'Issue', 'Return', 'Adjustment', 'Stock Correction -', 'Write-Off'];
 
+  get allowedMovementTypes(): string[] {
+    if (!this.selectedItem?.isAssetTracked) return this.movementTypes;
+    return this.movementTypes.filter(x => !['Issue','Return','Write-Off'].includes(x));
+  }
+
   ngOnInit(): void { this.load(); }
 
   get filteredItems(): StoreItem[] {
@@ -86,6 +91,7 @@ export class StoreRoomComponent implements OnInit {
 
   selectItem(item: StoreItem): void {
     this.selectedItemId = item.id;
+    if (!this.allowedMovementTypes.includes(this.movementForm.movementType)) this.movementForm.movementType = 'Stock In';
   }
 
   linkAsset(): void {
