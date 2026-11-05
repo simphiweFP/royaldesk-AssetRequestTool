@@ -211,6 +211,7 @@
             <label>Exception / return notes *
               <textarea [(ngModel)]="deliveryForm.notes" placeholder="Describe the delivery failure or physical return"></textarea>
             </label>
+            <label class="delivery-damaged-check" *ngIf="d.status==='Delivery Failed'"><input type="checkbox" [(ngModel)]="returnedDamaged"> Item was returned damaged (move to quarantine instead of available stock)</label>
             <div class="delivery-buttons">
               <button *ngIf="d.status!=='Delivery Failed'" type="button" [disabled]="deliveryBusy" (click)="failDelivery()">Record Failed Delivery</button>
               <button *ngIf="d.status==='Delivery Failed'" type="button" [disabled]="deliveryBusy" (click)="returnFailedDelivery()">Confirm Returned to Store Room</button>
