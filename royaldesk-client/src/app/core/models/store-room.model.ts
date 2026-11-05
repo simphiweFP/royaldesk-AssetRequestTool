@@ -6,6 +6,7 @@ export interface StoreItem {
   location?: string;
   quantityOnHand: number;
   reservedQuantity: number;
+  quarantinedQuantity: number;
   minimumStock: number;
   isAssetTracked: boolean;
   isActive: boolean;
