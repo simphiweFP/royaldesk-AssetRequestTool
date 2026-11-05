@@ -46,7 +46,7 @@ internal static class LinkedAssetInventory
         if (!link.PhysicallyInStore || link.QuantityOnHand-link.ReservedQuantity < 1)
             throw new InvalidOperationException("Linked asset is not available in Store Room. Reconcile the stock before assigning it.");
         await db.ExecuteAsync(new CommandDefinition("""
-            UPDATE StoreItems SET QuantityOnHand=QuantityOnHand-1,UpdatedAtUtc=@now WHERE Id=@id
+            UPDATE StoreItems SET QuantityOnHand=QuantityOnHand-1,QuarantinedQuantity=QuarantinedQuantity+1,UpdatedAtUtc=@now WHERE Id=@id
             """,new {id=link.StoreItemId,now=DateTime.UtcNow},tx,cancellationToken:ct));
         await db.ExecuteAsync(new CommandDefinition("""
             UPDATE StoreAssetLinks SET PhysicallyInStore=0 WHERE AssetId=@assetId
@@ -65,6 +65,10 @@ internal static class LinkedAssetInventory
         if (!damaged)
             await db.ExecuteAsync(new CommandDefinition("""
                 UPDATE StoreItems SET QuantityOnHand=QuantityOnHand+1,UpdatedAtUtc=@now WHERE Id=@id
+                """,new {id=link.StoreItemId,now=DateTime.UtcNow},tx,cancellationToken:ct));
+        else
+            await db.ExecuteAsync(new CommandDefinition("""
+                UPDATE StoreItems SET QuarantinedQuantity=QuarantinedQuantity+1,UpdatedAtUtc=@now WHERE Id=@id
                 """,new {id=link.StoreItemId,now=DateTime.UtcNow},tx,cancellationToken:ct));
         await MovementAsync(db,tx,assetId,link.StoreItemId,damaged ? "Quarantine" : "Return",
             damaged ? "Damaged item received; excluded from available stock" : "Usable asset returned to Store Room",actor,ct);
@@ -91,9 +95,11 @@ internal static class LinkedAssetInventory
         var link=await GetAsync(db,tx,assetId,ct);
         if(link is null || !link.PhysicallyInStore) return;
         if(link.Status.Equals("Available",StringComparison.OrdinalIgnoreCase)) return;
-        await db.ExecuteAsync(new CommandDefinition("""
-            UPDATE StoreItems SET QuantityOnHand=QuantityOnHand+1,UpdatedAtUtc=@now WHERE Id=@id
+        var released=await db.ExecuteAsync(new CommandDefinition("""
+            UPDATE StoreItems SET QuantityOnHand=QuantityOnHand+1,QuarantinedQuantity=QuarantinedQuantity-1,
+                UpdatedAtUtc=@now WHERE Id=@id AND QuarantinedQuantity>=1
             """,new {id=link.StoreItemId,now=DateTime.UtcNow},tx,cancellationToken:ct));
+        if(released!=1)throw new InvalidOperationException("Quarantined asset stock requires reconciliation before release.");
         await MovementAsync(db,tx,assetId,link.StoreItemId,"Return","Inspected / repaired and released to usable stock",actor,ct);
     }
 
@@ -105,6 +111,11 @@ internal static class LinkedAssetInventory
             throw new InvalidOperationException("Physical custody of the linked asset must be confirmed in Store Room before disposal.");
         if(link.Status.Equals("Available",StringComparison.OrdinalIgnoreCase))
             throw new InvalidOperationException("Asset must be quarantined before disposal.");
+        var removed=await db.ExecuteAsync(new CommandDefinition("""
+            UPDATE StoreItems SET QuarantinedQuantity=QuarantinedQuantity-1,UpdatedAtUtc=@now
+            WHERE Id=@id AND QuarantinedQuantity>=1
+            """,new{id=link.StoreItemId,now=DateTime.UtcNow},tx,cancellationToken:ct));
+        if(removed!=1)throw new InvalidOperationException("Cannot dispose a tagged asset without reconciled quarantined stock.");
         await db.ExecuteAsync(new CommandDefinition("""
             UPDATE StoreAssetLinks SET PhysicallyInStore=0 WHERE AssetId=@assetId
             """,new {assetId},tx,cancellationToken:ct));
