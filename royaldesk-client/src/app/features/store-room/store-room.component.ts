@@ -35,7 +35,7 @@ export class StoreRoomComponent implements OnInit {
     reference: '', notes: ''
   };
 
-  readonly movementTypes = ['Stock In', 'Reserve', 'Release Reservation', 'Issue', 'Return', 'Adjustment', 'Write-Off'];
+  readonly movementTypes = ['Stock In', 'Reserve', 'Release Reservation', 'Issue', 'Return', 'Adjustment', 'Stock Correction -', 'Write-Off'];
 
   ngOnInit(): void { this.load(); }
 
