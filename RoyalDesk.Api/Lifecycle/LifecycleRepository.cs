@@ -114,7 +114,7 @@ internal sealed class LifecycleRepository(IDbConnectionFactory connectionFactory
     {
         const string sql = """
             INSERT INTO Assets(AssetTag,SerialNumber,Category,Make,Model,BranchId,DepartmentId,Status,Condition,PurchaseDate,PurchaseValue,WarrantyExpiry,FullyDepreciated,Notes,CreatedAtUtc,UpdatedAtUtc)
-            VALUES(@AssetTag,@SerialNumber,@Category,@Make,@Model,@BranchId,@DepartmentId,'Available',@Condition,@PurchaseDate,@PurchaseValue,@WarrantyExpiry,@FullyDepreciated,@Notes,@Now,@Now);
+            VALUES(@AssetTag,@SerialNumber,@Category,@Make,@Model,@BranchId,@DepartmentId,CASE WHEN lower(@Condition) IN ('damaged','obsolete') THEN 'In Repair' ELSE 'Available' END,@Condition,@PurchaseDate,@PurchaseValue,@WarrantyExpiry,@FullyDepreciated,@Notes,@Now,@Now);
             SELECT last_insert_rowid();
             """;
 
