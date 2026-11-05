@@ -227,7 +227,7 @@ export class HelpDeskTicketsComponent implements OnInit {
   get newCount(): number { return this.tickets.filter(t => t.status === 'New').length; }
   get activeCount(): number { return this.tickets.filter(t => ['Assigned', 'In Progress'].includes(t.status)).length; }
   get waitingCount(): number { return this.tickets.filter(t => t.status.startsWith('Waiting') || t.status.startsWith('Escalated') || t.status==='Awaiting Receipt Confirmation').length; }
-  get resolvedCount(): number { return this.tickets.filter(t => t.status === 'Resolved').length; }
+  get resolvedCount(): number { return this.tickets.filter(t => ['Resolved','Done','Closed'].includes(t.status)).length; }
 
   typeLabel(type: string): string {
     if (type === 'Incident') return 'Problem';
