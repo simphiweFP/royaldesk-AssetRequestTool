@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { StoreItem, StoreMovement } from '../models/store-room.model';
+import { StoreItem, StoreMovement, StoreLinkedAsset } from '../models/store-room.model';
 
 @Injectable({ providedIn: 'root' })
 export class StoreRoomService {
@@ -14,6 +14,15 @@ export class StoreRoomService {
 
   movements(): Observable<StoreMovement[]> {
     return this.http.get<StoreMovement[]>(`${this.base}/movements`, { withCredentials: true });
+  }
+
+  assetInventory(): Observable<StoreLinkedAsset[]> {
+    return this.http.get<StoreLinkedAsset[]>(`${this.base}/asset-inventory`, { withCredentials: true });
+  }
+
+  linkAsset(storeItemId: number, assetId: number, physicallyInStore: boolean): Observable<void> {
+    return this.http.post<void>(`${this.base}/items/${storeItemId}/link-asset`,
+      { assetId, physicallyInStore }, { withCredentials: true });
   }
 
   createItem(payload: {
