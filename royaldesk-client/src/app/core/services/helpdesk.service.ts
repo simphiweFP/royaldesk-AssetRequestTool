@@ -74,6 +74,10 @@ export class HelpDeskService {
     return this.http.post<EquipmentDelivery>(`${this.base}/tickets/${ticketId}/delivery/prepare`, payload, { withCredentials: true });
   }
 
+  cancelDelivery(ticketId: number, notes: string): Observable<EquipmentDelivery> {
+    return this.http.post<EquipmentDelivery>(`${this.base}/tickets/${ticketId}/delivery/cancel`, { notes }, { withCredentials: true });
+  }
+
   retryDelivery(ticketId: number): Observable<EquipmentDelivery> {
     return this.http.post<EquipmentDelivery>(`${this.base}/tickets/${ticketId}/delivery/retry`, {}, { withCredentials: true });
   }
