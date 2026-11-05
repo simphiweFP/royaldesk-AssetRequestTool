@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using RoyalDesk.Api.HelpDesk;
+using RoyalDesk.Api.Deliveries;
 using RoyalDesk.Api.Services;
 using RoyalDesk.Api.StaffAccess;
 
@@ -7,7 +8,7 @@ namespace RoyalDesk.Api.Controllers;
 
 [ApiController]
 [Route("api/helpdesk")]
-public sealed class HelpDeskController(HelpDeskService service, JustIctEscalationService escalationService, RequestAttachmentService attachments) : ControllerBase
+public sealed class HelpDeskController(HelpDeskService service, JustIctEscalationService escalationService, RequestAttachmentService attachments, EquipmentDeliveryService deliveries) : ControllerBase
 {
     private string Actor => User.Identity?.Name ?? "unknown";
 
@@ -65,6 +66,45 @@ public sealed class HelpDeskController(HelpDeskService service, JustIctEscalatio
         await service.UpdateStatusAsync(id, dto, Actor, ct);
         return NoContent();
     }
+
+    [HttpGet("tickets/{id:int}/delivery")]
+    public async Task<IActionResult> Delivery(int id,CancellationToken ct)
+    {
+        var delivery=await deliveries.GetAsync(id,ct);
+        return delivery is null?NotFound():Ok(delivery);
+    }
+
+    [HttpGet("deliveries/open")]
+    public Task<IReadOnlyList<EquipmentDeliveryDto>> OpenDeliveries(CancellationToken ct)
+        => deliveries.GetOpenAsync(ct);
+
+    [HttpGet("tickets/{id:int}/delivery/history")]
+    public Task<IReadOnlyList<EquipmentDeliveryEventDto>> DeliveryHistory(int id,CancellationToken ct)
+        => deliveries.HistoryAsync(id,ct);
+
+    [HttpPost("tickets/{id:int}/delivery/prepare")]
+    public Task<EquipmentDeliveryDto> PrepareDelivery(int id,PrepareEquipmentDeliveryDto dto,CancellationToken ct)
+        => deliveries.PrepareAsync(id,dto,Actor,ct);
+
+    [HttpPost("tickets/{id:int}/delivery/pickup")]
+    public Task<EquipmentDeliveryDto> PickupDelivery(int id,PickupEquipmentDeliveryDto dto,CancellationToken ct)
+        => deliveries.PickupAsync(id,dto,Actor,ct);
+
+    [HttpPost("tickets/{id:int}/delivery/arrived")]
+    public Task<EquipmentDeliveryDto> MarkDeliveryArrived(int id,CancellationToken ct)
+        => deliveries.ArrivedAsync(id,Actor,ct);
+
+    [HttpPost("tickets/{id:int}/delivery/confirm")]
+    public Task<EquipmentDeliveryDto> ConfirmDelivery(int id,ConfirmEquipmentReceiptDto dto,CancellationToken ct)
+        => deliveries.ConfirmAsync(id,dto,Actor,ct);
+
+    [HttpPost("tickets/{id:int}/delivery/fail")]
+    public Task<EquipmentDeliveryDto> FailDelivery(int id,DeliveryExceptionDto dto,CancellationToken ct)
+        => deliveries.FailAsync(id,dto,Actor,ct);
+
+    [HttpPost("tickets/{id:int}/delivery/return")]
+    public Task<EquipmentDeliveryDto> ReturnFailedDelivery(int id,DeliveryExceptionDto dto,CancellationToken ct)
+        => deliveries.ReturnedAsync(id,dto,Actor,ct);
 
     [HttpGet("team")]
     public Task<IReadOnlyList<ITTeamMemberDto>> Team(CancellationToken ct)
