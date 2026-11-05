@@ -44,4 +44,4 @@ public sealed record PrepareEquipmentDeliveryDto(int StoreItemId, int? AssetId, 
     string RecipientName, string? LocalHandoverReason);
 public sealed record PickupEquipmentDeliveryDto(string DriverName, string? TrackingReference);
 public sealed record ConfirmEquipmentReceiptDto(int Quantity, string ReceivedBy, string ReceiptReference, string? Notes);
-public sealed record DeliveryExceptionDto(string Notes);
+public sealed record DeliveryExceptionDto(string Notes, bool Damaged = false);
