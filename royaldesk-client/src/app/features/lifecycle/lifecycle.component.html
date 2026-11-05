@@ -94,7 +94,7 @@
               <div class="card-heading"><div class="heading-symbol">▤</div><div><h2>Asset Register</h2><p>Search and review company equipment.</p></div></div>
               <input class="search" [(ngModel)]="assetSearch" placeholder="Search tag, serial, make, user or status…">
               <div class="table-wrap">
-                <table><thead><tr><th>Asset</th><th>Category</th><th>Location</th><th>Assigned to</th><th>Status</th></tr></thead><tbody><tr *ngFor="let a of filteredAssets"><td><strong>{{a.assetTag}}</strong><small>{{a.make}} {{a.model}} · {{a.serialNumber || 'No serial'}}</small></td><td>{{a.category}}</td><td>{{a.branchName || '—'}}</td><td>{{a.assignedEmployeeName || '—'}}</td><td><span class="pill">{{a.status}}</span></td></tr></tbody></table>
+                <table><thead><tr><th>Asset</th><th>Category</th><th>Location</th><th>Store Room</th><th>Assigned to</th><th>Status</th></tr></thead><tbody><tr *ngFor="let a of filteredAssets"><td><strong>{{a.assetTag}}</strong><small>{{a.make}} {{a.model}} · {{a.serialNumber || 'No serial'}}</small></td><td>{{a.category}}</td><td>{{a.branchName || '—'}}</td><td>{{a.storeItemName || 'Not linked' }}<small *ngIf="a.storeItemId">{{ a.physicallyInStore ? 'In IT custody' : 'Outside IT Store' }}</small></td><td>{{a.assignedEmployeeName || '—'}}</td><td><span class="pill">{{a.status}}</span></td></tr></tbody></table>
                 <div class="table-empty" *ngIf="filteredAssets.length===0"><span class="table-empty-icon">▣</span><strong>No assets registered yet</strong><p>Register an asset using the form on the left. It will appear here once saved.</p></div>
               </div>
             </article>
