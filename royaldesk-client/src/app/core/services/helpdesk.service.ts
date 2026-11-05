@@ -87,6 +87,12 @@ export class HelpDeskService {
     return this.http.post<EquipmentDelivery>(`${this.base}/tickets/${ticketId}/delivery/arrived`, {}, { withCredentials: true });
   }
 
+  uploadDeliveryProof(ticketId: number, file: File): Observable<void> {
+    const body = new FormData();
+    body.append('file', file, file.name);
+    return this.http.post<void>(`${this.base}/tickets/${ticketId}/delivery/proof`, body, { withCredentials: true });
+  }
+
   confirmReceipt(ticketId: number, quantity: number, receivedBy: string, receiptReference: string, notes: string): Observable<EquipmentDelivery> {
     return this.http.post<EquipmentDelivery>(`${this.base}/tickets/${ticketId}/delivery/confirm`,
       { quantity, receivedBy, receiptReference, notes }, { withCredentials: true });
