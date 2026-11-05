@@ -94,12 +94,16 @@ internal sealed class LifecycleRepository(IDbConnectionFactory connectionFactory
                    CAST(COALESCE(a.FullyDepreciated,0) AS INTEGER) FullyDepreciated,
                    CAST(a.Notes AS TEXT) Notes,
                    aa.EmployeeId AssignedEmployeeId,
-                   CASE WHEN e.Id IS NULL THEN NULL ELSE CAST(e.FirstName || ' ' || e.LastName AS TEXT) END AssignedEmployeeName
+                   CASE WHEN e.Id IS NULL THEN NULL ELSE CAST(e.FirstName || ' ' || e.LastName AS TEXT) END AssignedEmployeeName,
+                   sal.StoreItemId, CAST(si.Name AS TEXT) StoreItemName,
+                   CAST(COALESCE(sal.PhysicallyInStore,0) AS INTEGER) PhysicallyInStore
             FROM Assets a
             LEFT JOIN Branches b ON b.Id = a.BranchId
             LEFT JOIN Departments d ON d.Id = a.DepartmentId
             LEFT JOIN AssetAssignments aa ON aa.AssetId = a.Id AND aa.Status = 'Assigned'
             LEFT JOIN Employees e ON e.Id = aa.EmployeeId
+            LEFT JOIN StoreAssetLinks sal ON sal.AssetId=a.Id
+            LEFT JOIN StoreItems si ON si.Id=sal.StoreItemId
             ORDER BY a.AssetTag;
             """;
         await using var db = connectionFactory.CreateConnection();
