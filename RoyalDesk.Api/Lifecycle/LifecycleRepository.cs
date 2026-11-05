@@ -500,6 +500,10 @@ internal sealed class LifecycleRepository(IDbConnectionFactory connectionFactory
     public async Task UpdateRequestWorkflowAsync(int id, UpdateRequestWorkflowCommand command, string actor, CancellationToken ct)
     {
         await using var db = connectionFactory.CreateConnection();
+        var deliveryStatus = await db.ExecuteScalarAsync<string?>(new CommandDefinition(
+            "SELECT Status FROM EquipmentDeliveries WHERE TicketId=@id", new { id }, cancellationToken: ct));
+        if (deliveryStatus is not null && deliveryStatus != "Done")
+            throw new InvalidOperationException("Equipment must be confirmed received through the delivery workflow before ticket completion.");
         await db.ExecuteAsync(new CommandDefinition("""
             UPDATE AssetRequests
             SET Status=@Status,
