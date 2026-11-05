@@ -185,6 +185,14 @@
             </div>
             <button type="button" class="delivery-primary" [disabled]="deliveryBusy" (click)="pickupDelivery()">Confirm Driver Pickup</button>
           </div>
+          <div class="delivery-form" *ngIf="['Waiting for Driver Pickup','Awaiting Local Handover'].includes(d.status)">
+            <h3>Cancel Before Pickup / Handover</h3>
+            <p class="delivery-note">Cancelling before the stock leaves IT automatically releases the reservation.</p>
+            <label>Cancellation reason *<textarea [(ngModel)]="deliveryForm.notes" placeholder="Explain why this equipment request will not be issued"></textarea></label>
+            <div class="delivery-buttons">
+              <button type="button" [disabled]="deliveryBusy" (click)="cancelPreparedDelivery()">Cancel &amp; Release Reservation</button>
+            </div>
+          </div>
           <div class="delivery-form" *ngIf="d.status==='In Transit'">
             <p class="delivery-note">The driver has collected the equipment. Record arrival at the branch before receipt confirmation.</p>
             <button type="button" class="delivery-primary" [disabled]="deliveryBusy" (click)="arriveDelivery()">Mark Arrived at Branch</button>
