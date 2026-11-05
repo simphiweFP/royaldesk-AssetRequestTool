@@ -216,6 +216,16 @@
               <button *ngIf="d.status==='Delivery Failed'" type="button" [disabled]="deliveryBusy" (click)="returnFailedDelivery()">Confirm Returned to Store Room</button>
             </div>
           </div>
+          <div class="delivery-form" *ngIf="['Awaiting Receipt Confirmation','Partially Received','Done'].includes(d.status)">
+            <h3>Delivery Proof (Optional)</h3>
+            <p class="delivery-note">Attach a signed proof of delivery or a photo. It remains on the ticket for IT to download and review.</p>
+            <div class="delivery-fields">
+              <label>Signed POD / branch receipt
+                <input type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" (change)="selectDeliveryProof($event)">
+              </label>
+            </div>
+            <button type="button" class="delivery-primary" [disabled]="deliveryBusy || !deliveryProof" (click)="uploadDeliveryProof()">Attach Delivery Proof</button>
+          </div>
           <p *ngIf="d.status==='Done'" class="delivery-note">Receipt confirmed. The ticket has been completed and the stock issue recorded.</p>
           <div *ngIf="d.status==='Returned to Sender'" class="delivery-form">
             <p class="delivery-note">Undelivered stock is back in the Store Room. This ticket is not complete; prepare another driver attempt for the remaining {{ remainingDeliveryQuantity }} item(s).</p>
