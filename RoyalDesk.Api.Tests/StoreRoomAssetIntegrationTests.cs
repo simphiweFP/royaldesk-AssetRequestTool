@@ -54,6 +54,7 @@ public sealed class StoreRoomAssetIntegrationTests
                 new ReturnAssetCommand("Screen broken","Damaged","Needs repair"),"IT",CancellationToken.None);
             var afterReturn=Assert.Single(await store.GetItemsAsync());
             Assert.Equal(0,afterReturn.QuantityOnHand);
+            Assert.Equal(1,afterReturn.QuarantinedQuantity);
             var damaged=Assert.Single(await store.GetAssetInventoryAsync());
             Assert.True(damaged.PhysicallyInStore);
             Assert.Equal("Damaged",damaged.Condition);
@@ -73,6 +74,7 @@ public sealed class StoreRoomAssetIntegrationTests
             Assert.Equal("Disposed",disposed.Status);
             Assert.False(disposed.PhysicallyInStore);
             Assert.Equal(0,Assert.Single(await store.GetItemsAsync()).QuantityOnHand);
+            Assert.Equal(0,Assert.Single(await store.GetItemsAsync()).QuarantinedQuantity);
             Assert.Contains(await store.GetMovementsAsync(),m=>m.MovementType=="Write-Off" && m.StoreItemId==item.Id);
         }
         finally { if(File.Exists(file)) File.Delete(file); }
