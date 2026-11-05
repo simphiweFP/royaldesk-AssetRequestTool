@@ -34,6 +34,7 @@ export interface Asset {
   departmentName?: string; status: string; condition: string; purchaseDate?: string;
   purchaseValue?: number; warrantyExpiry?: string; fullyDepreciated: boolean;
   notes?: string; assignedEmployeeId?: number; assignedEmployeeName?: string;
+  storeItemId?: number; storeItemName?: string; physicallyInStore?: boolean;
 }
 
 export interface Assignment {
