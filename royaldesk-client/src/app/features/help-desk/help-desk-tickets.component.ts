@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { HelpDeskTicket, TicketStatusHistory } from '../../core/models/helpdesk.model';
+import { HelpDeskTicket, TicketStatusHistory, EquipmentDelivery, EquipmentDeliveryEvent } from '../../core/models/helpdesk.model';
 import { HelpDeskService } from '../../core/services/helpdesk.service';
 import { JustIctService } from '../../core/services/just-ict.service';
+import { StoreItem, StoreLinkedAsset } from '../../core/models/store-room.model';
 import { TicketTrackingComponent } from '../ticket-tracking/ticket-tracking.component';
 
 @Component({
@@ -17,7 +18,7 @@ export class HelpDeskTicketsComponent implements OnInit {
   private readonly api = inject(HelpDeskService);
   private readonly justIct = inject(JustIctService);
 
-  readonly statuses = ['All', 'New', 'Assigned', 'In Progress', 'Waiting for User', 'Waiting for Third Party', 'Escalated to Just ICT', 'Resolved', 'Closed'];
+  readonly statuses = ['All', 'New', 'Assigned', 'In Progress', 'Waiting for User', 'Waiting for Third Party', 'Escalated to Just ICT', 'Awaiting Local Handover', 'Waiting for Driver Pickup', 'In Transit', 'Awaiting Receipt Confirmation', 'Partially Received', 'Delivery Failed', 'Returned to Sender', 'Done', 'Resolved', 'Closed'];
   readonly requestTypes = ['All', 'Incident', 'Equipment', 'Service'];
   mode: 'team' | 'track' = 'team';
   tickets: HelpDeskTicket[] = [];
@@ -33,6 +34,130 @@ export class HelpDeskTicketsComponent implements OnInit {
   escalating = false;
   escalationTicket?: HelpDeskTicket;
   escalationForm = { teamViewerId: '', issueDescription: '', troubleshooting: '', additionalNotes: '', emailBody: '' };
+
+  delivery: EquipmentDelivery | null = null;
+  deliveryEvents: EquipmentDeliveryEvent[] = [];
+  deliveryStock: StoreItem[] = [];
+  eligibleDeliveryAssets: StoreLinkedAsset[] = [];
+  deliveryBusy = false;
+  deliveryError = '';
+  deliveryForm = {
+    storeItemId: 0, assetId: 0, recipientName: '',
+    deliveryRequired: true, localHandoverReason: '',
+    driverName: '', trackingReference: '',
+    receivedBy: '', receiptReference: '', receivedQuantity: 1, notes: ''
+  };
+  get selectedDeliveryStock(): StoreItem | undefined {
+    return this.deliveryStock.find(item => item.id === this.deliveryForm.storeItemId);
+  }
+  get remainingDeliveryQuantity(): number {
+    return this.delivery ? this.delivery.quantity - this.delivery.receivedQuantity : 0;
+  }
+
+  onDeliveryStockChanged(): void {
+    this.deliveryForm.assetId = 0;
+    this.eligibleDeliveryAssets = [];
+    if (!this.deliveryForm.storeItemId) return;
+    const itemId = this.deliveryForm.storeItemId;
+    this.api.deliveryAssets(itemId).subscribe({
+      next: assets => { if (this.deliveryForm.storeItemId === itemId) this.eligibleDeliveryAssets = assets; },
+      error: () => this.deliveryError = 'Could not load available asset tags for this stock item.'
+    });
+  }
+
+  loadDelivery(ticket: HelpDeskTicket): void {
+    this.delivery = null;
+    this.deliveryEvents = [];
+    this.deliveryError = '';
+    if (ticket.requestType !== 'Equipment') return;
+    this.deliveryForm = {
+      storeItemId: 0, assetId: 0, recipientName: ticket.requesterName,
+      deliveryRequired: ticket.branch.trim().toLowerCase() !== 'phoenix', localHandoverReason: '',
+      driverName: '', trackingReference: '', receivedBy: '', receiptReference: '',
+      receivedQuantity: ticket.quantity, notes: ''
+    };
+    this.api.deliveryStock().subscribe({
+      next: items => { if (this.selected?.id === ticket.id) this.deliveryStock = items; },
+      error: () => this.deliveryError = 'Could not load Store Room equipment.'
+    });
+    this.api.delivery(ticket.id).subscribe({
+      next: d => { if (this.selected?.id === ticket.id) {
+        this.delivery = d; this.deliveryForm.receivedQuantity = d.quantity - d.receivedQuantity;
+        this.loadDeliveryEvents(ticket.id);
+      }},
+      error: e => { if (this.selected?.id === ticket.id && e?.status !== 404) this.deliveryError = 'Could not load delivery status.'; }
+    });
+  }
+
+  loadDeliveryEvents(id: number): void {
+    this.api.deliveryHistory(id).subscribe({
+      next: events => { if (this.selected?.id === id) this.deliveryEvents = events; },
+      error: () => this.deliveryEvents = []
+    });
+  }
+
+  prepareDelivery(): void {
+    const t = this.selected, f = this.deliveryForm;
+    if (!t || !f.storeItemId || !f.recipientName.trim()) {
+      this.deliveryError = 'Choose Store Room stock and enter the recipient.'; return;
+    }
+    this.runDelivery(this.api.prepareDelivery(t.id, {
+      storeItemId: f.storeItemId, assetId: f.assetId || null,
+      deliveryRequired: f.deliveryRequired, recipientName: f.recipientName.trim(),
+      localHandoverReason: f.localHandoverReason.trim() || null
+    }), t.id);
+  }
+
+  pickupDelivery(): void {
+    if (!this.selected || !this.deliveryForm.driverName.trim()) {
+      this.deliveryError = 'Enter the name of the driver collecting the item.'; return;
+    }
+    this.runDelivery(this.api.pickupDelivery(this.selected.id,
+      this.deliveryForm.driverName, this.deliveryForm.trackingReference), this.selected.id);
+  }
+
+  arriveDelivery(): void {
+    if (this.selected) this.runDelivery(this.api.arriveDelivery(this.selected.id), this.selected.id);
+  }
+
+  confirmDelivery(): void {
+    if (!this.selected || !this.deliveryForm.receivedBy.trim() || !this.deliveryForm.receiptReference.trim() ||
+        this.deliveryForm.receivedQuantity < 1 || this.deliveryForm.receivedQuantity > this.remainingDeliveryQuantity) {
+      this.deliveryError = 'Provide the receiving person, proof/reference and a valid received quantity.'; return;
+    }
+    const f = this.deliveryForm;
+    this.runDelivery(this.api.confirmReceipt(this.selected.id,
+      f.receivedQuantity, f.receivedBy.trim(), f.receiptReference.trim(), f.notes), this.selected.id);
+  }
+
+  failDelivery(): void {
+    if (!this.selected || !this.deliveryForm.notes.trim()) {
+      this.deliveryError = 'Describe the failed delivery.'; return;
+    }
+    this.runDelivery(this.api.failDelivery(this.selected.id, this.deliveryForm.notes.trim()), this.selected.id);
+  }
+
+  returnFailedDelivery(): void {
+    if (!this.selected || !this.deliveryForm.notes.trim()) {
+      this.deliveryError = 'Record why the remaining items were physically returned to Store Room.'; return;
+    }
+    this.runDelivery(this.api.returnDelivery(this.selected.id, this.deliveryForm.notes.trim()), this.selected.id);
+  }
+
+  private runDelivery(operation: import('rxjs').Observable<EquipmentDelivery>, id: number): void {
+    this.deliveryBusy = true;
+    this.deliveryError = '';
+    operation.subscribe({
+      next: d => { this.deliveryBusy = false; if (this.selected?.id === id) {
+        this.delivery = d;
+        this.deliveryForm.receivedQuantity = d.quantity - d.receivedQuantity;
+        this.reloadSelected(id);
+      }},
+      error: e => { this.deliveryBusy = false;
+        this.deliveryError = e?.error?.detail || 'Could not update delivery. Check the stock, status and required fields.';
+      }
+    });
+  }
 
   ngOnInit(): void { this.load(); }
 
@@ -70,6 +195,7 @@ export class HelpDeskTicketsComponent implements OnInit {
 
   select(ticket: HelpDeskTicket): void {
     this.selected = ticket;
+    this.loadDelivery(ticket);
     this.history = [];
     this.attachments = [];
     this.api.attachments(ticket.id).subscribe({ next: files => this.attachments = files, error: () => { this.attachments = []; this.error = 'Could not load ticket attachments.'; } });
@@ -146,6 +272,6 @@ export class HelpDeskTicketsComponent implements OnInit {
   }
 
   private reloadSelected(id: number): void {
-    this.api.ticket(id).subscribe({ next: ticket => { this.selected = ticket; this.load(); this.api.history(id).subscribe({ next: history => this.history = history }); } });
+    this.api.ticket(id).subscribe({ next: ticket => { this.selected = ticket; this.loadDelivery(ticket); this.load(); this.api.history(id).subscribe({ next: history => this.history = history }); } });
   }
 }
