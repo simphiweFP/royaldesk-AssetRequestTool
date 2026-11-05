@@ -122,6 +122,10 @@ export class HelpDeskTicketsComponent implements OnInit {
     }), t.id);
   }
 
+  retryDelivery(): void {
+    if (this.selected) this.runDelivery(this.api.retryDelivery(this.selected.id), this.selected.id);
+  }
+
   pickupDelivery(): void {
     if (!this.selected || !this.deliveryForm.driverName.trim()) {
       this.deliveryError = 'Enter the name of the driver collecting the item.'; return;
