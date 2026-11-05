@@ -149,6 +149,13 @@ export class HelpDeskTicketsComponent implements OnInit {
     }), t.id);
   }
 
+  cancelPreparedDelivery(): void {
+    if (!this.selected || !this.deliveryForm.notes.trim()) {
+      this.deliveryError = 'Give a reason for cancelling the equipment delivery.'; return;
+    }
+    this.runDelivery(this.api.cancelDelivery(this.selected.id,this.deliveryForm.notes.trim()),this.selected.id);
+  }
+
   retryDelivery(): void {
     if (this.selected) this.runDelivery(this.api.retryDelivery(this.selected.id), this.selected.id);
   }
