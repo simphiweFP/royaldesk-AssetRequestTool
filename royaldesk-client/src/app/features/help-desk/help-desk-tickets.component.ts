@@ -49,6 +49,30 @@ export class HelpDeskTicketsComponent implements OnInit {
     });
   }
 
+  deliveryProof?: File;
+  selectDeliveryProof(event: Event): void {
+    const input=event.target as HTMLInputElement;
+    this.deliveryProof=input.files?.item(0) || undefined;
+  }
+
+  uploadDeliveryProof(): void {
+    if (!this.selected || !this.deliveryProof) { this.deliveryError='Choose a delivery photo or signed PDF first.'; return; }
+    const id=this.selected.id;
+    this.deliveryBusy=true;this.deliveryError='';
+    this.api.uploadDeliveryProof(id,this.deliveryProof).subscribe({
+      next:()=>{
+        this.deliveryBusy=false;this.deliveryProof=undefined;
+        this.api.attachments(id).subscribe({
+          next: files=>{ if(this.selected?.id===id)this.attachments=files; }
+        });
+      },
+      error:e=>{
+        this.deliveryBusy=false;
+        this.deliveryError=e?.error?.detail || 'Could not attach delivery proof.';
+      }
+    });
+  }
+
   delivery: EquipmentDelivery | null = null;
   deliveryEvents: EquipmentDeliveryEvent[] = [];
   deliveryStock: StoreItem[] = [];
@@ -81,6 +105,7 @@ export class HelpDeskTicketsComponent implements OnInit {
 
   loadDelivery(ticket: HelpDeskTicket): void {
     this.delivery = null;
+    this.deliveryProof = undefined;
     this.deliveryEvents = [];
     this.deliveryError = '';
     if (ticket.requestType !== 'Equipment') return;
