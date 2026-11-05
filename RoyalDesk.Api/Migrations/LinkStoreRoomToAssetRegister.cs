@@ -2,27 +2,32 @@ using FluentMigrator;
 
 namespace RoyalDesk.Api.Migrations;
 
-// Preserve all existing inventory; old assets must be explicitly reconciled with stock.
+// Preserve existing inventory balances and require explicit asset reconciliation.
 [Migration(202611050001)]
 public sealed class LinkStoreRoomToAssetRegister : Migration
 {
     public override void Up()
     {
-        Create.Table("StoreAssetLinks")
-            .WithColumn("AssetId").AsInt32().PrimaryKey().ForeignKey("Assets", "Id")
-            .WithColumn("StoreItemId").AsInt32().NotNullable().ForeignKey("StoreItems", "Id")
-            .WithColumn("PhysicallyInStore").AsBoolean().NotNullable().WithDefaultValue(false)
-            .WithColumn("LinkedAtUtc").AsDateTime2().NotNullable()
-            .WithColumn("LinkedBy").AsString(150).NotNullable();
-        Create.Index("IX_StoreAssetLinks_StoreItemId").OnTable("StoreAssetLinks").OnColumn("StoreItemId").Ascending();
-        Alter.Table("StoreMovements").AddColumn("AssetId").AsInt32().Nullable().ForeignKey("Assets", "Id");
-        Create.Index("IX_StoreMovements_AssetId").OnTable("StoreMovements").OnColumn("AssetId").Ascending();
+        Execute.Sql("""
+            CREATE TABLE IF NOT EXISTS StoreAssetLinks (
+                AssetId INTEGER NOT NULL PRIMARY KEY REFERENCES Assets(Id),
+                StoreItemId INTEGER NOT NULL REFERENCES StoreItems(Id),
+                PhysicallyInStore INTEGER NOT NULL DEFAULT 0,
+                LinkedAtUtc TEXT NOT NULL,
+                LinkedBy TEXT NOT NULL
+            );
+            CREATE INDEX IF NOT EXISTS IX_StoreAssetLinks_StoreItemId ON StoreAssetLinks(StoreItemId);
+            ALTER TABLE StoreMovements ADD COLUMN AssetId INTEGER NULL REFERENCES Assets(Id);
+            CREATE INDEX IF NOT EXISTS IX_StoreMovements_AssetId ON StoreMovements(AssetId);
+            """);
     }
 
     public override void Down()
     {
-        Delete.Index("IX_StoreMovements_AssetId").OnTable("StoreMovements");
-        Delete.Column("AssetId").FromTable("StoreMovements");
-        Delete.Table("StoreAssetLinks");
+        Execute.Sql("""
+            DROP INDEX IF EXISTS IX_StoreMovements_AssetId;
+            ALTER TABLE StoreMovements DROP COLUMN AssetId;
+            DROP TABLE IF EXISTS StoreAssetLinks;
+            """);
     }
 }
