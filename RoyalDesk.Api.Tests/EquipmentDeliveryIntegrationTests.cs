@@ -115,6 +115,26 @@ public sealed class EquipmentDeliveryIntegrationTests
     }
 
     [Fact]
+    public async Task DamagedReturn_IsQuarantinedAndCannotIncreaseAvailableStock()
+    {
+        var data=await SetupAsync(4,quantity:2);
+        try
+        {
+            await data.Deliveries.PrepareAsync(data.TicketId,
+                new PrepareEquipmentDeliveryDto(data.StoreItemId,null,true,"Branch Employee",null),"IT");
+            await data.Deliveries.PickupAsync(data.TicketId,new PickupEquipmentDeliveryDto("Driver","WB-DAMAGE"),"IT");
+            await data.Deliveries.FailAsync(data.TicketId,new DeliveryExceptionDto("Damaged in transit"),"IT");
+            await data.Deliveries.ReturnedAsync(data.TicketId,new DeliveryExceptionDto("Both items damaged",true),"IT");
+            var item=Assert.Single(await data.Store.GetItemsAsync());
+            Assert.Equal(2,item.QuantityOnHand);
+            Assert.Equal(2,item.QuarantinedQuantity);
+            Assert.Equal(2,item.AvailableQuantity);
+            Assert.Contains(await data.Store.GetMovementsAsync(),m=>m.MovementType=="Quarantine" && m.Quantity==2);
+        }
+        finally { if(File.Exists(data.Path))File.Delete(data.Path); }
+    }
+
+    [Fact]
     public async Task TaggedAsset_RemainsUnavailableDuringTransitAndMovesToDestinationAfterProof()
     {
         var data=await SetupAsync(1,quantity:1,assetTracked:true);
