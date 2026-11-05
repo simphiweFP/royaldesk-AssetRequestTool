@@ -49,6 +49,7 @@ export class HelpDeskTicketsComponent implements OnInit {
     });
   }
 
+  returnedDamaged = false;
   deliveryProof?: File;
   selectDeliveryProof(event: Event): void {
     const input=event.target as HTMLInputElement;
@@ -106,6 +107,7 @@ export class HelpDeskTicketsComponent implements OnInit {
   loadDelivery(ticket: HelpDeskTicket): void {
     this.delivery = null;
     this.deliveryProof = undefined;
+    this.returnedDamaged = false;
     this.deliveryEvents = [];
     this.deliveryError = '';
     if (ticket.requestType !== 'Equipment') return;
@@ -184,7 +186,7 @@ export class HelpDeskTicketsComponent implements OnInit {
     if (!this.selected || !this.deliveryForm.notes.trim()) {
       this.deliveryError = 'Record why the remaining items were physically returned to Store Room.'; return;
     }
-    this.runDelivery(this.api.returnDelivery(this.selected.id, this.deliveryForm.notes.trim()), this.selected.id);
+    this.runDelivery(this.api.returnDelivery(this.selected.id, this.deliveryForm.notes.trim(), this.returnedDamaged), this.selected.id);
   }
 
   private runDelivery(operation: import('rxjs').Observable<EquipmentDelivery>, id: number): void {
