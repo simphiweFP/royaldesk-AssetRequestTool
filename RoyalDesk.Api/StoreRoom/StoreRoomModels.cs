@@ -50,3 +50,21 @@ public sealed class StoreMovementRequest
     public string? Reference { get; set; }
     public string? Notes { get; set; }
 }
+
+
+public sealed class StoreLinkedAssetDto
+{
+    public int Id { get; set; }
+    public string AssetTag { get; set; } = "";
+    public string? SerialNumber { get; set; }
+    public string Category { get; set; } = "";
+    public string? Make { get; set; }
+    public string? Model { get; set; }
+    public string Status { get; set; } = "";
+    public string Condition { get; set; } = "";
+    public int? StoreItemId { get; set; }
+    public string? StoreItemName { get; set; }
+    public bool PhysicallyInStore { get; set; }
+    public string? AssignedEmployee { get; set; }
+}
+public sealed record LinkStoreAssetDto(int AssetId, bool PhysicallyInStore);
