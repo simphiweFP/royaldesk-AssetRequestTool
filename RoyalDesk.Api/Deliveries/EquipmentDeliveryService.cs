@@ -300,29 +300,36 @@ public sealed class EquipmentDeliveryService(IDbConnectionFactory connections)
         var outstanding=delivery.Quantity-delivery.ReceivedQuantity;
         if(outstanding<=0)throw new InvalidOperationException("No outstanding stock to return.");
         var now=DateTime.UtcNow;
-        await db.ExecuteAsync(new CommandDefinition("""
-            UPDATE StoreItems SET QuantityOnHand=QuantityOnHand+@qty,UpdatedAtUtc=@now WHERE Id=@id
-            """,new{id=delivery.StoreItemId,qty=outstanding,now},tx,cancellationToken:ct));
+        if(request.Damaged)
+            await db.ExecuteAsync(new CommandDefinition("""
+                UPDATE StoreItems SET QuarantinedQuantity=QuarantinedQuantity+@qty,UpdatedAtUtc=@now WHERE Id=@id
+                """,new{id=delivery.StoreItemId,qty=outstanding,now},tx,cancellationToken:ct));
+        else
+            await db.ExecuteAsync(new CommandDefinition("""
+                UPDATE StoreItems SET QuantityOnHand=QuantityOnHand+@qty,UpdatedAtUtc=@now WHERE Id=@id
+                """,new{id=delivery.StoreItemId,qty=outstanding,now},tx,cancellationToken:ct));
         if(delivery.AssetId.HasValue)
         {
             await db.ExecuteAsync(new CommandDefinition("""
                 UPDATE StoreAssetLinks SET PhysicallyInStore=1 WHERE AssetId=@assetId
                 """,new{assetId=delivery.AssetId.Value},tx,cancellationToken:ct));
             await db.ExecuteAsync(new CommandDefinition("""
-                UPDATE Assets SET Status='Available',UpdatedAtUtc=@now WHERE Id=@assetId
-                """,new{assetId=delivery.AssetId.Value,now},tx,cancellationToken:ct));
+                UPDATE Assets SET Status=@status,Condition=CASE WHEN @damaged THEN 'Damaged' ELSE Condition END,
+                    UpdatedAtUtc=@now WHERE Id=@assetId
+                """,new{assetId=delivery.AssetId.Value,status=request.Damaged?"In Repair":"Available",damaged=request.Damaged,now},tx,cancellationToken:ct));
         }
         await db.ExecuteAsync(new CommandDefinition("""
             INSERT INTO StoreMovements(StoreItemId,TicketId,AssetId,MovementType,Quantity,Reference,Notes,PerformedBy,PerformedAtUtc)
-            VALUES(@itemId,@ticketId,@assetId,'Return',@qty,@reference,@notes,@actor,@now)
+            VALUES(@itemId,@ticketId,@assetId,@movementType,@qty,@reference,@notes,@actor,@now)
             """,new{itemId=delivery.StoreItemId,ticketId,assetId=delivery.AssetId,qty=outstanding,
+                movementType=request.Damaged?"Quarantine":"Return",
                 reference=delivery.TicketNumber,notes=request.Notes.Trim(),actor,now},tx,cancellationToken:ct));
         await db.ExecuteAsync(new CommandDefinition("""
             UPDATE EquipmentDeliveries SET Status='Returned to Sender',ExceptionNotes=@notes,UpdatedAtUtc=@now
             WHERE Id=@id
             """,new{id=delivery.Id,notes=request.Notes.Trim(),now},tx,cancellationToken:ct));
         await StageAsync(db,tx,delivery.Id,ticketId,delivery.Status,"Returned to Sender",actor,
-            $"{outstanding} undelivered item(s) physically returned. {request.Notes.Trim()}",now,ct);
+            $"{outstanding} undelivered item(s) physically returned; damaged={request.Damaged}. {request.Notes.Trim()}",now,ct);
         await tx.CommitAsync(ct);
         return (await GetAsync(ticketId,ct))!;
     }
@@ -339,6 +346,13 @@ public sealed class EquipmentDeliveryService(IDbConnectionFactory connections)
         if(released!=1)throw new InvalidOperationException("Reservation missing; contact IT for reconciliation.");
         if(delivery.AssetId.HasValue)
         {
+            var eligible=await db.ExecuteScalarAsync<int>(new CommandDefinition("""
+                SELECT COUNT(*) FROM StoreAssetLinks l JOIN Assets a ON a.Id=l.AssetId
+                WHERE l.AssetId=@assetId AND l.StoreItemId=@itemId AND l.PhysicallyInStore=1
+                  AND a.Status='Available' AND a.Condition NOT IN ('Damaged','Obsolete')
+                """,new {assetId=delivery.AssetId.Value,itemId=delivery.StoreItemId},tx,cancellationToken:ct));
+            if(eligible!=1)
+                throw new InvalidOperationException("Tagged asset is no longer available for dispatch; inspect or reconcile it first.");
             await LinkedAssetInventory.IssueAsync(db,tx,delivery.AssetId.Value,actor,ct);
             await db.ExecuteAsync(new CommandDefinition("""
                 UPDATE Assets SET Status='In Transit',UpdatedAtUtc=@now WHERE Id=@id
