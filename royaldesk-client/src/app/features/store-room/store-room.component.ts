@@ -35,11 +35,11 @@ export class StoreRoomComponent implements OnInit {
     reference: '', notes: ''
   };
 
-  readonly movementTypes = ['Stock In', 'Reserve', 'Release Reservation', 'Issue', 'Return', 'Adjustment', 'Stock Correction -', 'Write-Off'];
+  readonly movementTypes = ['Stock In', 'Reserve', 'Release Reservation', 'Issue', 'Return', 'Adjustment', 'Stock Correction -', 'Write-Off', 'Dispose Quarantined'];
 
   get allowedMovementTypes(): string[] {
     if (!this.selectedItem?.isAssetTracked) return this.movementTypes;
-    return this.movementTypes.filter(x => !['Issue','Return','Write-Off'].includes(x));
+    return this.movementTypes.filter(x => !['Issue','Return','Write-Off','Dispose Quarantined'].includes(x));
   }
 
   ngOnInit(): void { this.load(); }
@@ -59,6 +59,7 @@ export class StoreRoomComponent implements OnInit {
   get selectedItem(): StoreItem | undefined { return this.items.find(i => i.id === this.selectedItemId); }
   get totalUnits(): number { return this.items.reduce((sum, item) => sum + item.quantityOnHand, 0); }
   get availableUnits(): number { return this.items.reduce((sum, item) => sum + item.availableQuantity, 0); }
+  get quarantinedUnits(): number { return this.items.reduce((sum, item) => sum + (item.quarantinedQuantity || 0), 0); }
   get reservedUnits(): number { return this.items.reduce((sum, item) => sum + item.reservedQuantity, 0); }
   get lowStockCount(): number { return this.items.filter(item => item.availableQuantity <= item.minimumStock).length; }
 
