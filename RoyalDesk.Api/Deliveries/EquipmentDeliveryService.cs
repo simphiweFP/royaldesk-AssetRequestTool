@@ -49,7 +49,7 @@ public sealed class EquipmentDeliveryService(IDbConnectionFactory connections)
     {
         await using var db=connections.CreateConnection();
         var rows=await db.QueryAsync<EquipmentDeliveryDto>(new CommandDefinition(
-            DetailQuery+" WHERE d.Status <> 'Done' ORDER BY d.UpdatedAtUtc DESC",
+            DetailQuery+" WHERE d.Status NOT IN ('Done','Cancelled') ORDER BY d.UpdatedAtUtc DESC",
             cancellationToken:ct));
         return rows.AsList();
     }
@@ -133,6 +133,35 @@ public sealed class EquipmentDeliveryService(IDbConnectionFactory connections)
                 @ref=ticket.TicketNumber,notes="Reserved for approved equipment delivery",actor,now},tx,cancellationToken:ct));
         await StageAsync(db,tx,id,ticketId,ticket.Status,status,actor,
             request.DeliveryRequired?"Stock reserved; awaiting driver pickup.":"Stock reserved for local recipient handover.",now,ct);
+        await tx.CommitAsync(ct);
+        return (await GetAsync(ticketId,ct))!;
+    }
+
+    public async Task<EquipmentDeliveryDto> CancelAsync(int ticketId,DeliveryExceptionDto request,string actor,CancellationToken ct=default)
+    {
+        if(string.IsNullOrWhiteSpace(request.Notes))throw new ArgumentException("Cancellation reason is required.");
+        await using var db=connections.CreateConnection();
+        await db.OpenAsync(ct);
+        await using var tx=await db.BeginTransactionAsync(ct);
+        var delivery=await RequireAsync(db,tx,ticketId,ct);
+        if(delivery.Status is not ("Waiting for Driver Pickup" or "Awaiting Local Handover"))
+            throw new InvalidOperationException("Only equipment not yet picked up or issued can be cancelled.");
+        var remaining=delivery.Quantity-delivery.ReceivedQuantity;
+        var now=DateTime.UtcNow;
+        var released=await db.ExecuteAsync(new CommandDefinition("""
+            UPDATE StoreItems SET ReservedQuantity=ReservedQuantity-@qty,UpdatedAtUtc=@now
+            WHERE Id=@itemId AND ReservedQuantity>=@qty
+            """,new{itemId=delivery.StoreItemId,qty=remaining,now},tx,cancellationToken:ct));
+        if(released!=1)throw new InvalidOperationException("Stock reservation is missing; reconcile before cancelling.");
+        await db.ExecuteAsync(new CommandDefinition("""
+            INSERT INTO StoreMovements(StoreItemId,TicketId,AssetId,MovementType,Quantity,Reference,Notes,PerformedBy,PerformedAtUtc)
+            VALUES(@itemId,@ticketId,@assetId,'Release Reservation',@qty,@reference,@notes,@actor,@now)
+            """,new{itemId=delivery.StoreItemId,ticketId,assetId=delivery.AssetId,
+                qty=remaining,reference=delivery.TicketNumber,notes=request.Notes.Trim(),actor,now},tx,cancellationToken:ct));
+        await db.ExecuteAsync(new CommandDefinition("""
+            UPDATE EquipmentDeliveries SET Status='Cancelled',ExceptionNotes=@notes,UpdatedAtUtc=@now WHERE Id=@id
+            """,new{id=delivery.Id,notes=request.Notes.Trim(),now},tx,cancellationToken:ct));
+        await StageAsync(db,tx,delivery.Id,ticketId,delivery.Status,"Cancelled",actor,request.Notes.Trim(),now,ct);
         await tx.CommitAsync(ct);
         return (await GetAsync(ticketId,ct))!;
     }
