@@ -49,7 +49,7 @@ public sealed class EquipmentDeliveryService(IDbConnectionFactory connections)
     {
         await using var db=connections.CreateConnection();
         var rows=await db.QueryAsync<EquipmentDeliveryDto>(new CommandDefinition(
-            DetailQuery+" WHERE d.Status NOT IN ('Done','Returned to Sender') ORDER BY d.UpdatedAtUtc DESC",
+            DetailQuery+" WHERE d.Status <> 'Done' ORDER BY d.UpdatedAtUtc DESC",
             cancellationToken:ct));
         return rows.AsList();
     }
