@@ -54,6 +54,9 @@ internal sealed class AssetRecord
     public string? Notes { get; set; }
     public long? AssignedEmployeeId { get; set; }
     public string? AssignedEmployeeName { get; set; }
+    public long? StoreItemId { get; set; }
+    public string? StoreItemName { get; set; }
+    public long PhysicallyInStore { get; set; }
 }
 
 internal sealed class AssignmentRecord
