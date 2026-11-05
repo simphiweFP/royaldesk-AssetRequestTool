@@ -89,3 +89,40 @@ export interface TicketEscalation {
   escalatedByName: string;
   escalatedAtUtc: string;
 }
+
+export interface EquipmentDelivery {
+  id: number;
+  ticketId: number;
+  ticketNumber: string;
+  storeItemId: number;
+  storeItemName?: string;
+  assetId?: number;
+  assetTag?: string;
+  destinationBranch: string;
+  deliveryRequired: boolean;
+  recipientName: string;
+  quantity: number;
+  receivedQuantity: number;
+  status: string;
+  driverName?: string;
+  trackingReference?: string;
+  receivedBy?: string;
+  receiptReference?: string;
+  exceptionNotes?: string;
+  preparedAtUtc?: string;
+  pickedUpAtUtc?: string;
+  receivedAtUtc?: string;
+  completedAtUtc?: string;
+  createdAtUtc: string;
+  updatedAtUtc: string;
+}
+export interface EquipmentDeliveryEvent {
+  id: number;
+  deliveryId: number;
+  fromStatus?: string;
+  toStatus: string;
+  quantity?: number;
+  details?: string;
+  performedBy: string;
+  performedAtUtc: string;
+}
