@@ -40,6 +40,68 @@ public sealed class StoreRoomService(IDbConnectionFactory connectionFactory)
         return rows.AsList();
     }
 
+    public async Task<IReadOnlyList<StoreLinkedAssetDto>> GetAssetInventoryAsync(CancellationToken ct = default)
+    {
+        await using var db = connectionFactory.CreateConnection();
+        await db.OpenAsync(ct);
+        var assets = await db.QueryAsync<StoreLinkedAssetDto>(new CommandDefinition("""
+            SELECT a.Id,a.AssetTag,a.SerialNumber,a.Category,a.Make,a.Model,a.Status,a.Condition,
+                   l.StoreItemId,s.Name AS StoreItemName,
+                   COALESCE(l.PhysicallyInStore,0) AS PhysicallyInStore,
+                   trim(COALESCE(e.FirstName,'') || ' ' || COALESCE(e.LastName,'')) AS AssignedEmployee
+            FROM Assets a
+            LEFT JOIN StoreAssetLinks l ON l.AssetId=a.Id
+            LEFT JOIN StoreItems s ON s.Id=l.StoreItemId
+            LEFT JOIN AssetAssignments aa ON aa.AssetId=a.Id AND aa.Status='Assigned'
+            LEFT JOIN Employees e ON e.Id=aa.EmployeeId
+            ORDER BY (CASE WHEN a.Condition='Damaged' OR a.Status IN ('In Repair','Pending Write-Off','Approved for Write-Off') THEN 0 ELSE 1 END), a.AssetTag
+            """, cancellationToken:ct));
+        return assets.AsList();
+    }
+
+    public async Task LinkAssetAsync(int storeItemId, LinkStoreAssetDto dto, string actor, CancellationToken ct = default)
+    {
+        await using var db = connectionFactory.CreateConnection();
+        await db.OpenAsync(ct);
+        await using var tx = await db.BeginTransactionAsync(ct);
+        var storeItem = await db.QuerySingleOrDefaultAsync<StoreItemDto>(new CommandDefinition("""
+            SELECT Id,Name,Category,Sku,Location,QuantityOnHand,ReservedQuantity,MinimumStock,IsAssetTracked,IsActive
+            FROM StoreItems WHERE Id=@storeItemId AND IsActive=1
+            """,new {storeItemId},tx,cancellationToken:ct));
+        if(storeItem is null || !storeItem.IsAssetTracked)
+            throw new InvalidOperationException("Select an active asset-tracked Store Room item.");
+        var asset = await db.QuerySingleOrDefaultAsync<StoreLinkedAssetDto>(new CommandDefinition("""
+            SELECT Id,AssetTag,Condition,Status FROM Assets WHERE Id=@id
+            """,new {id=dto.AssetId},tx,cancellationToken:ct));
+        if(asset is null || asset.Status.Equals("Disposed",StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException("Select a valid asset that is not disposed.");
+        if(await db.ExecuteScalarAsync<int>(new CommandDefinition(
+            "SELECT COUNT(*) FROM StoreAssetLinks WHERE AssetId=@id",
+            new {id=dto.AssetId},tx,cancellationToken:ct))>0)
+            throw new InvalidOperationException("Asset is already linked to a Store Room item.");
+        bool usable = asset.Status.Equals("Available",StringComparison.OrdinalIgnoreCase) &&
+            !asset.Condition.Equals("Damaged",StringComparison.OrdinalIgnoreCase) &&
+            !asset.Condition.Equals("Obsolete",StringComparison.OrdinalIgnoreCase);
+        if (usable && !dto.PhysicallyInStore)
+            throw new InvalidOperationException("Available assets must be physically confirmed in the Store Room before linking.");
+        if (usable)
+        {
+            var counted = await db.ExecuteScalarAsync<int>(new CommandDefinition("""
+                SELECT COUNT(*) FROM StoreAssetLinks l
+                JOIN Assets a ON a.Id=l.AssetId
+                WHERE l.StoreItemId=@storeItemId AND l.PhysicallyInStore=1 AND a.Status='Available'
+                """,new {storeItemId},tx,cancellationToken:ct));
+            if(storeItem.QuantityOnHand-storeItem.ReservedQuantity <= counted)
+                throw new InvalidOperationException("No unlinked available unit remains for this stock item. Receive/reconcile stock first.");
+        }
+        await db.ExecuteAsync(new CommandDefinition("""
+            INSERT INTO StoreAssetLinks(AssetId,StoreItemId,PhysicallyInStore,LinkedAtUtc,LinkedBy)
+            VALUES(@assetId,@storeItemId,@inStore,@now,@actor)
+            """,new {assetId=dto.AssetId,storeItemId,inStore=dto.PhysicallyInStore,now=DateTime.UtcNow,actor},
+            tx,cancellationToken:ct));
+        await tx.CommitAsync(ct);
+    }
+
     public async Task<StoreItemDto> CreateItemAsync(CreateStoreItemDto dto, string actor, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(dto.Name) || string.IsNullOrWhiteSpace(dto.Category))
@@ -86,6 +148,11 @@ public sealed class StoreRoomService(IDbConnectionFactory connectionFactory)
             SELECT Id, Name, Category, Sku, Location, QuantityOnHand, ReservedQuantity, MinimumStock, IsAssetTracked, IsActive
             FROM StoreItems WHERE Id = @Id AND IsActive = 1;
             """, new { Id = itemId }, tx, cancellationToken: ct)) ?? throw new KeyNotFoundException("Store item not found.");
+
+        if(item.IsAssetTracked && (request.MovementType.Equals("Issue",StringComparison.OrdinalIgnoreCase) ||
+             request.MovementType.Equals("Return",StringComparison.OrdinalIgnoreCase) ||
+             request.MovementType.Equals("Write-Off",StringComparison.OrdinalIgnoreCase)))
+            throw new InvalidOperationException("Asset-tracked stock must be issued, returned or disposed through Asset Assignments / Write-Offs to keep inventory and asset history synchronised.");
 
         var onHand = item.QuantityOnHand;
         var reserved = item.ReservedQuantity;
