@@ -3,6 +3,7 @@
     <article><span>Total Units</span><strong>{{ totalUnits }}</strong><small>Usable stock physically in Store Room</small></article>
     <article><span>Available</span><strong>{{ availableUnits }}</strong><small>Ready to issue</small></article>
     <article><span>Reserved</span><strong>{{ reservedUnits }}</strong><small>Linked to planned work</small></article>
+    <article><span>Quarantined</span><strong>{{ quarantinedUnits }}</strong><small>Damaged or held from issue</small></article>
     <article><span>Low Stock</span><strong>{{ lowStockCount }}</strong><small>At or below minimum level</small></article>
   </div>
 
@@ -26,12 +27,13 @@
       <input class="search" [(ngModel)]="search" placeholder="Search item, category, code or location…">
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Item</th><th>On Hand</th><th>Reserved</th><th>Available</th><th>Status</th></tr></thead>
+          <thead><tr><th>Item</th><th>On Hand</th><th>Reserved</th><th>Quarantined</th><th>Available</th><th>Status</th></tr></thead>
           <tbody>
             <tr *ngFor="let item of filteredItems" (click)="selectItem(item)" [class.selected]="selectedItemId===item.id">
               <td><strong>{{ item.name }}</strong><small>{{ item.category }} · {{ item.sku || 'No code' }} · {{ item.location || 'No location' }}</small></td>
               <td>{{ item.quantityOnHand }}</td>
               <td>{{ item.reservedQuantity }}</td>
+              <td>{{ item.quarantinedQuantity }}</td>
               <td>{{ item.availableQuantity }}</td>
               <td><span class="pill" [class.low]="item.stockStatus==='Low Stock'">{{ item.stockStatus }}</span></td>
             </tr>
