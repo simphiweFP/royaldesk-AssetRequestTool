@@ -12,6 +12,34 @@
       <article><span>Resolved</span><strong>{{ resolvedCount }}</strong><small>Completed requests in this view</small></article>
     </div>
 
+    <div class="ticket-metrics delivery-metrics">
+      <article><span>Waiting for Driver</span><strong>{{ awaitingPickupCount }}</strong><small>Packed and ready for collection</small></article>
+      <article><span>Delivery in Progress</span><strong>{{ inTransitCount }}</strong><small>In transit or awaiting branch receipt</small></article>
+      <article><span>Delivery Exceptions</span><strong>{{ deliveryExceptionCount }}</strong><small>Failed or returned equipment needing IT action</small></article>
+    </div>
+
+    <article class="ticket-card delivery-queue-card" *ngIf="outstandingDeliveries.length">
+      <div class="ticket-card-heading"><div class="heading-symbol">▣</div>
+        <div><h2>Outstanding Branch Deliveries</h2><p>Track stock awaiting a driver, shipments in transit, unconfirmed receipts and delivery exceptions.</p></div>
+      </div>
+      <div class="ticket-table-wrap">
+        <table>
+          <thead><tr><th>Ticket</th><th>Destination</th><th>Equipment</th><th>Received</th><th>Delivery Status</th><th>Last Update</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let d of outstandingDeliveries">
+              <td><strong>{{ d.ticketNumber }}</strong></td>
+              <td>{{ d.destinationBranch }}</td>
+              <td>{{ d.storeItemName }} {{ d.assetTag || '' }}</td>
+              <td>{{ d.receivedQuantity }} / {{ d.quantity }}</td>
+              <td><span class="status-pill">{{ d.status }}</span></td>
+              <td>{{ d.updatedAtUtc | date:'dd MMM yyyy HH:mm' }}</td>
+              <td class="row-actions"><button type="button" (click)="openDeliveryTicket(d)">View Delivery</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+
     <article class="ticket-card">
       <div class="ticket-card-heading">
         <div class="heading-symbol">▤</div>
