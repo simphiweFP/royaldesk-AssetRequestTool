@@ -65,6 +65,9 @@ public sealed class AssetDto
     public string? Notes { get; set; }
     public int? AssignedEmployeeId { get; set; }
     public string? AssignedEmployeeName { get; set; }
+    public int? StoreItemId { get; set; }
+    public string? StoreItemName { get; set; }
+    public bool PhysicallyInStore { get; set; }
 }
 
 public sealed record CreateAssetDto(
