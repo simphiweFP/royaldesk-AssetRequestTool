@@ -35,6 +35,20 @@ export class HelpDeskTicketsComponent implements OnInit {
   escalationTicket?: HelpDeskTicket;
   escalationForm = { teamViewerId: '', issueDescription: '', troubleshooting: '', additionalNotes: '', emailBody: '' };
 
+  outstandingDeliveries: EquipmentDelivery[] = [];
+  get awaitingPickupCount(): number { return this.outstandingDeliveries.filter(d => d.status==='Waiting for Driver Pickup').length; }
+  get inTransitCount(): number { return this.outstandingDeliveries.filter(d => ['In Transit','Awaiting Receipt Confirmation','Partially Received'].includes(d.status)).length; }
+  get deliveryExceptionCount(): number { return this.outstandingDeliveries.filter(d => ['Delivery Failed','Returned to Sender'].includes(d.status)).length; }
+
+  openDeliveryTicket(delivery: EquipmentDelivery): void {
+    const cached=this.tickets.find(t=>t.id===delivery.ticketId);
+    if(cached) { this.select(cached); return; }
+    this.api.ticket(delivery.ticketId).subscribe({
+      next: ticket=>this.select(ticket),
+      error: ()=>this.error='Could not open the delivery ticket.'
+    });
+  }
+
   delivery: EquipmentDelivery | null = null;
   deliveryEvents: EquipmentDeliveryEvent[] = [];
   deliveryStock: StoreItem[] = [];
@@ -174,7 +188,7 @@ export class HelpDeskTicketsComponent implements OnInit {
 
   get newCount(): number { return this.tickets.filter(t => t.status === 'New').length; }
   get activeCount(): number { return this.tickets.filter(t => ['Assigned', 'In Progress'].includes(t.status)).length; }
-  get waitingCount(): number { return this.tickets.filter(t => t.status.startsWith('Waiting') || t.status.startsWith('Escalated')).length; }
+  get waitingCount(): number { return this.tickets.filter(t => t.status.startsWith('Waiting') || t.status.startsWith('Escalated') || t.status==='Awaiting Receipt Confirmation').length; }
   get resolvedCount(): number { return this.tickets.filter(t => t.status === 'Resolved').length; }
 
   typeLabel(type: string): string {
@@ -187,6 +201,10 @@ export class HelpDeskTicketsComponent implements OnInit {
   load(): void {
     this.loading = true;
     this.error = '';
+    this.api.openDeliveries().subscribe({
+      next: records=>this.outstandingDeliveries=records,
+      error: ()=>{ this.outstandingDeliveries=[]; }
+    });
     this.api.tickets(this.statusFilter).subscribe({
       next: tickets => { this.tickets = tickets; this.loading = false; },
       error: e => { this.error = e?.error?.detail || e?.error || 'Could not load IT tickets.'; this.loading = false; }
