@@ -7,7 +7,7 @@ public sealed class StoreRoomService(IDbConnectionFactory connectionFactory)
 {
     private static readonly HashSet<string> AllowedMovements = new(StringComparer.OrdinalIgnoreCase)
     {
-        "Stock In", "Reserve", "Release Reservation", "Issue", "Return", "Adjustment", "Write-Off"
+        "Stock In", "Reserve", "Release Reservation", "Issue", "Return", "Adjustment", "Stock Correction -", "Write-Off"
     };
 
     public async Task<IReadOnlyList<StoreItemDto>> GetItemsAsync(CancellationToken ct = default)
@@ -82,6 +82,8 @@ public sealed class StoreRoomService(IDbConnectionFactory connectionFactory)
         bool usable = asset.Status.Equals("Available",StringComparison.OrdinalIgnoreCase) &&
             !asset.Condition.Equals("Damaged",StringComparison.OrdinalIgnoreCase) &&
             !asset.Condition.Equals("Obsolete",StringComparison.OrdinalIgnoreCase);
+        if (asset.Status.Equals("Assigned",StringComparison.OrdinalIgnoreCase) && dto.PhysicallyInStore)
+            throw new InvalidOperationException("An assigned asset is still in employee custody. Process the return before confirming it in Store Room.");
         if (usable && !dto.PhysicallyInStore)
             throw new InvalidOperationException("Available assets must be physically confirmed in the Store Room before linking.");
         if (usable)
@@ -181,6 +183,20 @@ public sealed class StoreRoomService(IDbConnectionFactory connectionFactory)
                 break;
             case "Adjustment":
                 onHand += qty;
+                break;
+            case "Stock Correction -":
+                if (onHand - reserved < qty)
+                    throw new InvalidOperationException("Stock correction cannot reduce reserved or unavailable units.");
+                if (item.IsAssetTracked)
+                {
+                    var linkedUsable = await connection.ExecuteScalarAsync<int>(new CommandDefinition("""
+                        SELECT COUNT(*) FROM StoreAssetLinks l JOIN Assets a ON a.Id=l.AssetId
+                        WHERE l.StoreItemId=@itemId AND l.PhysicallyInStore=1 AND a.Status='Available'
+                        """, new { itemId }, tx, cancellationToken: ct));
+                    if (onHand - qty < linkedUsable)
+                        throw new InvalidOperationException("Cannot remove stock already reconciled to available asset tags.");
+                }
+                onHand -= qty;
                 break;
         }
 
