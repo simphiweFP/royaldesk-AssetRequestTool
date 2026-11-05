@@ -26,3 +26,18 @@ export interface StoreMovement {
   performedBy: string;
   performedAtUtc: string;
 }
+
+export interface StoreLinkedAsset {
+  id: number;
+  assetTag: string;
+  serialNumber?: string | null;
+  category: string;
+  make?: string | null;
+  model?: string | null;
+  status: string;
+  condition: string;
+  storeItemId?: number | null;
+  storeItemName?: string | null;
+  physicallyInStore: boolean;
+  assignedEmployee?: string | null;
+}
