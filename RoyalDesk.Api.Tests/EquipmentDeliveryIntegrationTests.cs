@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using RoyalDesk.Api.Data;
 using RoyalDesk.Api.Deliveries;
 using RoyalDesk.Api.HelpDesk;
+using RoyalDesk.Api.Lifecycle;
 using RoyalDesk.Api.Migrations;
 using RoyalDesk.Api.StoreRoom;
 
@@ -128,6 +129,16 @@ public sealed class EquipmentDeliveryIntegrationTests
                 new ConfirmEquipmentReceiptDto(1,"Branch Employee","Signed POD",null),"IT");
             Assert.Equal("Done",done.Status);
             Assert.Equal("Delivered",Assert.Single(await data.Store.GetAssetInventoryAsync()).Status);
+            Assert.Equal(0,Assert.Single(await data.Store.GetItemsAsync()).QuantityOnHand);
+            await using(var db=new SqliteConnection($"Data Source={data.Path}"))
+                await db.ExecuteAsync("""
+                    INSERT INTO Employees(EmployeeNumber,FirstName,LastName,CreatedAtUtc,UpdatedAtUtc)
+                    VALUES('DEL-001','Branch','Employee',@now,@now)
+                    """,new{now=DateTime.UtcNow});
+            var assignment=await new LifecycleRepository(data.Factory).AssignAssetAsync(
+                new AssignAssetCommand(1,1,"Good"),"IT",CancellationToken.None);
+            Assert.Equal(1,assignment.AssetId);
+            Assert.Equal("Assigned",Assert.Single(await data.Store.GetAssetInventoryAsync()).Status);
             Assert.Equal(0,Assert.Single(await data.Store.GetItemsAsync()).QuantityOnHand);
         }
         finally { if(File.Exists(data.Path))File.Delete(data.Path); }
