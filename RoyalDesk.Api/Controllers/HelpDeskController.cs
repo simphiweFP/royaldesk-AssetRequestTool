@@ -101,6 +101,10 @@ public sealed class HelpDeskController(HelpDeskService service, JustIctEscalatio
     public Task<EquipmentDeliveryDto> PrepareDelivery(int id,PrepareEquipmentDeliveryDto dto,CancellationToken ct)
         => deliveries.PrepareAsync(id,dto,Actor,ct);
 
+    [HttpPost("tickets/{id:int}/delivery/retry")]
+    public Task<EquipmentDeliveryDto> RetryDelivery(int id,CancellationToken ct)
+        => deliveries.RetryAsync(id,Actor,ct);
+
     [HttpPost("tickets/{id:int}/delivery/pickup")]
     public Task<EquipmentDeliveryDto> PickupDelivery(int id,PickupEquipmentDeliveryDto dto,CancellationToken ct)
         => deliveries.PickupAsync(id,dto,Actor,ct);
