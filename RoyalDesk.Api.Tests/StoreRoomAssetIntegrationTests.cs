@@ -48,6 +48,7 @@ public sealed class StoreRoomAssetIntegrationTests
             var assignment=await lifecycle.AssignAssetAsync(new AssignAssetCommand(assetId,employeeId,"Good"),"IT",CancellationToken.None);
             var afterIssue=Assert.Single(await store.GetItemsAsync());
             Assert.Equal(0,afterIssue.QuantityOnHand);
+            Assert.Equal(0,afterIssue.QuarantinedQuantity);
             Assert.False(Assert.Single(await store.GetAssetInventoryAsync()).PhysicallyInStore);
 
             await lifecycle.ReturnAssetAsync((int)assignment.Id,
