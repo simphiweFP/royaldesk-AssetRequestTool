@@ -83,7 +83,12 @@ builder.Services
     .AddLogging(logging => logging.AddFluentMigratorConsole());
 
 var app = builder.Build();
-using (var scope = app.Services.CreateScope()) scope.ServiceProvider.GetRequiredService<IMigrationRunner>().MigrateUp();
+using (var scope = app.Services.CreateScope())
+{
+    scope.ServiceProvider.GetRequiredService<IMigrationRunner>().MigrateUp();
+    if (app.Environment.IsDevelopment())
+        await DevelopmentStaffSeeder.SeedAsync(scope.ServiceProvider, app.Configuration);
+}
 
 if (app.Environment.IsDevelopment())
 {
