@@ -9,7 +9,7 @@ namespace RoyalDesk.Api.Controllers;
 
 [ApiController]
 [Route("api/helpdesk")]
-public sealed class HelpDeskController(HelpDeskService service, JustIctEscalationService escalationService, RequestAttachmentService attachments, EquipmentDeliveryService deliveries, StoreRoomService storeRoom) : ControllerBase
+public sealed class HelpDeskController(HelpDeskService service, JustIctEscalationService escalationService, RequestAttachmentService attachments, EquipmentDeliveryService deliveries, StoreRoomService storeRoom, TicketMergeService merging) : ControllerBase
 {
     private string Actor => User.Identity?.Name ?? "unknown";
 
@@ -145,6 +145,24 @@ public sealed class HelpDeskController(HelpDeskService service, JustIctEscalatio
     [HttpPost("tickets/{id:int}/delivery/return")]
     public Task<EquipmentDeliveryDto> ReturnFailedDelivery(int id,DeliveryExceptionDto dto,CancellationToken ct)
         => deliveries.ReturnedAsync(id,dto,Actor,ct);
+
+    // Existing staff access middleware restricts helpdesk routes to ticket staff.
+    [HttpPost("tickets/merge")]
+    [RequirePage("tickets")]
+    public async Task<ActionResult<IReadOnlyList<TicketMergeRecord>>> MergeTickets(
+        [FromBody] MergeTicketsRequest request, CancellationToken ct)
+    {
+        try { return Ok(await merging.MergeAsync(request, Actor, ct)); }
+        catch (UnauthorizedAccessException) { return Forbid(); }
+        catch (ArgumentException ex) { return BadRequest(new { detail = ex.Message }); }
+        catch (InvalidOperationException ex) { return Conflict(new { detail = ex.Message }); }
+        catch (KeyNotFoundException ex) { return NotFound(new { detail = ex.Message }); }
+    }
+
+    [HttpGet("tickets/{id:int}/merged")]
+    [RequirePage("tickets")]
+    public Task<IReadOnlyList<TicketMergeRecord>> MergedTickets(int id, CancellationToken ct)
+        => merging.GetMergedAsync(id, ct);
 
     [HttpGet("team")]
     public Task<IReadOnlyList<ITTeamMemberDto>> Team(CancellationToken ct)
