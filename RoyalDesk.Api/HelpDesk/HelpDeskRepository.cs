@@ -120,7 +120,7 @@ public sealed class HelpDeskRepository(IDbConnectionFactory connectionFactory) :
         var current = await connection.QuerySingleOrDefaultAsync<string>(new CommandDefinition(
             "SELECT Status FROM AssetRequests WHERE Id = @Id", new { Id = ticketId }, transaction, cancellationToken: ct));
         if (current is null) throw new KeyNotFoundException("Ticket not found.");
-        if (current is "Resolved" or "Closed" or "Cancelled") throw new InvalidOperationException("Completed tickets cannot be assigned.");
+        if (current is "Resolved" or "Closed" or "Cancelled" or "Merged") throw new InvalidOperationException("Completed tickets cannot be assigned.");
 
         var now = DateTime.UtcNow;
         await connection.ExecuteAsync(new CommandDefinition("""
@@ -148,7 +148,7 @@ public sealed class HelpDeskRepository(IDbConnectionFactory connectionFactory) :
             "SELECT Status, AssignedToId FROM AssetRequests WHERE Id = @Id", new { Id = ticketId }, transaction, cancellationToken: ct));
         if (row is null) throw new KeyNotFoundException("Ticket not found.");
         if (row.AssignedToId != member.Id) throw new InvalidOperationException("Only the assigned technician can start this ticket.");
-        if (row.Status is "Resolved" or "Closed" or "Cancelled") throw new InvalidOperationException("Completed tickets cannot be started.");
+        if (row.Status is "Resolved" or "Closed" or "Cancelled" or "Merged") throw new InvalidOperationException("Completed tickets cannot be started.");
 
         var now = DateTime.UtcNow;
         await connection.ExecuteAsync(new CommandDefinition("""
@@ -171,6 +171,7 @@ public sealed class HelpDeskRepository(IDbConnectionFactory connectionFactory) :
         var current = await connection.QuerySingleOrDefaultAsync<string>(new CommandDefinition(
             "SELECT Status FROM AssetRequests WHERE Id = @Id", new { Id = ticketId }, transaction, cancellationToken: ct));
         if (current is null) throw new KeyNotFoundException("Ticket not found.");
+        if (current == "Merged") throw new InvalidOperationException("This ticket was merged into another ticket and cannot be updated.");
 
         var deliveryStatus = await connection.ExecuteScalarAsync<string?>(new CommandDefinition(
             "SELECT Status FROM EquipmentDeliveries WHERE TicketId=@ticketId",
