@@ -60,6 +60,7 @@ builder.Services.AddScoped<ILifecycleRepository, LifecycleRepository>();
 builder.Services.AddScoped<ILifecycleService, LifecycleService>();
 builder.Services.AddScoped<IHelpDeskRepository, HelpDeskRepository>();
 builder.Services.AddScoped<HelpDeskService>();
+builder.Services.AddScoped<TicketMergeService>();
 builder.Services.AddScoped<JustIctEscalationRepository>();
 builder.Services.AddScoped<JustIctEscalationService>();
 builder.Services.AddScoped<PublicTrackingService>();
