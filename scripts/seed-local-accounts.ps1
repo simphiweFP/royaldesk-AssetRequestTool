@@ -15,7 +15,7 @@ foreach ($port in @(7080,5080)) {
     }
 }
 if (Test-Path $database) {
-    Write-Host "Demo database already exists. Existing accounts will not be overwritten." -ForegroundColor Yellow
+    Write-Host "Demo database already exists. Only accounts owned by the demo seeder will have passwords reset." -ForegroundColor Yellow
     Write-Host "To reset, back up and remove ONLY the dedicated demo database after stopping the API." -ForegroundColor Yellow
 }
 $env:ASPNETCORE_ENVIRONMENT = "Development"
@@ -38,9 +38,11 @@ Write-Host ""
 Write-Host "These credentials are not suitable for production or a shared network." -ForegroundColor Yellow
 Write-Host "Using isolated SQLite file: $database"
 Write-Host "Only seeder-created demo accounts can have their passwords reset."
+Write-Host "Angular staff login API: https://localhost:7080/api/staff-access/login"
+Write-Host "The API will now verify both demo logins against its selected SQLite database on startup."
 Push-Location $root
 try {
-    dotnet run --project RoyalDesk.Api
+    dotnet run --project RoyalDesk.Api --launch-profile https
     if ($LASTEXITCODE -ne 0) { throw "RoyalDesk API exited with code $LASTEXITCODE. Check migrations and seeding errors." }
 }
 finally {
