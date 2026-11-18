@@ -21,10 +21,11 @@
   </section>
 
   <main class="access-content">
-    <section class="access-shell">
+    <section class="access-shell" aria-labelledby="staff-signin-heading">
       <ng-container *ngIf="!setupMode">
-        <h3>Staff Sign In</h3>
-        <p class="form-description">Enter your RoyalDesk staff credentials to continue.</p>
+        <div class="form-eyebrow"><span class="form-eyebrow-mark" aria-hidden="true"></span> SECURE STAFF PORTAL</div>
+        <h3 id="staff-signin-heading">Welcome back</h3>
+        <p class="form-description">Sign in to manage your RoyalDesk workspace.</p>
         <div class="error" role="alert" *ngIf="error">{{ error }}</div>
         <form class="form" (ngSubmit)="unlock()">
           <label>Employee username
@@ -33,12 +34,13 @@
           <label>Password
             <input name="password" type="password" [(ngModel)]="password" autocomplete="current-password" required />
           </label>
-          <button class="primary" type="submit" [disabled]="loading || !username.trim() || !password">{{ loading ? 'Signing in…' : 'Sign In' }}</button>
+          <button class="primary" type="submit" [disabled]="loading || !username.trim() || !password">{{ loading ? 'Signing in…' : 'Sign in to RoyalDesk' }}</button>
         </form>
       </ng-container>
 
       <ng-container *ngIf="setupMode">
-        <h3>Set Up RoyalDesk Administrator</h3>
+        <div class="form-eyebrow"><span class="form-eyebrow-mark" aria-hidden="true"></span> RESTRICTED SETUP</div>
+        <h3 id="staff-signin-heading">Set Up RoyalDesk Administrator</h3>
         <p class="form-description">No staff access profile exists yet. Create the first administrator using the one-time bootstrap key configured on the API server.</p>
         <div class="error" role="alert" *ngIf="error">{{ error }}</div>
         <div class="loading" *ngIf="loading">Checking administrator setup…</div>
