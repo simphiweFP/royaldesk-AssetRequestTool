@@ -56,14 +56,23 @@
         </select>
       </div>
 
+      <div class="ticket-merge-toolbar">
+        <span>{{ mergeSelection.length }} selected</span>
+        <button type="button" [disabled]="mergeSelection.length < 2" (click)="openMerge()">Merge selected tickets</button>
+        <button type="button" *ngIf="mergeSelection.length" (click)="mergeSelection=[]">Clear</button>
+      </div>
       <div class="ticket-error" *ngIf="error">{{ error }}</div>
       <div class="ticket-loading" *ngIf="loading">Loading IT tickets…</div>
 
       <div class="ticket-table-wrap" *ngIf="!loading">
         <table>
-          <thead><tr><th>Ticket</th><th>Type</th><th>Requester</th><th>Request</th><th>Assigned Technician</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
+          <thead><tr><th>Merge</th><th>Ticket</th><th>Type</th><th>Requester</th><th>Request</th><th>Assigned Technician</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
           <tbody>
             <tr *ngFor="let ticket of filteredTickets" [class.selected]="selected?.id===ticket.id" (click)="select(ticket)">
+              <td (click)="$event.stopPropagation()"><input type="checkbox" [disabled]="ticket.status==='Merged'"
+                [checked]="mergeSelection.includes(ticket.id)"
+                [attr.aria-label]="'Select '+ticket.ticketNumber+' for merging'"
+                (change)="toggleMergeTicket(ticket, $any($event.target).checked)"></td>
               <td><strong>{{ ticket.ticketNumber }}</strong><small>{{ ticket.branch }} · {{ ticket.department }}</small></td>
               <td><span class="status-pill">{{ typeLabel(ticket.requestType) }}</span></td>
               <td><strong>{{ ticket.requesterName }}</strong><small>{{ ticket.requesterEmail || 'No email supplied' }}</small></td>
@@ -99,6 +108,10 @@
           <div><span>Branch / Department</span><strong>{{ selected.branch }} · {{ selected.department }}</strong></div>
           <div><span>{{ selected.requestType==='Equipment' ? 'Equipment' : selected.requestType==='Service' ? 'Service' : 'Problem Category' }}</span><strong>{{ selected.itemType }}</strong></div>
           <div><span>Requested</span><strong>{{ selected.requestedAtUtc | date:'medium' }}</strong></div>
+        </div>
+        <div class="ticket-merge-links" *ngIf="mergedChildren.length">
+          <strong>Merged tickets</strong>
+          <p *ngFor="let link of mergedChildren">Ticket #{{ link.mergedTicketId }} linked. Original history and attachments retained.</p>
         </div>
         <div class="ticket-attachments">
           <h3>Supporting Attachments</h3>
@@ -260,6 +273,36 @@
   </ng-container>
 
   <app-ticket-tracking *ngIf="mode==='track'"></app-ticket-tracking>
+
+  <div class="modal-backdrop" *ngIf="mergeOpen" (click)="mergeOpen = mergeBusy ? true : false">
+    <section class="escalation-modal merge-dialog" role="dialog" aria-modal="true" aria-labelledby="merge-title" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div><small>RoyalDesk · Ticket Management</small><h2 id="merge-title">Merge tickets</h2>
+          <p>Select the primary ticket and confirm which {{ mergeSelection.length }} records belong together.</p></div>
+        <button type="button" [disabled]="mergeBusy" (click)="mergeOpen=false" aria-label="Close">×</button>
+      </div>
+      <div class="merge-body">
+        <label>Primary ticket
+          <select [(ngModel)]="mergePrimary">
+            <option *ngFor="let ticket of mergeCandidates" [ngValue]="ticket.id">{{ ticket.ticketNumber }} — {{ ticket.requesterName }}</option>
+          </select>
+        </label>
+        <p>Other tickets will be marked Merged; their original records remain available to IT.</p>
+        <ul><li *ngFor="let ticket of mergeCandidates">{{ ticket.ticketNumber }} · {{ ticket.requesterName }}</li></ul>
+        <label>Reason for merge * <textarea maxlength="1000" [(ngModel)]="mergeReason" placeholder="Explain why the tickets should be merged"></textarea></label>
+        <label class="merge-confirm" *ngIf="mergeHasDifferentRequesters">
+          <input type="checkbox" [(ngModel)]="mergeDifferentRequesters">
+          I confirm that these tickets have different requesters and should be merged.
+        </label>
+        <div class="ticket-error" *ngIf="error">{{ error }}</div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="secondary" [disabled]="mergeBusy" (click)="mergeOpen=false">Cancel</button>
+        <button type="button" class="primary-action" [disabled]="mergeBusy || !mergeReason.trim() || (mergeHasDifferentRequesters && !mergeDifferentRequesters)"
+          (click)="submitMerge()">{{ mergeBusy ? 'Merging…' : 'Confirm merge' }}</button>
+      </div>
+    </section>
+  </div>
 
   <div class="modal-backdrop" *ngIf="showEscalation" (click)="closeEscalation()">
     <section class="escalation-modal" role="dialog" aria-modal="true" aria-labelledby="escalation-title" (click)="$event.stopPropagation()">
