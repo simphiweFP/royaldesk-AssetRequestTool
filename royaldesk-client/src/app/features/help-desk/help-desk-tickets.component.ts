@@ -18,10 +18,71 @@ export class HelpDeskTicketsComponent implements OnInit {
   private readonly api = inject(HelpDeskService);
   private readonly justIct = inject(JustIctService);
 
-  readonly statuses = ['All', 'New', 'Assigned', 'In Progress', 'Waiting for User', 'Waiting for Third Party', 'Escalated to Just ICT', 'Awaiting Local Handover', 'Waiting for Driver Pickup', 'In Transit', 'Awaiting Receipt Confirmation', 'Partially Received', 'Delivery Failed', 'Returned to Sender', 'Done', 'Resolved', 'Closed'];
+  readonly statuses = ['All', 'New', 'Assigned', 'In Progress', 'Waiting for User', 'Waiting for Third Party', 'Escalated to Just ICT', 'Awaiting Local Handover', 'Waiting for Driver Pickup', 'In Transit', 'Awaiting Receipt Confirmation', 'Partially Received', 'Delivery Failed', 'Returned to Sender', 'Done', 'Resolved', 'Closed', 'Merged'];
   readonly requestTypes = ['All', 'Incident', 'Equipment', 'Service'];
   mode: 'team' | 'track' = 'team';
   tickets: HelpDeskTicket[] = [];
+  mergeSelection: number[] = [];
+  mergePrimary = 0;
+  mergeReason = '';
+  mergeDifferentRequesters = false;
+  mergeOpen = false;
+  mergeBusy = false;
+  mergedChildren: { primaryTicketId: number; mergedTicketId: number }[] = [];
+
+  get mergeCandidates(): HelpDeskTicket[] {
+    return this.tickets.filter(ticket => this.mergeSelection.includes(ticket.id));
+  }
+
+  toggleMergeTicket(ticket: HelpDeskTicket, checked: boolean): void {
+    if (ticket.status === 'Merged') return;
+    this.mergeSelection = checked
+      ? [...new Set([...this.mergeSelection, ticket.id])]
+      : this.mergeSelection.filter(id => id !== ticket.id);
+    if (!this.mergeSelection.includes(this.mergePrimary)) this.mergePrimary = this.mergeSelection[0] ?? 0;
+  }
+
+  get mergeHasDifferentRequesters(): boolean {
+    const primary = this.mergeCandidates.find(ticket => ticket.id === this.mergePrimary);
+    if (!primary) return false;
+    return this.mergeCandidates.some(ticket =>
+      ticket.requesterName.trim().toLowerCase() !== primary.requesterName.trim().toLowerCase() ||
+      (ticket.requesterEmail || '').trim().toLowerCase() !== (primary.requesterEmail || '').trim().toLowerCase());
+  }
+
+  openMerge(): void {
+    if (this.mergeSelection.length < 2) return;
+    this.mergePrimary = this.mergeSelection[0];
+    this.mergeReason = '';
+    this.mergeDifferentRequesters = false;
+    this.mergeOpen = true;
+  }
+
+  submitMerge(): void {
+    if (this.mergeBusy || this.mergeSelection.length < 2 || !this.mergeReason.trim() ||
+        (this.mergeHasDifferentRequesters && !this.mergeDifferentRequesters)) return;
+    this.mergeBusy = true;
+    this.api.mergeTickets({
+      primaryTicketId: this.mergePrimary,
+      secondaryTicketIds: this.mergeSelection.filter(id => id !== this.mergePrimary),
+      reason: this.mergeReason.trim(),
+      confirmDifferentRequesters: this.mergeDifferentRequesters
+    }).subscribe({
+      next: () => {
+        this.mergeBusy = false;
+        this.mergeOpen = false;
+        this.mergeSelection = [];
+        this.selected = undefined;
+        this.load();
+      },
+      error: e => {
+        this.mergeBusy = false;
+        this.error = e?.error?.detail || 'Could not merge tickets.';
+      }
+    });
+  }
+
+
   history: TicketStatusHistory[] = [];
   attachments: { id: number; fileName: string; contentType: string; sizeBytes: number }[] = [];
   selected?: HelpDeskTicket;
@@ -252,6 +313,8 @@ export class HelpDeskTicketsComponent implements OnInit {
   select(ticket: HelpDeskTicket): void {
     this.selected = ticket;
     this.loadDelivery(ticket);
+    this.mergedChildren = [];
+    this.api.mergedTickets(ticket.id).subscribe({ next: links => { if (this.selected?.id === ticket.id) this.mergedChildren = links; } });
     this.history = [];
     this.attachments = [];
     this.api.attachments(ticket.id).subscribe({ next: files => this.attachments = files, error: () => { this.attachments = []; this.error = 'Could not load ticket attachments.'; } });
