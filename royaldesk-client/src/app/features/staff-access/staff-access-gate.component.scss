@@ -139,3 +139,90 @@ button, input { font: inherit; }
   .portal-hero-benefits > div { width:33.33%; font-size:10px; }
   .portal-hero-benefits span { font-size:20px; }
 }
+
+/* SIM refinement — composed staff access, no banner overlap or oversized form.
+   This deliberately preserves the company's original logo, workshop photography,
+   and the employee portal's corporate typography and colours. */
+.access-page { overflow-x:clip; }
+.portal-hero { height:305px; min-height:305px; }
+.portal-hero-inner { width:min(1220px,calc(100% - 48px)); }
+.hero-content { width:min(530px,100%); }
+.portal-hero h1 { font-size:clamp(44px,3.7vw,56px); }
+.portal-hero h2 { font-size:clamp(23px,2vw,27px); margin:12px 0 12px; }
+.portal-hero p { font-size:15px; max-width:490px; }
+.portal-hero-benefits { margin-top:20px; }
+.portal-hero-benefits > div { width:132px; }
+.access-content {
+  width:min(1220px,calc(100% - 48px));
+  margin:32px auto 48px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  justify-items:center;
+  align-content:start;
+}
+.access-shell {
+  width:min(472px,100%);
+  padding:32px 36px 34px;
+  border:1px solid #e0e6ef;
+  border-top:3px solid #e51b2b;
+  border-radius:10px;
+  background:#fff;
+  box-shadow:0 14px 40px rgba(14,38,88,.075),0 2px 8px rgba(14,38,88,.025);
+}
+.form-eyebrow {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:12px;
+  color:#687994;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:1.3px;
+}
+.form-eyebrow-mark { width:6px; height:6px; border-radius:50%; background:#e51b2b; }
+.access-shell h3 { font-size:26px; letter-spacing:-.55px; line-height:1.2; color:#102f70; }
+.form-description { margin:9px 0 24px; font-size:13px; line-height:1.55; }
+.form { gap:18px; }
+.form label { gap:8px; font-size:12px; color:#17243f; }
+.form input {
+  min-width:0;
+  height:46px;
+  border-color:#cbd5e3;
+  border-radius:6px;
+  font-size:14px;
+  transition:border-color .15s ease,box-shadow .15s ease;
+}
+.form input:focus-visible { border-color:#143f91; box-shadow:0 0 0 3px rgba(20,63,145,.12); }
+.primary {
+  margin-top:2px;
+  min-height:47px;
+  background:#143f91;
+  border-radius:6px;
+  transition:background-color .15s ease,transform .15s ease;
+}
+.primary:hover:not(:disabled) { background:#0f347d; }
+.primary:active:not(:disabled) { transform:translateY(1px); }
+.primary:disabled { background:#7d97c6; opacity:1; cursor:not-allowed; }
+.portal-header button:hover { background:#f5f7fb; border-color:#8fa5cc; }
+@media (max-width:760px) {
+  .portal-hero { height:auto; min-height:280px; }
+  .portal-hero-inner { width:calc(100% - 32px); padding:28px 0; }
+  .access-content { width:calc(100% - 32px); margin:24px auto 32px; }
+  .access-shell { padding:28px 24px; }
+}
+@media (max-width:480px) {
+  .portal-hero { min-height:300px; }
+  .portal-hero-inner { padding:24px 0; }
+  .portal-hero h1 { font-size:40px; }
+  .portal-hero h2 { font-size:22px; }
+  .portal-hero p { font-size:13px; line-height:1.4; }
+  .portal-hero-benefits { margin-top:16px; }
+  .portal-hero-benefits > div { font-size:10px; }
+  .access-content { width:calc(100% - 28px); margin:18px auto 28px; }
+  .access-shell { padding:24px 20px 26px; border-radius:8px; }
+  .access-shell h3 { font-size:24px; }
+  .form input { height:46px; font-size:16px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .form input,.primary { transition:none; }
+}
