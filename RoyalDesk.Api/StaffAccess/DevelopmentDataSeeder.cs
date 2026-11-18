@@ -182,7 +182,8 @@ public sealed class DevelopmentDataSeeder(IDbConnectionFactory connections, IWeb
             (Type:"Incident", Name:"External Test User", Email:"external@example.test", Category:"Software", Detail:"Related external-email ticket for merge testing.", Status:"New", Days:-1),
             (Type:"Service", Name:"Musa Khumalo", Email:"musa.khumalo@example.test", Category:"User Account", Detail:"Demo user account setup issue.", Status:"Waiting for Third Party", Days:-8),
             (Type:"Incident", Name:"Zanele Pillay", Email:"zanele.pillay@example.test", Category:"Hardware", Detail:"Laptop screen flickers intermittently.", Status:"Escalated to Just ICT", Days:-3),
-            (Type:"Equipment", Name:"Anele Mokoena", Email:"anele.mokoena@example.test", Category:"Keyboard", Detail:"Keyboard replacement after key failure.", Status:"Resolved", Days:-10)
+            (Type:"Equipment", Name:"Anele Mokoena", Email:"anele.mokoena@example.test", Category:"Keyboard", Detail:"Keyboard replacement after key failure.", Status:"Resolved", Days:-10),
+            (Type:"Equipment", Name:"Musa Khumalo", Email:"musa.khumalo@example.test", Category:"Keyboard", Detail:"One keyboard reserved for branch delivery demonstration.", Status:"Assigned", Days:-2)
         };
         var ticketIds = new List<long>();
         foreach (var sample in scenarios)
@@ -223,9 +224,38 @@ public sealed class DevelopmentDataSeeder(IDbConnectionFactory connections, IWeb
                 WHERE Id IN @ids
                 """, new { technicianId, assigned = now.AddDays(-2),
                     ids = new[] { ticketIds[2],ticketIds[3],ticketIds[4],ticketIds[5],
-                                  ticketIds[7],ticketIds[8],ticketIds[11],ticketIds[12],ticketIds[13] } },
+                                  ticketIds[7],ticketIds[8],ticketIds[11],ticketIds[12],ticketIds[13],ticketIds[14] } },
                 tx, cancellationToken: ct));
         }
+
+        // A realistic delivery in the waiting-for-driver queue, with a matching reservation.
+        var keyboardStockId = await db.ExecuteScalarAsync<long>(new CommandDefinition(
+            "SELECT Id FROM StoreItems WHERE Sku='SIM-STK-KBD'", transaction: tx, cancellationToken: ct));
+        var deliveryTicketId = ticketIds[14];
+        var deliveryId = await db.ExecuteScalarAsync<long>(new CommandDefinition("""
+            INSERT INTO EquipmentDeliveries(TicketId,StoreItemId,AssetId,DestinationBranch,DeliveryRequired,
+                RecipientName,Quantity,Status,PreparedAtUtc,CreatedBy,CreatedAtUtc,UpdatedAtUtc)
+            VALUES(@ticket,@stock,NULL,'Phoenix',1,'Musa Khumalo',1,'Waiting for Driver Pickup',@now,@actor,@now,@now);
+            SELECT last_insert_rowid();
+            """, new { ticket = deliveryTicketId, stock = keyboardStockId, actor = Actor, now }, tx, cancellationToken: ct));
+        await db.ExecuteAsync(new CommandDefinition(
+            "UPDATE StoreItems SET ReservedQuantity=ReservedQuantity+1,UpdatedAtUtc=@now WHERE Id=@id",
+            new { id = keyboardStockId, now }, tx, cancellationToken: ct));
+        await db.ExecuteAsync(new CommandDefinition("""
+            INSERT INTO StoreMovements(StoreItemId,TicketId,MovementType,Quantity,Reference,Notes,PerformedBy,PerformedAtUtc)
+            VALUES(@stock,@ticket,'Reserve',1,'DEMO DELIVERY','Reserved test keyboard for simulated branch pickup',@actor,@now)
+            """, new { stock = keyboardStockId, ticket = deliveryTicketId, actor = Actor, now }, tx, cancellationToken: ct));
+        await db.ExecuteAsync(new CommandDefinition("""
+            INSERT INTO EquipmentDeliveryEvents(DeliveryId,FromStatus,ToStatus,Details,PerformedBy,PerformedAtUtc)
+            VALUES(@delivery,'Assigned','Waiting for Driver Pickup','Demo stock reserved for pickup',@actor,@now)
+            """, new { delivery = deliveryId, actor = Actor, now }, tx, cancellationToken: ct));
+        await db.ExecuteAsync(new CommandDefinition("""
+            UPDATE AssetRequests SET Status='Waiting for Driver Pickup',LastUpdatedAtUtc=@now WHERE Id=@id
+            """, new { id = deliveryTicketId, now }, tx, cancellationToken: ct));
+        await db.ExecuteAsync(new CommandDefinition("""
+            INSERT INTO TicketStatusHistory(TicketId,FromStatus,ToStatus,ChangedBy,ChangedByName,Comment,PublicVisible,ChangedAtUtc)
+            VALUES(@id,'Assigned','Waiting for Driver Pickup',@actor,'RoyalDesk Demo','Demo keyboard reserved for branch delivery',1,@now)
+            """, new { id = deliveryTicketId, actor = Actor, now }, tx, cancellationToken: ct));
 
         // One historical merged-ticket example, plus unmerged duplicates to test the merge UI.
         await db.ExecuteAsync(new CommandDefinition("""
