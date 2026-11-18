@@ -21,7 +21,17 @@
   </section>
 
   <main class="access-content">
-    <section class="access-shell" aria-labelledby="staff-signin-heading">
+    <div class="access-panel">
+      <aside class="access-panel-intro" aria-label="RoyalDesk staff workspace">
+        <div class="access-intro-label"><span class="access-intro-dot" aria-hidden="true"></span> ROYAL TYRES IT</div>
+        <h3>One workspace.<br />Clear ownership.</h3>
+        <p>Manage the work behind every support request, from first response through resolution.</p>
+        <div class="access-intro-divider"></div>
+        <div class="access-intro-feature"><span class="access-intro-number">01</span><span>Support tickets and follow-ups</span></div>
+        <div class="access-intro-feature"><span class="access-intro-number">02</span><span>Assets and equipment lifecycle</span></div>
+        <div class="access-intro-feature"><span class="access-intro-number">03</span><span>Accountable IT service delivery</span></div>
+      </aside>
+      <section class="access-shell" aria-labelledby="staff-signin-heading">
       <ng-container *ngIf="!setupMode">
         <div class="form-eyebrow"><span class="form-eyebrow-mark" aria-hidden="true"></span> SECURE STAFF PORTAL</div>
         <h3 id="staff-signin-heading">Welcome back</h3>
@@ -53,7 +63,8 @@
           <button class="primary" type="submit" [disabled]="loading">Create Administrator</button>
         </form>
       </ng-container>
-    </section>
+      </section>
+    </div>
   </main>
   <footer class="royaldesk-footer">
     <div class="royaldesk-footer-inner">
