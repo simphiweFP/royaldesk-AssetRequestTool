@@ -128,3 +128,14 @@ button, input { font: inherit; }
   .access-content { margin:16px auto 28px; }
   .access-shell { width:100%; padding:20px 16px; }
 }
+
+/* Shared RoyalDesk three-point brand strip, matching the employee portal. */
+.portal-hero-benefits { margin-top:24px; display:flex; align-items:stretch; color:$blue; }
+.portal-hero-benefits > div { width:137px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; text-align:center; font-size:13px; font-weight:600; line-height:1.2; }
+.portal-hero-benefits > div + div { border-left:1px solid #ccd3dd; }
+.portal-hero-benefits span { font-size:24px; line-height:32px; }
+@media (max-width:480px) {
+  .portal-hero-benefits { margin-top:16px; }
+  .portal-hero-benefits > div { width:33.33%; font-size:10px; }
+  .portal-hero-benefits span { font-size:20px; }
+}
