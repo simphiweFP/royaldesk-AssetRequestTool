@@ -209,6 +209,24 @@ public sealed class DevelopmentDataSeeder(IDbConnectionFactory connections, IWeb
                     """, new { id, status = sample.Status, actor = Actor, now }, tx, cancellationToken: ct));
         }
 
+        // Connect active ticket scenarios to the seeded technician for realistic queues.
+        var technicianId = await db.ExecuteScalarAsync<int?>(new CommandDefinition(
+            "SELECT Id FROM ITTeamMembers WHERE lower(Username)='royaldesk.technician' AND IsActive=1 LIMIT 1",
+            transaction: tx, cancellationToken: ct));
+        if (technicianId.HasValue)
+        {
+            await db.ExecuteAsync(new CommandDefinition("""
+                UPDATE AssetRequests
+                SET AssignedToId=@technicianId, AssignedToName='RoyalDesk Test Technician',
+                    AssignedAtUtc=@assigned,
+                    StartedAtUtc=CASE WHEN Status IN ('In Progress','Waiting for User','Waiting for Third Party','Escalated to Just ICT','Resolved','Closed') THEN @assigned ELSE NULL END
+                WHERE Id IN @ids
+                """, new { technicianId, assigned = now.AddDays(-2),
+                    ids = new[] { ticketIds[2],ticketIds[3],ticketIds[4],ticketIds[5],
+                                  ticketIds[7],ticketIds[8],ticketIds[11],ticketIds[12],ticketIds[13] } },
+                tx, cancellationToken: ct));
+        }
+
         // One historical merged-ticket example, plus unmerged duplicates to test the merge UI.
         await db.ExecuteAsync(new CommandDefinition("""
             INSERT INTO TicketMerges(PrimaryTicketId,MergedTicketId,MergedBy,Reason,MergedAtUtc)
