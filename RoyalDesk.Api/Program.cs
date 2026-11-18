@@ -88,10 +88,39 @@ using (var scope = app.Services.CreateScope())
 {
     scope.ServiceProvider.GetRequiredService<IMigrationRunner>().MigrateUp();
     if (app.Environment.IsDevelopment())
+    {
+        await DevelopmentStaffSeeder.SeedAsync(scope.ServiceProvider, app.Configuration);
+        await scope.ServiceProvider.GetRequiredService<DevelopmentDataSeeder>().SeedAsync();
+
+        if (string.Equals(app.Configuration["ROYALDESK_SEED_DEMO_USERS"], "true", StringComparison.OrdinalIgnoreCase))
         {
-            await DevelopmentStaffSeeder.SeedAsync(scope.ServiceProvider, app.Configuration);
-            await scope.ServiceProvider.GetRequiredService<DevelopmentDataSeeder>().SeedAsync();
+            // A successful seed is not sufficient: verify against the SAME connection
+            // that the server will use for browser logins.
+            var staffAccess = scope.ServiceProvider.GetRequiredService<StaffAccessService>();
+            foreach (var (username, key) in new[]
+            {
+                ("royaldesk.admin", "ROYALDESK_DEMO_ADMIN_PASSWORD"),
+                ("royaldesk.technician", "ROYALDESK_DEMO_TECH_PASSWORD")
+            })
+            {
+                var password = app.Configuration[key];
+                if (string.IsNullOrWhiteSpace(password))
+                    throw new InvalidOperationException($"Missing {key} for development login verification.");
+                try
+                {
+                    _ = await staffAccess.LoginAsync(username, password);
+                    app.Logger.LogInformation("Verified local development login for {Username}.", username);
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    throw new InvalidOperationException(
+                        $"Development login verification failed for {username}. " +
+                        "Check the configured SQLite database and demo seeder ownership; " +
+                        "the browser must connect to this same API instance.", ex);
+                }
+            }
         }
+    }
 }
 
 if (app.Environment.IsDevelopment())
