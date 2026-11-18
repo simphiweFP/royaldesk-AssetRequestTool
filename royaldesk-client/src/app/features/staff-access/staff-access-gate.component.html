@@ -4,13 +4,15 @@
     <button type="button" (click)="employeePortal()">Employee Portal</button>
   </header>
 
-  <section class="portal-hero">
-    <div class="hero-content">
+  <section class="portal-hero" aria-label="RoyalDesk staff access introduction">
+    <img class="portal-hero-image" src="assets/images/royal_tyres_workshop_in_focus.png" alt="Royal Tyres workshop" />
+    <div class="portal-hero-overlay"></div>
+    <div class="portal-hero-inner"><div class="hero-content">
       <h1><span>Royal</span>Desk</h1>
       <h2>{{ setupMode ? 'Set Up RoyalDesk Administrator' : 'RoyalDesk Staff Access' }}</h2>
       <p *ngIf="!setupMode">Sign in with your employee username and password to access your assigned RoyalDesk pages.</p>
       <p *ngIf="setupMode">Restricted first-time administrator setup for authorised IT staff.</p>
-    </div>
+    </div></div>
   </section>
 
   <main class="access-content">
@@ -44,7 +46,6 @@
           <button class="primary" type="submit" [disabled]="loading">Create Administrator</button>
         </form>
       </ng-container>
-      <button class="employee-link" type="button" (click)="employeePortal()">← Back to Employee IT Portal</button>
     </section>
   </main>
   <footer class="royaldesk-footer">
