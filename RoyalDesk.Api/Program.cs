@@ -1,4 +1,5 @@
 using FluentMigrator.Runner;
+using Dapper;
 using RoyalDesk.Api.Authentication;
 using RoyalDesk.Api.BusinessValue;
 using RoyalDesk.Api.Data;
@@ -89,6 +90,24 @@ using (var scope = app.Services.CreateScope())
     scope.ServiceProvider.GetRequiredService<IMigrationRunner>().MigrateUp();
     if (app.Environment.IsDevelopment())
     {
+        // Diagnostics are emitted only to the local API logs, never the login response.
+        // SQLite may resolve relative paths against a different working directory
+        // depending on whether the server is launched by Visual Studio or a script.
+        var diagnosticsFactory = scope.ServiceProvider.GetRequiredService<IDbConnectionFactory>();
+        await using (var db = diagnosticsFactory.CreateConnection())
+        {
+            await db.OpenAsync();
+            var databasePath = await db.ExecuteScalarAsync<string>("SELECT file FROM pragma_database_list WHERE name='main'");
+            var adminCount = await db.ExecuteScalarAsync<int>(
+                "SELECT COUNT(*) FROM StaffPortalAccess WHERE lower(trim(Username))='royaldesk.admin' AND IsActive=1");
+            app.Logger.LogInformation("Development SQLite database: {DatabasePath}", databasePath);
+            app.Logger.LogInformation("Active royaldesk.admin found: {Found}", adminCount == 1);
+            if (adminCount == 0)
+                app.Logger.LogWarning(
+                    "royaldesk.admin is not active in this database. If using seeded local credentials, " +
+                    "start the API with scripts/seed-local-accounts.ps1 and avoid a second Visual Studio API instance.");
+        }
+
         await DevelopmentStaffSeeder.SeedAsync(scope.ServiceProvider, app.Configuration);
         await scope.ServiceProvider.GetRequiredService<DevelopmentDataSeeder>().SeedAsync();
 
