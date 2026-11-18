@@ -14,6 +14,7 @@ import { HelpDeskService } from '../../core/services/helpdesk.service';
 export class TicketTrackingComponent {
   private readonly api = inject(HelpDeskService);
 
+  readonly departments = ['Administration', 'IT', 'Sales', 'Finance', 'Operations', 'Human Resources', 'Workshop'];
   name = '';
   department = '';
   verification = '';
