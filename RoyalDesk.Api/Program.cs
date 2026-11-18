@@ -90,6 +90,9 @@ using (var scope = app.Services.CreateScope())
     scope.ServiceProvider.GetRequiredService<IMigrationRunner>().MigrateUp();
     if (app.Environment.IsDevelopment())
     {
+        await DevelopmentStaffSeeder.SeedAsync(scope.ServiceProvider, app.Configuration);
+        await scope.ServiceProvider.GetRequiredService<DevelopmentDataSeeder>().SeedAsync();
+
         // Diagnostics are emitted only to the local API logs, never the login response.
         // SQLite may resolve relative paths against a different working directory
         // depending on whether the server is launched by Visual Studio or a script.
@@ -107,9 +110,6 @@ using (var scope = app.Services.CreateScope())
                     "royaldesk.admin is not active in this database. If using seeded local credentials, " +
                     "start the API with scripts/seed-local-accounts.ps1 and avoid a second Visual Studio API instance.");
         }
-
-        await DevelopmentStaffSeeder.SeedAsync(scope.ServiceProvider, app.Configuration);
-        await scope.ServiceProvider.GetRequiredService<DevelopmentDataSeeder>().SeedAsync();
 
         if (string.Equals(app.Configuration["ROYALDESK_SEED_DEMO_USERS"], "true", StringComparison.OrdinalIgnoreCase))
         {
