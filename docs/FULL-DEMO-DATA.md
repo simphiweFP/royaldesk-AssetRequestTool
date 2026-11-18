@@ -12,8 +12,8 @@ Running the seeder creates:
 - Two accepted assignments.
 - Onboarding/offboarding checklist examples.
 - One pending write-off.
-- Fourteen IT tickets spanning New, Assigned, In Progress, Waiting, Resolved, Closed and Escalated.
-- An external-email scenario, an already merged pair, and two unmerged duplicate incidents ready to test the merge UI.
+- Fifteen IT tickets spanning New, Assigned, In Progress, Waiting, Resolved, Closed and Escalated.
+- An external-email scenario, an already merged pair, two unmerged duplicate incidents ready to test the merge UI, and a keyboard delivery awaiting driver pickup.
 - Ticket status histories and asset history records.
 
 **Not seeded:** real email messages, real file attachments, live procurement/SAP transactions, signed delivery evidence or live courier pickups. These require a separate integration test environment. No fake data should be sent to real recipients.
@@ -66,10 +66,10 @@ Open `http://localhost:4200/portal` for staff and `http://localhost:4200/` for p
 - Dashboard: asset statuses and employee metrics should be populated.
 - Asset Register: assets `SIM-LAP-001` to `SIM-LAP-004` and other categories.
 - Assignments: two employees have accepted laptops.
-- Store Room: five items with nonzero opening balances and movements.
+- Store Room: five items with nonzero opening balances and movements, including one reserved keyboard.
 - Onboarding and Offboarding: sample incomplete and completed tasks.
 - Write-Offs: a damaged Lenovo laptop with pending approval.
-- Tickets: status/category filters produce varied results and history.
+- Tickets: status/category filters produce varied results and history.\n- Deliveries: one demo keyboard reserved and awaiting driver pickup with a delivery-event timeline.
 - Merge: select the two Anele email incidents, choose a primary, provide a reason and confirm; the historical external pair already shows merged status.
 - Public request: submit a **new** incident with your own inbox and any domain, independent of staff login.
 - Access Management: administrator can see staff permissions.
