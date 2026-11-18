@@ -226,3 +226,71 @@ button, input { font: inherit; }
 @media (prefers-reduced-motion:reduce) {
   .form input,.primary { transition:none; }
 }
+
+/* A single composed sign-in surface, designed for desktop rather than leaving
+   an isolated form surrounded by unused whitespace. */
+.access-content { width:min(1040px,calc(100% - 48px)); margin:32px auto 46px; display:block; }
+.access-panel {
+  width:100%;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  background:#fff;
+  border:1px solid #e0e6ef;
+  border-radius:12px;
+  overflow:hidden;
+  box-shadow:0 14px 44px rgba(14,38,88,.07),0 2px 8px rgba(14,38,88,.025);
+}
+.access-panel-intro {
+  min-width:0;
+  padding:42px 42px 38px;
+  background:#f0f4fa;
+  border-right:1px solid #dce4f0;
+  color:#17243f;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.access-intro-label {
+  display:flex; align-items:center; gap:9px;
+  font-size:10px; font-weight:800; letter-spacing:1.3px;
+  color:#45608b;
+}
+.access-intro-dot { width:7px; height:7px; border-radius:50%; background:#e51b2b; }
+.access-panel-intro h3 {
+  color:#102f70; font-size:clamp(24px,2.25vw,31px);
+  line-height:1.17; letter-spacing:-.8px;
+  margin:17px 0 14px; font-weight:750;
+}
+.access-panel-intro p {
+  margin:0; color:#526581; max-width:345px; line-height:1.6; font-size:13px;
+}
+.access-intro-divider { height:1px; background:#d6e0ed; margin:30px 0 21px; }
+.access-intro-feature { display:flex; align-items:center; gap:14px; margin:10px 0; font-size:13px; font-weight:600; color:#203d71; }
+.access-intro-number { color:#e51b2b; font-size:11px; letter-spacing:1px; font-weight:800; }
+.access-panel .access-shell {
+  border:0; border-top:0; border-radius:0; box-shadow:none;
+  padding:48px 46px; width:100%; min-width:0;
+  display:flex; flex-direction:column; justify-content:center;
+}
+.access-panel .form { width:100%; }
+@media (max-width:860px) {
+  .access-content { width:calc(100% - 32px); margin:24px auto 32px; }
+  .access-panel-intro { padding:30px 25px; }
+  .access-panel .access-shell { padding:36px 28px; }
+}
+@media (max-width:680px) {
+  .access-panel { grid-template-columns:minmax(0,1fr); }
+  .access-panel-intro { border-right:0; border-bottom:1px solid #dce4f0; padding:24px; }
+  .access-panel-intro h3 { font-size:24px; margin:10px 0; }
+  .access-panel-intro h3 br { display:none; }
+  .access-panel-intro p { font-size:12px; max-width:none; }
+  .access-intro-divider,.access-intro-feature { display:none; }
+  .access-panel .access-shell { padding:30px 24px; }
+}
+@media (max-width:480px) {
+  .access-content { width:calc(100% - 28px); margin:16px auto 28px; }
+  .access-panel { border-radius:9px; }
+  .access-panel-intro { padding:18px 20px; }
+  .access-panel-intro h3 { font-size:20px; }
+  .access-panel .access-shell { padding:26px 20px; }
+}
