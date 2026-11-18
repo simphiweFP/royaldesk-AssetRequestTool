@@ -1116,51 +1116,19 @@ footer {
 .upload-caption { margin: 0 0 10px; color: #69758b; font-size: 12px; }
 
 
-/* Bring back the pre-restyling RoyalDesk workshop canvas without duplicating the portal header/footer. */
-.page .hero {
-  width: 100vw;
-  max-width: none;
-  margin-left: calc(50% - 50vw);
-  height: 325px;
-  margin-bottom: 22px;
-}
-.page .hero-inner { width: min(1220px, calc(100% - 64px)); }
-.page .content {
-  width: min(1220px, 100%);
-  grid-template-columns: minmax(0, 520px) minmax(0, 1fr);
-  padding: 0 0 30px;
-}
-@media (max-width: 900px) {
-  .page .content { grid-template-columns: minmax(0, 1fr); }
-}
-@media (max-width: 650px) {
-  .page .hero { height: auto; min-height: 315px; }
-  .page .hero-inner { width: calc(100% - 40px); padding: 28px 0; }
-  .page .hero-copy { width: min(455px, 100%); }
-  .page .benefit { width: 33.333%; }
-}
 
-
-/* Keep return navigation inside the Your Request card instead of above the workshop banner. */
-.summary-heading { align-items: flex-start; gap: 12px; }
-.summary-heading-copy { flex: 1; min-width: 0; }
-.summary-back-button {
-  flex: 0 0 auto;
-  min-height: 36px;
-  padding: 0 12px;
-  border: 1px solid #b7c5d9;
-  border-radius: 6px;
-  background: #fff;
-  color: #143f91;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  white-space: nowrap;
+/* The shared EmployeePortal component owns the only workshop hero. */
+.page { min-height:0; background:transparent; }
+.page .content { width:min(1220px,100%); grid-template-columns:minmax(0,520px) minmax(0,1fr); padding:0 0 30px; gap:20px; }
+@media (max-width:900px) {
+  .page .content { grid-template-columns:minmax(0,1fr); }
 }
-.summary-back-button:hover { background: #f3f6fb; }
-.summary-back-button:focus-visible { outline: 3px solid rgba(20, 63, 145, .22); outline-offset: 2px; }
-.success-back-button { align-self: flex-end; }
-@media (max-width: 650px) {
-  .summary-heading { flex-wrap: wrap; }
-  .summary-back-button { margin-left: auto; }
+@media (max-width:480px) {
+  .page .content { gap:14px; }
+  .request-card, .summary-card { padding:16px; min-width:0; }
+  .card-heading h3 { font-size:19px; }
+  .summary-row { grid-template-columns:minmax(0,110px) minmax(0,1fr); }
+  .summary-row strong, .summary-row span { overflow-wrap:anywhere; }
+  .attachment-row { flex-wrap:wrap; }
+  .attachment-row button { min-height:36px; }
 }
