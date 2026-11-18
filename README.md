@@ -5,6 +5,8 @@ RoyalDesk started as a small full-stack IT asset request assessment and now incl
 ## What it does
 
 - Equipment requests with API validation and audit logging
+- Additive helpdesk ticket merging (staff-only, preserving original tickets, histories and attachments)
+- Ticket submission using valid personal or business email addresses (no domain allow-list)
 - Central asset register with branch, department, serial, value, condition and lifecycle status
 - Employee register
 - Asset assignment history
@@ -77,3 +79,11 @@ The original request validation/repository/service/audit tests remain in place. 
 ## Architecture note
 
 RoyalDesk owns the employee/equipment lifecycle. SAP should remain the financial/procurement system of record. When procurement integration is added, RoyalDesk should request purchasing only after available internal inventory has been checked.
+
+## Ticket merging (feature branch)
+
+Authorised IT staff can now select multiple tickets from the IT Ticket Queue, choose a primary, provide a reason and confirm a merge. The backend stores the links in an additive TicketMerges table. Existing request, asset, delivery and employee functionality is retained.
+
+Details, endpoint examples, manual verification steps and safe test account setup: [docs/HELPDESK-TICKET-MERGE-TESTING.md](docs/HELPDESK-TICKET-MERGE-TESTING.md).
+
+**Release status:** Changes are committed but still require a local build, database migration rehearsal, end-to-end testing and an explicitly provisioned development staff account. Do not deploy directly to production.
