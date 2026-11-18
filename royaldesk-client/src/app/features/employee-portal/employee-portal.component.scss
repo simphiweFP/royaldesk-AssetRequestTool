@@ -45,7 +45,7 @@ $border: #dce2ea;
 .portal-actions { 
 
   width: min(1100px, calc(100% - 48px));
-  margin: -18px auto 24px; display: grid;
+  margin: 24px auto 32px; display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px; position: relative; z-index: 1;
 }
@@ -98,7 +98,7 @@ $border: #dce2ea;
   .portal-hero h1 { font-size: 44px; }
   .portal-hero h2 { font-size: 24px; }
   .portal-hero p { font-size: 14px; }
-  .portal-actions { grid-template-columns: 1fr; width: calc(100% - 32px); margin-top: -18px; }
+  .portal-actions { grid-template-columns: 1fr; width: calc(100% - 32px); margin-top: 20px; }
   .portal-actions .option-card { min-height: 145px; }
   .embedded { padding: 14px 16px; }
   .royaldesk-footer-inner { width: calc(100% - 32px); padding: 18px 0; grid-template-columns: 1fr; justify-items: center; text-align: center; }
@@ -106,3 +106,26 @@ $border: #dce2ea;
   .royaldesk-footer-right { text-align: center; }
 }
 @media (prefers-reduced-motion: reduce) { .portal-actions .option-card { transition: none; } }
+
+/* Responsive, non-overlapping content rhythm across employee pages. */
+.portal-hero { flex: 0 0 auto; }
+.portal-actions { flex: 0 0 auto; }
+.portal-header { min-width: 0; }
+.portal-header-actions { min-width: 0; }
+@media (max-width: 480px) {
+  .portal-header { height: 72px; flex-basis: 72px; padding: 0 12px; gap: 8px; }
+  .portal-header img { width: min(132px, 36vw); }
+  .portal-header-actions .portal-home-link { font-size: 0; padding: 8px; }
+  .portal-header-actions .portal-home-link span { font-size: 19px; }
+  .portal-header-actions button:not(.portal-home-link) { min-height: 36px; padding: 0 9px; font-size: 11px; }
+  .portal-hero { height: auto; min-height: 340px; }
+  .portal-hero-inner { padding: 28px 0; }
+  .portal-hero h1 { font-size: 40px; }
+  .portal-hero h2 { font-size: 21px; }
+  .portal-hero p { max-width: 310px; }
+  .portal-hero-benefits { margin-top: 16px; }
+  .portal-hero-benefits span { font-size: 20px; }
+  .portal-actions { margin: 18px auto 28px; }
+  .portal-actions .option-card { min-height: 130px; }
+  .embedded { padding: 16px; }
+}
