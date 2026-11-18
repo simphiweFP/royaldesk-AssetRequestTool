@@ -18,6 +18,25 @@ Running the seeder creates:
 
 **Not seeded:** real email messages, real file attachments, live procurement/SAP transactions, signed delivery evidence or live courier pickups. These require a separate integration test environment. No fake data should be sent to real recipients.
 
+## Quick setup with known test passwords
+
+From the repository root, run:
+
+```powershell
+git switch feature/royaldesk-asset-lifecycle
+git pull
+powershell -ExecutionPolicy Bypass -File ./scripts/seed-local-accounts.ps1
+```
+
+The local-only script starts the API against a separate SQLite database and seeds two staff accounts, plus the full demo fixtures. It does not change the normal application database.
+
+| Role | Username | Local-only test password |
+| --- | --- | --- |
+| Admin | `royaldesk.admin` | `RoyalDesk-Admin-Demo-2026!` |
+| Technician | `royaldesk.technician` | `RoyalDesk-Tech-Demo-2026!` |
+
+These are public test passwords for an isolated local machine only. Never deploy them as real accounts. The seeder skips existing usernames and does not reset their passwords.
+
 ## Run with PowerShell (Windows)
 
 From the repository root:
