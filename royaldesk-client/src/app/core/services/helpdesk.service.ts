@@ -31,6 +31,16 @@ export class HelpDeskService {
     return this.http.get<TicketStatusHistory[]>(`${this.base}/tickets/${id}/history`, { withCredentials: true });
   }
 
+  mergeTickets(payload: { primaryTicketId: number; secondaryTicketIds: number[]; reason: string; confirmDifferentRequesters: boolean }) {
+    return this.http.post<{ primaryTicketId: number; mergedTicketId: number }[]>(
+      this.base + '/tickets/merge', payload, { withCredentials: true });
+  }
+
+  mergedTickets(id: number) {
+    return this.http.get<{ primaryTicketId: number; mergedTicketId: number }[]>(
+      this.base + '/tickets/' + id + '/merged', { withCredentials: true });
+  }
+
   team(): Observable<ITTeamMember[]> {
     return this.http.get<ITTeamMember[]>(`${this.base}/team`, { withCredentials: true });
   }
