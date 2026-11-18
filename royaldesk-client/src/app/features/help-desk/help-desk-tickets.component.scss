@@ -142,3 +142,20 @@ tbody tr.selected { background:#f7f9fd; }
 .delivery-event small { color: #69758b; font-size: 11px; }
 @media (max-width: 760px) { .delivery-fields { grid-template-columns: 1fr; } .delivery-summary { grid-template-columns: repeat(2,minmax(0,1fr)); } }
 @media (max-width: 420px) { .delivery-summary { grid-template-columns: 1fr; } }
+
+/* Additive helpdesk merge controls — keep the existing RoyalDesk visual system. */
+.ticket-merge-toolbar { display:flex; align-items:center; flex-wrap:wrap; gap:10px; margin:8px 0 14px; color:#53627a; font-size:12px; }
+.ticket-merge-toolbar button { border:1px solid #b7c5d9; border-radius:6px; background:#fff; color:#143f91; min-height:34px; padding:6px 12px; cursor:pointer; font-weight:600; }
+.ticket-merge-toolbar button:first-of-type { border-color:#143f91; background:#143f91; color:#fff; }
+.ticket-merge-toolbar button:disabled { opacity:.45; cursor:not-allowed; }
+.ticket-merge-links { padding:14px 18px; border-top:1px solid #dce2ea; color:#17243f; font-size:12px; }
+.ticket-merge-links p { margin:6px 0; color:#53627a; }
+.merge-dialog { width:min(640px,100%); }
+.merge-body { display:grid; gap:14px; margin-top:18px; color:#17243f; font-size:13px; }
+.merge-body label { display:grid; gap:6px; font-weight:600; }
+.merge-body select, .merge-body textarea { width:100%; padding:10px; min-height:40px; border:1px solid #cbd4df; border-radius:6px; background:white; color:#17243f; font:inherit; }
+.merge-body textarea { min-height:90px; resize:vertical; }
+.merge-body ul { margin:0; padding-left:20px; line-height:1.8; }
+.merge-body p { margin:0; color:#53627a; }
+.merge-body .merge-confirm { display:flex; align-items:flex-start; gap:8px; line-height:1.5; }
+.merge-confirm input { width:auto; min-height:0; margin-top:3px; }
