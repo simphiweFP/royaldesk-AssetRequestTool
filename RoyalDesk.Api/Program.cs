@@ -68,6 +68,7 @@ builder.Services.AddScoped<StoreRoomService>();
 builder.Services.AddScoped<EquipmentDeliveryService>();
 builder.Services.AddScoped<BusinessValueService>();
 builder.Services.AddScoped<StaffAccessService>();
+builder.Services.AddScoped<DevelopmentDataSeeder>();
 builder.Services.AddScoped<IEmailOutbox, EmailOutbox>();
 builder.Services.AddScoped<TicketNotificationService>();
 builder.Services.AddHostedService<EmailOutboxWorker>();
@@ -87,7 +88,10 @@ using (var scope = app.Services.CreateScope())
 {
     scope.ServiceProvider.GetRequiredService<IMigrationRunner>().MigrateUp();
     if (app.Environment.IsDevelopment())
-        await DevelopmentStaffSeeder.SeedAsync(scope.ServiceProvider, app.Configuration);
+        {
+            await DevelopmentStaffSeeder.SeedAsync(scope.ServiceProvider, app.Configuration);
+            await scope.ServiceProvider.GetRequiredService<DevelopmentDataSeeder>().SeedAsync();
+        }
 }
 
 if (app.Environment.IsDevelopment())
