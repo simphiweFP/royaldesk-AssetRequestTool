@@ -1,15 +1,28 @@
 <div class="employee-portal">
   <header class="portal-header">
     <img src="assets/images/royal-tyres-logo-final.png" alt="Royal Tyres" />
-    <button type="button" (click)="openStaff()">Staff Access</button>
+    <nav class="portal-header-actions" aria-label="Employee portal navigation">
+      <button class="portal-home-link" type="button" *ngIf="mode!=='home'" (click)="mode='home'" aria-label="Return to employee portal home">
+        <span aria-hidden="true">←</span> Employee Portal
+      </button>
+      <button type="button" (click)="openStaff()">Staff Access</button>
+    </nav>
   </header>
 
-  <section class="portal-hero" *ngIf="mode==='home'">
-    <div>
-      <h1><span>Royal</span>Desk</h1>
-      <h2>Your IT support starts here.</h2>
-      <p>Having an IT problem or need something from IT? RoyalDesk makes it easy to report an issue, request equipment or services, and follow progress without having to chase for updates.</p>
-      <p class="hero-guidance">Choose what you need below. We’ll guide you through the request.</p>
+  <section class="portal-hero" aria-label="RoyalDesk employee portal">
+    <img class="portal-hero-image" src="assets/images/royal_tyres_workshop_in_focus.png" alt="Royal Tyres workshop" />
+    <div class="portal-hero-overlay"></div>
+    <div class="portal-hero-inner">
+      <div class="portal-hero-copy">
+        <h1><span>Royal</span>Desk</h1>
+        <h2>{{ mode==='home' ? 'Your IT support starts here.' : mode==='track' ? 'Track My Request' : requestType==='Incident' ? 'Report an IT Problem' : requestType==='Service' ? 'Request IT Service' : 'Request IT Equipment' }}</h2>
+        <p>{{ mode==='home' ? 'Report an issue, request equipment or IT services, and track progress in one place.' : mode==='track' ? 'Follow the progress of your IT request and see the latest updates.' : 'Tell Royal Tyres IT what you need and follow the progress of your request.' }}</p>
+        <div class="portal-hero-benefits" aria-label="RoyalDesk benefits">
+          <div><span aria-hidden="true">⚙</span>Simple Request</div>
+          <div><span aria-hidden="true">♙</span>Clear IT Ownership</div>
+          <div><span aria-hidden="true">▮▮▮</span>Track Progress</div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -45,7 +58,6 @@
   </section>
 
   <section class="embedded tracking" *ngIf="mode==='track'">
-    <button class="back" type="button" (click)="mode='home'">← Employee Portal</button>
     <app-ticket-tracking></app-ticket-tracking>
   </section>
   <footer class="royaldesk-footer">
