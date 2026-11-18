@@ -23,29 +23,31 @@
   <main class="access-content">
     <div class="access-panel">
       <aside class="access-panel-intro" aria-label="RoyalDesk staff workspace">
-        <div class="access-intro-label"><span class="access-intro-dot" aria-hidden="true"></span> ROYAL TYRES IT</div>
-        <h3>One workspace.<br />Clear ownership.</h3>
-        <p>Manage the work behind every support request, from first response through resolution.</p>
+        <div class="access-intro-label"><span class="access-intro-mark" aria-hidden="true"></span> ROYAL TYRES · INTERNAL WORKSPACE</div>
+        <h3>Every request.<br />Accounted for.</h3>
+        <p>A single view of IT support and the equipment lifecycle, built for the people keeping Royal Tyres running.</p>
         <div class="access-intro-divider"></div>
-        <div class="access-intro-feature"><span class="access-intro-number">01</span><span>Support tickets and follow-ups</span></div>
-        <div class="access-intro-feature"><span class="access-intro-number">02</span><span>Assets and equipment lifecycle</span></div>
-        <div class="access-intro-feature"><span class="access-intro-number">03</span><span>Accountable IT service delivery</span></div>
+        <div class="access-intro-feature"><span class="access-intro-number">01</span><span>IT requests and resolution</span></div>
+        <div class="access-intro-feature"><span class="access-intro-number">02</span><span>Equipment and asset ownership</span></div>
+        <div class="access-intro-feature"><span class="access-intro-number">03</span><span>Traceable operational history</span></div>
+        <div class="access-intro-footer">ROYALDESK <span aria-hidden="true">/</span> STAFF PORTAL</div>
       </aside>
       <section class="access-shell" aria-labelledby="staff-signin-heading">
       <ng-container *ngIf="!setupMode">
         <div class="form-eyebrow"><span class="form-eyebrow-mark" aria-hidden="true"></span> SECURE STAFF PORTAL</div>
         <h3 id="staff-signin-heading">Welcome back</h3>
-        <p class="form-description">Sign in to manage your RoyalDesk workspace.</p>
+        <p class="form-description">Access your authorised RoyalDesk tools.</p>
         <div class="error" role="alert" *ngIf="error">{{ error }}</div>
         <form class="form" (ngSubmit)="unlock()">
           <label>Employee username
-            <input name="username" type="text" [(ngModel)]="username" autocomplete="username" required />
+            <input name="username" type="text" spellcheck="false" [(ngModel)]="username" autocomplete="username" required />
           </label>
           <label>Password
             <input name="password" type="password" [(ngModel)]="password" autocomplete="current-password" required />
           </label>
           <button class="primary" type="submit" [disabled]="loading || !username.trim() || !password">{{ loading ? 'Signing in…' : 'Sign in to RoyalDesk' }}</button>
         </form>
+        <p class="form-footnote">For authorised Royal Tyres staff only.</p>
       </ng-container>
 
       <ng-container *ngIf="setupMode">
