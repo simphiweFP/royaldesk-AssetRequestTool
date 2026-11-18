@@ -124,6 +124,19 @@ public sealed class DevelopmentDataSeeder(IDbConnectionFactory connections, IWeb
                 """, new { stockId, quantity = item.Qty, actor = Actor, now }, tx, cancellationToken: ct));
         }
 
+        // Link available tagged hardware to physical Store Room stock for delivery testing.
+        var demoLaptopStore = await db.ExecuteScalarAsync<long>(new CommandDefinition(
+            "SELECT Id FROM StoreItems WHERE Sku='SIM-STK-LAP'", transaction: tx, cancellationToken: ct));
+        var demoMonitorStore = await db.ExecuteScalarAsync<long>(new CommandDefinition(
+            "SELECT Id FROM StoreItems WHERE Sku='SIM-STK-MON'", transaction: tx, cancellationToken: ct));
+        foreach (var link in new[] { (Asset: assetIds[2], Store: demoLaptopStore),
+                                    (Asset: assetIds[4], Store: demoMonitorStore),
+                                    (Asset: assetIds[5], Store: demoMonitorStore) })
+            await db.ExecuteAsync(new CommandDefinition("""
+                INSERT INTO StoreAssetLinks(AssetId,StoreItemId,PhysicallyInStore,LinkedAtUtc,LinkedBy)
+                VALUES(@Asset,@Store,1,@now,@actor)
+                """, new { link.Asset, link.Store, now, actor = Actor }, tx, cancellationToken: ct));
+
         // Assigned and accepted, available, damaged and write-off states.
         for (var i = 0; i < 2; i++)
         {
